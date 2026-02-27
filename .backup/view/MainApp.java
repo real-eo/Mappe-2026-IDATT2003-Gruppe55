@@ -79,7 +79,7 @@ public class MainApp extends Application {
         controls.setPadding(new Insets(5));
         root.setBottom(controls);
 
-        primaryStage.setTitle("Millions – Stock Market Game");
+        primaryStage.setTitle("Millions - Stock Market Game");
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.show();
     }
