@@ -23,7 +23,7 @@ class PortfolioTest {
     void setUp() {
         portfolio = new Portfolio();
         stock = new Stock("EQNR", "Equinor ASA", new BigDecimal("280"));
-        share = new Share(stock, 10, new BigDecimal("280"));
+        share = new Share(stock, new BigDecimal("10"), new BigDecimal("280"));
     }
 
     @Test

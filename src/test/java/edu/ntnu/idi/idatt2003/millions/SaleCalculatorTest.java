@@ -26,7 +26,7 @@ class SaleCalculatorTest {
     @Test
     void profitable_sale_calculatesCorrectly() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("200.00"));
-        Share share = new Share(stock, 10, new BigDecimal("100.00"));
+        Share share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
         SaleCalculator calc = new SaleCalculator(share);
 
         assertEquals(new BigDecimal("2000.00"), calc.getGross());
@@ -46,7 +46,7 @@ class SaleCalculatorTest {
     @Test
     void loss_sale_hasNoTax() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
-        Share share = new Share(stock, 5, new BigDecimal("200.00"));
+        Share share = new Share(stock, new BigDecimal("5"), new BigDecimal("200.00"));
         SaleCalculator calc = new SaleCalculator(share);
 
         assertEquals(BigDecimal.ZERO, calc.getTax());
