@@ -4,6 +4,9 @@ import edu.ntnu.idi.idatt2003.millions.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.Share;
+
+import java.math.BigDecimal;
 
 import java.util.List;
 
@@ -33,19 +36,19 @@ public class ExchangeController {
      * @param quantity the number of shares
      * @throws MillionsException if the purchase fails
      */
-    public void buy(String symbol, int quantity) throws MillionsException {
+    public void buy(String symbol, BigDecimal quantity) throws MillionsException {
         exchange.buy(player, symbol, quantity);
     }
 
     /**
      * Executes a sell order for the current player.
      *
-     * @param symbol   the stock symbol
+     * @param share    the share to sell
      * @param quantity the number of shares
      * @throws MillionsException if the sale fails
      */
-    public void sell(String symbol, int quantity) throws MillionsException {
-        exchange.sell(player, symbol, quantity);
+    public void sell(Share share, BigDecimal quantity) throws MillionsException {
+        exchange.sell(player, share, quantity);
     }
 
     /**
