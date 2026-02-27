@@ -35,6 +35,7 @@ public class Stock {
         if (initialPrice == null || initialPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Initial price must be positive");
         }
+        
         this.symbol = symbol;
         this.companyName = companyName;
         this.prices = new ArrayList<>();
