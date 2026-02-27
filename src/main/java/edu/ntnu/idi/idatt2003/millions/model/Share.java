@@ -8,7 +8,9 @@ import java.math.BigDecimal;
 public class Share {
 
     private final Stock stock;
-    private final int quantity;
+    // ! The spec specifies that quantity must be type `BigDecimal`, but that doesn't make sense for shares. 
+    // ! In a real application, this would likely be an `int` or `long`. However, we will follow the spec as given. 
+    private final BigDecimal quantity;  
     private final BigDecimal purchasePrice;
 
     /**
@@ -19,11 +21,11 @@ public class Share {
      * @param purchasePrice the price per share at time of purchase (must be positive)
      * @throws IllegalArgumentException if any argument is invalid
      */
-    public Share(Stock stock, int quantity, BigDecimal purchasePrice) {
+    public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {         
         if (stock == null) {
             throw new IllegalArgumentException("Stock must not be null");
         }
-        if (quantity <= 0) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
         if (purchasePrice == null || purchasePrice.compareTo(BigDecimal.ZERO) <= 0) {
@@ -48,7 +50,7 @@ public class Share {
      *
      * @return quantity
      */
-    public int getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
