@@ -115,7 +115,7 @@ Alternatively, you can run tests from the command line:
 mvn test
 ```
 
-## 🎮 How to Use the Application
+## How to Use the Application
 
 Once the application starts:
 1. **View Available Stocks**: See all stocks with their current prices in the main list
