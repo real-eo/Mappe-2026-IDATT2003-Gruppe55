@@ -25,11 +25,11 @@ public class Portfolio {
      * @param share the share to add (must not be null)
      * @throws IllegalArgumentException if share is null
      */
-    public void add(Share share) {
+    public boolean add(Share share) {
         if (share == null) {
             throw new IllegalArgumentException("Share must not be null");
         }
-        shares.add(share);
+        return shares.add(share);
     }
 
     /**
