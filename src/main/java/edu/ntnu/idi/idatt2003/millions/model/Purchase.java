@@ -43,7 +43,7 @@ public class Purchase extends Transaction {
             throw new InsufficientFundsException(
                     "Insufficient funds: required " + total + " but player has " + player.getMoney());
         }
-        player.subtractMoney(total);
+        player.withdrawMoney(total);
         player.getPortfolio().add(getShare());
         player.getTransactionArchive().add(this);
         markCommitted();
