@@ -65,6 +65,6 @@ public class Share {
 
     @Override
     public String toString() {
-        return quantity + " × " + stock.getSymbol() + " @ " + purchasePrice;
+        return quantity + " x " + stock.getSymbol() + " @ " + purchasePrice;
     }
 }
