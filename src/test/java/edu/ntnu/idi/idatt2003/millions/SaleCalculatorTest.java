@@ -40,7 +40,7 @@ class SaleCalculatorTest {
      * gross       = 100 * 5  = 500
      * commission  = 1% * 500 = 5
      * costBasis   = 200 * 5  = 1000
-     * profit      = 500 - 5 - 1000 = -505  (negative → no tax)
+     * profit      = 500 - 5 - 1000 = -505  (negative -> no tax)
      * total       = 500 - 5 - 0 = 495
      */
     @Test

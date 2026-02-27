@@ -46,7 +46,7 @@ class TransactionArchiveTest {
     @Test
     void countDistinctWeeks_countsDifferentWeeks_separately() throws Exception {
         exchange.buy(player, "EQNR", new BigDecimal("10")); // week 1
-        exchange.advance();               // → week 2
+        exchange.advance();               // -> week 2
         exchange.buy(player, "DNB", new BigDecimal("5"));   // week 2
         assertEquals(2, player.getTransactionArchive().countDistinctWeeks());
     }

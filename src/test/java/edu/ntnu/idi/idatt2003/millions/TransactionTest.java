@@ -74,7 +74,7 @@ class TransactionTest {
         Purchase purchase = new Purchase(share, 1, new PurchaseCalculator(share));
         purchase.commit(player);
 
-        // Now sell at same price (no profit → no tax)
+        // Now sell at same price (no profit -> no tax)
         Sale sale = new Sale(share, 1, new SaleCalculator(share));
         sale.commit(player);
 
