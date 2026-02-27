@@ -1,24 +1,24 @@
 # Portfolio Project IDATT2003
 
-## 📖 Project Description
+## Project Description
 
 [//]: # (TODO: Write a short description of your project/product here.)
 
 This project is a **stock market simulation game** called "Millions" with a graphical user interface built using **JavaFX**. It's built on **Java 25** and **Maven**. 
 
 ### Key Features:
-- 📈 **Stock Trading**: Buy and sell shares on a simulated stock exchange with realistic Norwegian stocks (Equinor, DNB, Telenor)
-- 💰 **Portfolio Management**: Track owned shares and their current values with real-time calculations
-- 📊 **Weekly Simulation**: Advance time to simulate market changes with stock prices fluctuating ±5% per week
-- 📝 **Transaction History**: Complete archive of all buy and sell transactions
-- 🛡️ **Error Handling**: Robust validation for insufficient funds, invalid quantities, and more
-- 💵 **Financial Precision**: Uses BigDecimal for accurate monetary calculations
+- **Stock Trading**: Buy and sell shares on a simulated stock exchange with realistic Norwegian stocks (Equinor, DNB, Telenor)
+- **Portfolio Management**: Track owned shares and their current values with real-time calculations
+- **Weekly Simulation**: Advance time to simulate market changes with stock prices fluctuating ±5% per week
+- **Transaction History**: Complete archive of all buy and sell transactions
+- **Error Handling**: Robust validation for insufficient funds, invalid quantities, and more
+- **Financial Precision**: Uses BigDecimal for accurate monetary calculations
 
 ## � Project Structure
 
 [//]: # (TODO: Describe the structure of your project here. How have you used packages in your structure. Where are all sourcefiles stored. Where are all JUnit-test classes stored. etc.)
 
-### 📦 Packages:
+### Packages:
 - **`controller`**: Main application controller managing interactions between model and view
 - **`model`**: Core business logic classes like `Exchange`, `Player`, `Portfolio`, `Stock`, and transactions
 - **`model.calculator`**: Transaction calculation logic for purchases and sales
@@ -32,16 +32,16 @@ millions-assignment/
 │   ├── main/
 │   │   └── java/
 │   │       └── edu/ntnu/idi/idatt2003/millions/
-│   │           ├── controller/              # 🎮 Application controller
+│   │           ├── controller/              # Application controller
 │   │           │   └── ExchangeController.java
-│   │           ├── exception/               # ⚠️ Custom exceptions
+│   │           ├── exception/               # Custom exceptions
 │   │           │   ├── MillionsException.java
 │   │           │   ├── InsufficientFundsException.java
 │   │           │   ├── InvalidQuantityException.java
 │   │           │   ├── ShareNotOwnedException.java
 │   │           │   ├── StockNotFoundException.java
 │   │           │   └── TransactionAlreadyCommittedException.java
-│   │           ├── model/                   # 📊 Domain models
+│   │           ├── model/                   # Domain models
 │   │           │   ├── Exchange.java
 │   │           │   ├── Player.java
 │   │           │   ├── Portfolio.java
@@ -51,11 +51,11 @@ millions-assignment/
 │   │           │   ├── Purchase.java
 │   │           │   ├── Sale.java
 │   │           │   ├── TransactionArchive.java
-│   │           │   └── calculator/          # 🧮 Business logic
+│   │           │   └── calculator/          # Business logic
 │   │           │       ├── TransactionCalculator.java
 │   │           │       ├── PurchaseCalculator.java
 │   │           │       └── SaleCalculator.java
-│   │           └── view/                    # 🖥️ User interface
+│   │           └── view/                    # User interface
 │   │               └── MainApp.java
 │   └── test/
 │       └── java/
@@ -76,7 +76,7 @@ millions-assignment/
 
 [Project GitHub Repository - IDATT2003 - Gruppe 55](https://github.com/NTNU-IDI/Mappe-2026-IDATT2003-Gruppe55) 
 
-## 🚀 How to Run the Project
+## How to Run the Project
 
 [//]: # (TODO: Describe how to run your project here. What is the main class? What is the main method? What is the input and output of the program? What is the expected behaviour of the program?)
 
