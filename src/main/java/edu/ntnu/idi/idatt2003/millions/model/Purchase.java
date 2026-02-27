@@ -3,7 +3,7 @@ package edu.ntnu.idi.idatt2003.millions.model;
 import edu.ntnu.idi.idatt2003.millions.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.exception.TransactionAlreadyCommittedException;
-import edu.ntnu.idi.idatt2003.millions.model.calculator.TransactionCalculator;
+import edu.ntnu.idi.idatt2003.millions.model.calculator.PurchaseCalculator;
 
 import java.math.BigDecimal;
 
@@ -20,10 +20,9 @@ public class Purchase extends Transaction {
      *
      * @param share      the share to buy
      * @param week       the week number
-     * @param calculator the cost calculator for this purchase
      */
-    public Purchase(Share share, int week, TransactionCalculator calculator) {
-        super(share, week, calculator);
+    public Purchase(Share share, int week) {
+        super(share, week, new PurchaseCalculator(share));
     }
 
     /**
@@ -33,7 +32,7 @@ public class Purchase extends Transaction {
      * @throws TransactionAlreadyCommittedException if this transaction has already been committed
      * @throws InsufficientFundsException           if the player does not have enough funds
      */
-    @Override
+ @Override
     public void commit(Player player) throws MillionsException {
         if (isCommitted()) {
             throw new TransactionAlreadyCommittedException(
