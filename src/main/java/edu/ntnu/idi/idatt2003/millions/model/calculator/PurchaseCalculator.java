@@ -30,7 +30,7 @@ public class PurchaseCalculator implements TransactionCalculator {
      */
     public PurchaseCalculator(Share share) {
         this.gross = share.getPurchasePrice()
-                .multiply(BigDecimal.valueOf(share.getQuantity()))
+                .multiply(share.getQuantity())
                 .setScale(SCALE, RoundingMode.HALF_UP);
         this.commission = gross.multiply(COMMISSION_RATE)
                 .setScale(SCALE, RoundingMode.HALF_UP);

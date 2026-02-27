@@ -37,13 +37,13 @@ public class SaleCalculator implements TransactionCalculator {
         BigDecimal salesPrice = share.getStock().getSalesPrice();
 
         this.gross = salesPrice
-                .multiply(BigDecimal.valueOf(share.getQuantity()))
+                .multiply(share.getQuantity())
                 .setScale(SCALE, RoundingMode.HALF_UP);
         this.commission = gross.multiply(COMMISSION_RATE)
                 .setScale(SCALE, RoundingMode.HALF_UP);
 
         BigDecimal costBasis = share.getPurchasePrice()
-                .multiply(BigDecimal.valueOf(share.getQuantity()))
+                .multiply(share.getQuantity())
                 .setScale(SCALE, RoundingMode.HALF_UP);
         BigDecimal profit = gross.subtract(commission).subtract(costBasis);
         
