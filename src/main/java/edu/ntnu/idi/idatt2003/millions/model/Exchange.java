@@ -167,6 +167,10 @@ public class Exchange {
         return purchase;
     }
 
+    // ! It seems really stupid to pass the share object here instead of just the symbol as we also pass the player.
+    // ! However, the spec explicitly states that the method signature should be `sell(Player player, Share share)`,
+    // ! so we will follow the spec as given. In a real application, we would likely want to refactor this to take 
+    // ! the symbol and quantity instead like the `buy` method, and look up the share from the player's portfolio.
     /**
      * Creates and commits a {@link Sale} transaction for the given player.
      *
@@ -197,7 +201,7 @@ public class Exchange {
         week++;
         for (Stock stock : stocks.values()) {
             BigDecimal current = stock.getSalesPrice();
-            
+
             // Random change in range [-MAX_CHANGE, +MAX_CHANGE]
             double changeRate = (random.nextDouble() * 2 - 1) * MAX_CHANGE.doubleValue();
             BigDecimal factor = BigDecimal.ONE.add(
