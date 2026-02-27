@@ -194,6 +194,22 @@ public class Exchange {
     }
 
     /**
+     * Creates and commits a {@link Sale} transaction for the given player, selling their entire share.
+     *
+     * @param player   the selling player
+     * @param share    the share to sell
+     * @throws StockNotFoundException if the symbol is not listed
+     * @throws ShareNotOwnedException if the player does not own the stock
+     * @throws MillionsException      if the sale cannot be committed
+     */
+    public Sale sell(Player player, Share share) throws MillionsException {
+        return sell(player, share, share.getQuantity());
+    }
+
+    
+
+
+    /**
      * Advances the simulation by one week, incrementing the week counter and updating
      * each stock's price by a random small change (±{@value} % at most).
      */
