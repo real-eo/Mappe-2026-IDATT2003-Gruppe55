@@ -54,7 +54,8 @@ class TransactionArchiveTest {
     @Test
     void archive_storesTransactionsInOrder() throws Exception {
         exchange.buy(player, "EQNR", new BigDecimal("10"));
-        exchange.sell(player, , new BigDecimal("10"));
+        var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
+        exchange.sell(player, share);
         assertEquals(2, player.getTransactionArchive().getTransactions().size());
     }
 }
