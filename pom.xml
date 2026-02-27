@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.ntnu.idi.idatt2003</groupId>
-    <artifactId>millions-assignment</artifactId>
+    <artifactId>millions</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <build>

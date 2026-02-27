@@ -28,3 +28,5 @@ target/
 
 # Project files
 .backup/
+.vscode/
+.idea/
