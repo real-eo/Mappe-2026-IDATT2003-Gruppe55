@@ -1,12 +1,13 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions;
 
-import edu.ntnu.idi.idatt2003.millions.exception.InsufficientFundsException;
-import edu.ntnu.idi.idatt2003.millions.exception.ShareNotOwnedException;
-import edu.ntnu.idi.idatt2003.millions.exception.StockNotFoundException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.StockNotFoundException;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
-import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -108,5 +109,55 @@ class ExchangeTest {
     @Test
     void getStock_throwsStockNotFound_forUnknownSymbol() {
         assertThrows(StockNotFoundException.class, () -> exchange.getStock("MISSING"));
+    }
+
+    @Test
+    void getGainers_returnsTopPositiveChanges_withLimit() {
+        Stock winner = new Stock("WIN", "Winner Corp", new BigDecimal("100.00"));
+        winner.addPrice(new BigDecimal("125.00")); // +25
+
+        Stock runnerUp = new Stock("UP", "Up Corp", new BigDecimal("100.00"));
+        runnerUp.addPrice(new BigDecimal("110.00")); // +10
+
+        Stock loser = new Stock("DOWN", "Down Corp", new BigDecimal("100.00"));
+        loser.addPrice(new BigDecimal("90.00")); // -10
+
+        Stock unchanged = new Stock("FLAT", "Flat Corp", new BigDecimal("100.00")); // 0
+
+        Exchange statsExchange = new Exchange("Stats", List.of(winner, runnerUp, loser, unchanged));
+
+        List<Stock> gainers = statsExchange.getGainers(2);
+
+        assertEquals(2, gainers.size());
+        assertEquals("WIN", gainers.get(0).getSymbol());
+        assertEquals("UP", gainers.get(1).getSymbol());
+    }
+
+    @Test
+    void getLosers_returnsMostNegativeChanges_withLimit() {
+        Stock worst = new Stock("WORST", "Worst Corp", new BigDecimal("100.00"));
+        worst.addPrice(new BigDecimal("70.00")); // -30
+
+        Stock secondWorst = new Stock("BAD", "Bad Corp", new BigDecimal("100.00"));
+        secondWorst.addPrice(new BigDecimal("92.00")); // -8
+
+        Stock gainer = new Stock("GOOD", "Good Corp", new BigDecimal("100.00"));
+        gainer.addPrice(new BigDecimal("130.00")); // +30
+
+        Exchange statsExchange = new Exchange("Stats", List.of(worst, secondWorst, gainer));
+
+        List<Stock> losers = statsExchange.getLosers(2);
+
+        assertEquals(2, losers.size());
+        assertEquals("WORST", losers.get(0).getSymbol());
+        assertEquals("BAD", losers.get(1).getSymbol());
+    }
+
+    @Test
+    void gainersAndLosers_returnEmpty_whenLimitIsNonPositive() {
+        assertTrue(exchange.getGainers(0).isEmpty());
+        assertTrue(exchange.getLosers(0).isEmpty());
+        assertTrue(exchange.getGainers(-1).isEmpty());
+        assertTrue(exchange.getLosers(-1).isEmpty());
     }
 }

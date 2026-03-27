@@ -1,8 +1,8 @@
-package edu.ntnu.idi.idatt2003.millions.model;
+﻿package edu.ntnu.idi.idatt2003.millions.model;
 
-import edu.ntnu.idi.idatt2003.millions.exception.MillionsException;
-import edu.ntnu.idi.idatt2003.millions.exception.ShareNotOwnedException;
-import edu.ntnu.idi.idatt2003.millions.exception.TransactionAlreadyCommittedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.TransactionAlreadyCommittedException;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 
 import java.math.BigDecimal;
@@ -50,3 +50,4 @@ public class Sale extends Transaction {
         markCommitted();
     }
 }
+

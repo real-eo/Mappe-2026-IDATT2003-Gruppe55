@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.exception;
+﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Thrown when a stock symbol cannot be found on the exchange.
@@ -14,3 +14,4 @@ public class StockNotFoundException extends MillionsException {
         super(message);
     }
 }
+

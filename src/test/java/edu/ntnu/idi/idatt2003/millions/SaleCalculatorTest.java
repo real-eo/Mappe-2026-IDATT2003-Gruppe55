@@ -1,8 +1,9 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions;
 
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -36,7 +37,7 @@ class SaleCalculatorTest {
     }
 
     /**
-     * Scenario: bought at 200, now selling at 100 (loss – no tax).
+     * Scenario: bought at 200, now selling at 100 (loss â€“ no tax).
      * gross       = 100 * 5  = 500
      * commission  = 1% * 500 = 5
      * costBasis   = 200 * 5  = 1000
@@ -53,3 +54,4 @@ class SaleCalculatorTest {
         assertEquals(new BigDecimal("495.00"), calc.getTotal());
     }
 }
+

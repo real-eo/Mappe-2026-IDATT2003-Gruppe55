@@ -1,4 +1,14 @@
-package edu.ntnu.idi.idatt2003.millions.model;
+﻿package edu.ntnu.idi.idatt2003.millions.domain.model;
+
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InvalidQuantityException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.StockNotFoundException;
+import edu.ntnu.idi.idatt2003.millions.model.Player;
+import edu.ntnu.idi.idatt2003.millions.model.Purchase;
+import edu.ntnu.idi.idatt2003.millions.model.Sale;
+import edu.ntnu.idi.idatt2003.millions.model.Share;
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -8,11 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InvalidQuantityException;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.StockNotFoundException;
 
 /**
  * Represents a stock exchange where players can buy and sell shares.
