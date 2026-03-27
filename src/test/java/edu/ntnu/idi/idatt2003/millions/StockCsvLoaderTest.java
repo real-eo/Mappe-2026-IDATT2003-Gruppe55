@@ -1,7 +1,8 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions;
 
+import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
-import edu.ntnu.idi.idatt2003.millions.model.io.StockCsvLoader;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -68,3 +69,4 @@ class StockCsvLoaderTest {
         assertTrue(stocks.size() > 100);
     }
 }
+

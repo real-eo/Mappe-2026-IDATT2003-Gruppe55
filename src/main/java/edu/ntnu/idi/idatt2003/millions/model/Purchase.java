@@ -1,8 +1,8 @@
-package edu.ntnu.idi.idatt2003.millions.model;
+﻿package edu.ntnu.idi.idatt2003.millions.model;
 
-import edu.ntnu.idi.idatt2003.millions.exception.InsufficientFundsException;
-import edu.ntnu.idi.idatt2003.millions.exception.MillionsException;
-import edu.ntnu.idi.idatt2003.millions.exception.TransactionAlreadyCommittedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.TransactionAlreadyCommittedException;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.PurchaseCalculator;
 
 import java.math.BigDecimal;
@@ -49,3 +49,4 @@ public class Purchase extends Transaction {
         markCommitted();
     }
 }
+

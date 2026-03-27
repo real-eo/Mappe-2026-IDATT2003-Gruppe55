@@ -143,3 +143,4 @@ public class Stock {
         return symbol + " (" + companyName + ") @ " + getSalesPrice();
     }
 }
+

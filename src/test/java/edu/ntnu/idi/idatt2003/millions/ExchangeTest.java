@@ -1,12 +1,13 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions;
 
-import edu.ntnu.idi.idatt2003.millions.exception.InsufficientFundsException;
-import edu.ntnu.idi.idatt2003.millions.exception.ShareNotOwnedException;
-import edu.ntnu.idi.idatt2003.millions.exception.StockNotFoundException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.StockNotFoundException;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
-import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

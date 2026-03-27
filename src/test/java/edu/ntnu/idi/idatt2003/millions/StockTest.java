@@ -1,8 +1,9 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions;
 
-import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -72,3 +73,4 @@ class StockTest {
         assertEquals(new BigDecimal("-5.50"), stock.getLatestPriceChange());
     }
 }
+

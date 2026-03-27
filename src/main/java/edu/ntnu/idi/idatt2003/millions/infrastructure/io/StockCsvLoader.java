@@ -1,6 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.model.io;
-
-import edu.ntnu.idi.idatt2003.millions.model.Stock;
+﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
 
 /**
  * Loads stocks from CSV data on the format: symbol,name,price.
@@ -110,3 +110,4 @@ public class StockCsvLoader {
         return new Stock(symbol, name, price);
     }
 }
+

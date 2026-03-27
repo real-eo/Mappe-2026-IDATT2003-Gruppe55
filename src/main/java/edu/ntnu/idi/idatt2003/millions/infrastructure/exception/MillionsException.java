@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.exception;
+﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Base exception for all Millions application errors.
@@ -14,3 +14,4 @@ public class MillionsException extends Exception {
         super(message);
     }
 }
+

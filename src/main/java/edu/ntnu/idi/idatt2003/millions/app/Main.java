@@ -1,7 +1,7 @@
-package edu.ntnu.idi.idatt2003.millions;
+﻿package edu.ntnu.idi.idatt2003.millions.app;
 
+import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
-import edu.ntnu.idi.idatt2003.millions.model.io.StockCsvLoader;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        StockCsvLoader loader = new StockCsvLoader();
+        StockCsvLoader stockCsvLoader = new StockCsvLoader();
 
         try {
-            List<Stock> stocks = loader.loadFromResource("data/sp500.csv");
+            List<Stock> stocks = stockCsvLoader.loadFromResource("data/sp500.csv");
             System.out.println("Loaded stocks: " + stocks.size());
 
             int previewCount = Math.min(5, stocks.size());
@@ -30,3 +30,5 @@ public class Main {
         }
     }
 }
+
+
