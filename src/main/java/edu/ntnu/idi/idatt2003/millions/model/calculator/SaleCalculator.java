@@ -5,13 +5,15 @@ import edu.ntnu.idi.idatt2003.millions.model.Share;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+// ! THIS FILE HAS WEIRD FUNCTIONALLITY SPECIFIED IN THE SPEC. WILL KEEP AS IS FOR NOW, AND ASK TEACHING ASSISTANT ABOUT IT.
+
 /**
  * Calculates the proceeds from selling shares.
  *
  * <ul>
  *   <li>Gross = salesPrice × quantity</li>
  *   <li>Commission = 1% of gross</li>
- *   <li>Profit = gross − commission − (purchasePrice × quantity)</li>
+ *   <li>Profit = gross − commission − (purchasePrice x quantity)</li>
  *   <li>Tax = 30% of profit (only when profit is positive)</li>
  *   <li>Total = gross − commission − tax</li>
  * </ul>
@@ -33,15 +35,18 @@ public class SaleCalculator implements TransactionCalculator {
      */
     public SaleCalculator(Share share) {
         BigDecimal salesPrice = share.getStock().getSalesPrice();
+
         this.gross = salesPrice
-                .multiply(BigDecimal.valueOf(share.getQuantity()))
+                .multiply(share.getQuantity())
                 .setScale(SCALE, RoundingMode.HALF_UP);
         this.commission = gross.multiply(COMMISSION_RATE)
                 .setScale(SCALE, RoundingMode.HALF_UP);
+
         BigDecimal costBasis = share.getPurchasePrice()
-                .multiply(BigDecimal.valueOf(share.getQuantity()))
+                .multiply(share.getQuantity())
                 .setScale(SCALE, RoundingMode.HALF_UP);
         BigDecimal profit = gross.subtract(commission).subtract(costBasis);
+        
         this.tax = profit.compareTo(BigDecimal.ZERO) > 0
                 ? profit.multiply(TAX_RATE).setScale(SCALE, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;

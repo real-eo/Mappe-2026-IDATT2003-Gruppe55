@@ -3,7 +3,7 @@ package edu.ntnu.idi.idatt2003.millions.model;
 import edu.ntnu.idi.idatt2003.millions.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.exception.ShareNotOwnedException;
 import edu.ntnu.idi.idatt2003.millions.exception.TransactionAlreadyCommittedException;
-import edu.ntnu.idi.idatt2003.millions.model.calculator.TransactionCalculator;
+import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 
 import java.math.BigDecimal;
 
@@ -22,8 +22,8 @@ public class Sale extends Transaction {
      * @param week       the week number
      * @param calculator the proceeds calculator for this sale
      */
-    public Sale(Share share, int week, TransactionCalculator calculator) {
-        super(share, week, calculator);
+    public Sale(Share share, int week) {
+        super(share, week, new SaleCalculator(share));
     }
 
     /**

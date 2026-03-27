@@ -70,7 +70,7 @@ public class Player {
      * @param amount the amount to subtract (must be positive)
      * @throws IllegalArgumentException if amount is null or non-positive
      */
-    public void subtractMoney(BigDecimal amount) {
+    public void withdrawMoney(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }

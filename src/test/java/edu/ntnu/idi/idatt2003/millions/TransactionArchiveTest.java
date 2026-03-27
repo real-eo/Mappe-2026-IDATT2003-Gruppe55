@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,9 +23,10 @@ class TransactionArchiveTest {
 
     @BeforeEach
     void setUp() {
-        exchange = new Exchange("Test Exchange", new Random(0));
-        exchange.addStock(new Stock("EQNR", "Equinor ASA", new BigDecimal("100.00")));
-        exchange.addStock(new Stock("DNB", "DNB Bank", new BigDecimal("200.00")));
+        Stock EQNR = new Stock("EQNR", "Equinor ASA", new BigDecimal("100.00"));
+        Stock DNB = new Stock("DNB", "DNB Bank", new BigDecimal("200.00"));
+
+        exchange = new Exchange("Test Exchange", List.of(EQNR, DNB), new Random(0));
         player = new Player("Alice", new BigDecimal("1000000"));
     }
 
@@ -36,23 +38,24 @@ class TransactionArchiveTest {
 
     @Test
     void countDistinctWeeks_countsMultipleTransactionsInSameWeek_asOne() throws Exception {
-        exchange.buy(player, "EQNR", 10); // week 1
-        exchange.buy(player, "DNB", 5);   // week 1
+        exchange.buy(player, "EQNR", new BigDecimal("10")); // week 1
+        exchange.buy(player, "DNB", new BigDecimal("5"));   // week 1
         assertEquals(1, player.getTransactionArchive().countDistinctWeeks());
     }
 
     @Test
     void countDistinctWeeks_countsDifferentWeeks_separately() throws Exception {
-        exchange.buy(player, "EQNR", 10); // week 1
-        exchange.advance();               // → week 2
-        exchange.buy(player, "DNB", 5);   // week 2
+        exchange.buy(player, "EQNR", new BigDecimal("10")); // week 1
+        exchange.advance();               // -> week 2
+        exchange.buy(player, "DNB", new BigDecimal("5"));   // week 2
         assertEquals(2, player.getTransactionArchive().countDistinctWeeks());
     }
 
     @Test
     void archive_storesTransactionsInOrder() throws Exception {
-        exchange.buy(player, "EQNR", 10);
-        exchange.sell(player, "EQNR", 10);
+        exchange.buy(player, "EQNR", new BigDecimal("10"));
+        var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
+        exchange.sell(player, share);
         assertEquals(2, player.getTransactionArchive().getTransactions().size());
     }
 }

@@ -17,7 +17,7 @@ class PurchaseCalculatorTest {
     @Test
     void gross_isPrice_times_quantity() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
-        Share share = new Share(stock, 10, new BigDecimal("100.00"));
+        Share share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
         PurchaseCalculator calc = new PurchaseCalculator(share);
         assertEquals(new BigDecimal("1000.00"), calc.getGross());
     }
@@ -25,7 +25,7 @@ class PurchaseCalculatorTest {
     @Test
     void commission_isHalfPercent_ofGross() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
-        Share share = new Share(stock, 10, new BigDecimal("100.00"));
+        Share share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
         PurchaseCalculator calc = new PurchaseCalculator(share);
         // 0.5% of 1000 = 5.00
         assertEquals(new BigDecimal("5.00"), calc.getCommission());
@@ -34,7 +34,7 @@ class PurchaseCalculatorTest {
     @Test
     void tax_isAlwaysZero() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("200.00"));
-        Share share = new Share(stock, 5, new BigDecimal("200.00"));
+        Share share = new Share(stock, new BigDecimal("5"), new BigDecimal("200.00"));
         PurchaseCalculator calc = new PurchaseCalculator(share);
         assertEquals(BigDecimal.ZERO, calc.getTax());
     }
@@ -42,7 +42,7 @@ class PurchaseCalculatorTest {
     @Test
     void total_isGross_plus_commission() {
         Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
-        Share share = new Share(stock, 10, new BigDecimal("100.00"));
+        Share share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
         PurchaseCalculator calc = new PurchaseCalculator(share);
         // 1000 + 5 = 1005
         assertEquals(new BigDecimal("1005.00"), calc.getTotal());

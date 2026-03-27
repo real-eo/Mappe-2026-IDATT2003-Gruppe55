@@ -6,6 +6,7 @@ import edu.ntnu.idi.idatt2003.millions.exception.StockNotFoundException;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.Share;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,15 +26,17 @@ class ExchangeTest {
 
     @BeforeEach
     void setUp() {
-        exchange = new Exchange("Test Exchange", new Random(42));
-        exchange.addStock(new Stock("EQNR", "Equinor ASA", new BigDecimal("100.00")));
-        exchange.addStock(new Stock("DNB", "DNB Bank", new BigDecimal("200.00")));
+        List<Stock> stocks = List.of(
+                new Stock("EQNR", "Equinor ASA", new BigDecimal("100.00")),
+                new Stock("DNB", "DNB Bank", new BigDecimal("200.00"))
+        );
+        exchange = new Exchange("Test Exchange", stocks, new Random(42));
         player = new Player("Alice", new BigDecimal("50000"));
     }
 
     @Test
     void buy_reducesPlayerBalance_and_addsShareToPortfolio() throws Exception {
-        exchange.buy(player, "EQNR", 10);
+        exchange.buy(player, "EQNR", new BigDecimal("10"));
         // gross=1000, commission=5, total=1005
         assertEquals(new BigDecimal("48995.00"), player.getMoney());
         assertEquals(1, player.getPortfolio().getShares().size());
@@ -41,27 +44,31 @@ class ExchangeTest {
 
     @Test
     void buy_throwsStockNotFound_forUnknownSymbol() {
-        assertThrows(StockNotFoundException.class, () -> exchange.buy(player, "UNKNOWN", 1));
+        assertThrows(StockNotFoundException.class, () -> exchange.buy(player, "UNKNOWN", new BigDecimal("1")));
     }
 
     @Test
     void buy_throwsInsufficientFunds_whenPlayerHasNoMoney() {
         Player poorPlayer = new Player("Bob", new BigDecimal("1.00"));
         assertThrows(InsufficientFundsException.class,
-                () -> exchange.buy(poorPlayer, "EQNR", 100));
+                () -> exchange.buy(poorPlayer, "EQNR", new BigDecimal("100")));
     }
 
     @Test
     void sell_increasesPlayerBalance_and_removesShareFromPortfolio() throws Exception {
-        exchange.buy(player, "EQNR", 10);
-        exchange.sell(player, "EQNR", 10);
+        exchange.buy(player, "EQNR", new BigDecimal("10"));
+        // Get the share from portfolio to sell it
+        var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
+        exchange.sell(player, share, new BigDecimal("10"));
         assertTrue(player.getPortfolio().getShares().isEmpty());
     }
 
     @Test
-    void sell_throwsShareNotOwned_whenPlayerDoesNotOwnStock() {
+    void sell_throwsShareNotOwned_whenPlayerDoesNotOwnStock() throws StockNotFoundException {
+        Stock stock = exchange.getStock("EQNR");
+        var share = new Share(stock, new BigDecimal("5"), stock.getSalesPrice());
         assertThrows(ShareNotOwnedException.class,
-                () -> exchange.sell(player, "EQNR", 10));
+                () -> exchange.sell(player, share, new BigDecimal("10")));
     }
 
     @Test
