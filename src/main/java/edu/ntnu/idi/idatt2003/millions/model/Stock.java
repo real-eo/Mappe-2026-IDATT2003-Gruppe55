@@ -70,12 +70,59 @@ public class Stock {
     }
 
     /**
-     * Returns an unmodifiable view of all historical prices.
+     * Returns all historical prices that have been registered for this stock.
+     *
+     * @return list of prices, oldest first
+     */
+    public List<BigDecimal> getHistoricalPrices() {
+        return Collections.unmodifiableList(prices);
+    }
+
+    /**
+     * Returns the highest registered price for this stock.
+     *
+     * @return highest price
+     */
+    public BigDecimal getHighestPrice() {
+        return prices.stream()
+                .max(BigDecimal::compareTo)
+                .orElseThrow();
+    }
+
+    /**
+     * Returns the lowest registered price for this stock.
+     *
+     * @return lowest price
+     */
+    public BigDecimal getLowestPrice() {
+        return prices.stream()
+                .min(BigDecimal::compareTo)
+                .orElseThrow();
+    }
+
+    /**
+     * Returns the latest price change: latest price minus previous price.
+     * If only one price has been registered, the change is interpreted as zero.
+     *
+     * @return latest price change
+     */
+    public BigDecimal getLatestPriceChange() {
+        if (prices.size() < 2) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal latest = prices.get(prices.size() - 1);
+        BigDecimal previous = prices.get(prices.size() - 2);
+        return latest.subtract(previous);
+    }
+
+    /**
+     * Returns all historical prices.
      *
      * @return list of prices, oldest first
      */
     public List<BigDecimal> getPrices() {
-        return Collections.unmodifiableList(prices);
+        return getHistoricalPrices();
     }
 
     /**
