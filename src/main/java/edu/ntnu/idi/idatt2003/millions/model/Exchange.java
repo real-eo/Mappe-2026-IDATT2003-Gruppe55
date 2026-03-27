@@ -6,6 +6,7 @@ import edu.ntnu.idi.idatt2003.millions.exception.StockNotFoundException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,42 @@ public class Exchange {
                 .filter(s -> s.getSymbol().toLowerCase().contains(lower)
                         || s.getCompanyName().toLowerCase().contains(lower))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns top performing stocks by positive price change since previous week.
+     *
+     * @param limit maximum number of stocks to return
+     * @return gainers sorted descending by latest price change
+     */
+    public List<Stock> getGainers(int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+
+        return stocks.values().stream()
+                .filter(stock -> stock.getLatestPriceChange().compareTo(BigDecimal.ZERO) > 0)
+                .sorted(Comparator.comparing(Stock::getLatestPriceChange).reversed())
+                .limit(limit)
+                .toList();
+    }
+
+    /**
+     * Returns worst performing stocks by negative price change since previous week.
+     *
+     * @param limit maximum number of stocks to return
+     * @return losers sorted ascending by latest price change
+     */
+    public List<Stock> getLosers(int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+
+        return stocks.values().stream()
+                .filter(stock -> stock.getLatestPriceChange().compareTo(BigDecimal.ZERO) < 0)
+                .sorted(Comparator.comparing(Stock::getLatestPriceChange))
+                .limit(limit)
+                .toList();
     }
 
     /**
