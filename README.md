@@ -14,7 +14,7 @@ This project is a **stock market simulation game** called "Millions" with a grap
 - **Error Handling**: Robust validation for insufficient funds, invalid quantities, and more
 - **Financial Precision**: Uses BigDecimal for accurate monetary calculations
 
-## � Project Structure
+## Project Structure
 
 [//]: # (TODO: Describe the structure of your project here. How have you used packages in your structure. Where are all sourcefiles stored. Where are all JUnit-test classes stored. etc.)
 
@@ -70,7 +70,7 @@ millions-assignment/
 └── README.md
 ```
 
-## � Link to Repository
+## Link to Repository
 
 [//]: # (TODO: Include a link to your GitHub repository here.)
 
