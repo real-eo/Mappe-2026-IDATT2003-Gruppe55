@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;

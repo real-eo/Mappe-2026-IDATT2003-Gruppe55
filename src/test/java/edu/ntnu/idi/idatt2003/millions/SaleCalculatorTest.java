@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions;
 
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;

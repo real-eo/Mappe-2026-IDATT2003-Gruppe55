@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
