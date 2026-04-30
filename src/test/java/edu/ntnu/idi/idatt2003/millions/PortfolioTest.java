@@ -1,10 +1,11 @@
 package edu.ntnu.idi.idatt2003.millions;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import edu.ntnu.idi.idatt2003.millions.model.Portfolio;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
@@ -67,3 +68,4 @@ class PortfolioTest {
         assertThrows(IllegalArgumentException.class, () -> portfolio.add(null));
     }
 }
+

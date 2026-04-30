@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.exception;
+﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Thrown when a player does not have enough funds to complete a purchase.
@@ -14,3 +14,4 @@ public class InsufficientFundsException extends MillionsException {
         super(message);
     }
 }
+

@@ -1,13 +1,14 @@
 package edu.ntnu.idi.idatt2003.millions;
 
-import edu.ntnu.idi.idatt2003.millions.exception.InsufficientFundsException;
-import edu.ntnu.idi.idatt2003.millions.exception.ShareNotOwnedException;
-import edu.ntnu.idi.idatt2003.millions.exception.TransactionAlreadyCommittedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.TransactionAlreadyCommittedException;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Purchase;
 import edu.ntnu.idi.idatt2003.millions.model.Sale;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -100,3 +101,4 @@ class TransactionTest {
         assertThrows(TransactionAlreadyCommittedException.class, () -> sale.commit(player));
     }
 }
+

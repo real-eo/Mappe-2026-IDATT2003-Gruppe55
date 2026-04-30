@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.model;
+﻿package edu.ntnu.idi.idatt2003.millions.model;
 
 import java.math.BigDecimal;
 
@@ -9,6 +9,11 @@ import java.math.BigDecimal;
  * of share holdings, and an archive of past transactions.</p>
  */
 public class Player {
+
+    private static final long INVESTOR_MIN_WEEKS = 10;
+    private static final long SPECULATOR_MIN_WEEKS = 20;
+    private static final BigDecimal INVESTOR_MIN_FACTOR = new BigDecimal("1.20");
+    private static final BigDecimal SPECULATOR_MIN_FACTOR = new BigDecimal("2.00");
 
     private final String name;
     private final BigDecimal startingMoney;
@@ -108,8 +113,50 @@ public class Player {
         return transactionArchive;
     }
 
+    /**
+     * Returns the player's current net worth: cash balance plus portfolio market value.
+     *
+     * @return current net worth
+     */
+    public BigDecimal getNetWorth() {
+        BigDecimal portfolioValue = portfolio.getShares().stream()
+                .map(share -> share.getStock().getSalesPrice().multiply(share.getQuantity()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return money.add(portfolioValue);
+    }
+
+    /**
+     * Returns the player's progression status based on trading history and net worth growth.
+     *
+     * <ul>
+     *   <li>NOVICE: default level</li>
+     *   <li>INVESTOR: at least 10 distinct trading weeks and at least 20% net worth growth</li>
+     *   <li>SPECULATOR: at least 20 distinct trading weeks and at least 100% net worth growth</li>
+     * </ul>
+     *
+     * @return the player's current status
+     */
+    public PlayerStatus getStatus() {
+        long tradingWeeks = transactionArchive.countDistinctWeeks();
+        BigDecimal netWorth = getNetWorth();
+
+        if (tradingWeeks >= SPECULATOR_MIN_WEEKS
+                && netWorth.compareTo(startingMoney.multiply(SPECULATOR_MIN_FACTOR)) >= 0) {
+            return PlayerStatus.SPECULATOR;
+        }
+
+        if (tradingWeeks >= INVESTOR_MIN_WEEKS
+                && netWorth.compareTo(startingMoney.multiply(INVESTOR_MIN_FACTOR)) >= 0) {
+            return PlayerStatus.INVESTOR;
+        }
+
+        return PlayerStatus.NOVICE;
+    }
+
     @Override
     public String toString() {
         return name + " [" + money + "]";
     }
 }
+

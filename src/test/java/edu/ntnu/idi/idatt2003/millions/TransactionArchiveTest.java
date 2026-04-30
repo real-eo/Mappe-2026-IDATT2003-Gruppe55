@@ -1,11 +1,12 @@
 package edu.ntnu.idi.idatt2003.millions;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.TransactionArchive;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -59,3 +60,4 @@ class TransactionArchiveTest {
         assertEquals(2, player.getTransactionArchive().getTransactions().size());
     }
 }
+

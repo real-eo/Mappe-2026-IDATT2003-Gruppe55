@@ -3,6 +3,7 @@ package edu.ntnu.idi.idatt2003.millions;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.PurchaseCalculator;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -48,3 +49,4 @@ class PurchaseCalculatorTest {
         assertEquals(new BigDecimal("1005.00"), calc.getTotal());
     }
 }
+
