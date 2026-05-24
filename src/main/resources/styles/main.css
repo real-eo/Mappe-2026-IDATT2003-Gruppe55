@@ -3,26 +3,13 @@
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.overlay {
-    -fx-background-color: rgba(0, 0, 0, 0.5);
-}
-
 .dialog-card {
     -fx-background-color: #0a0e1a;
     -fx-border-color: #1e293b;
-    -fx-border-width: 0.7;
+    -fx-border-width: 0.67;
     -fx-background-radius: 7;
     -fx-border-radius: 7;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 12, 0.2, 0, 4);
-}
-
-.title-icon {
-    -fx-background-color: #0f172a;
-    -fx-background-radius: 4;
-    -fx-text-fill: #3b82f6;
-    -fx-font-weight: 700;
-    -fx-font-size: 12;
-    -fx-padding: 2 6;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 12, 0.2, 0, 6);
 }
 
 .dialog-title {
@@ -33,12 +20,12 @@
 
 .dialog-subtitle {
     -fx-text-fill: #94a3b8;
-    -fx-font-size: 12;
+    -fx-font-size: 12.25;
 }
 
 .field-label {
     -fx-text-fill: #e2e8f0;
-    -fx-font-size: 12;
+    -fx-font-size: 12.25;
     -fx-font-weight: 600;
 }
 
@@ -47,7 +34,7 @@
     -fx-background-radius: 5;
     -fx-border-radius: 5;
     -fx-border-color: transparent;
-    -fx-padding: 4 10;
+    -fx-padding: 3.5 10.5;
     -fx-alignment: center-left;
     -fx-spacing: 6;
 }
@@ -58,35 +45,22 @@
     -fx-padding: 0;
     -fx-text-fill: #e2e8f0;
     -fx-prompt-text-fill: #94a3b8;
-    -fx-font-size: 12;
-}
-
-.input-icon {
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 12;
+    -fx-font-size: 12.25;
 }
 
 .info-panel {
     -fx-background-color: rgba(30, 41, 59, 0.5);
     -fx-border-color: #1e293b;
-    -fx-border-width: 0.7;
+    -fx-border-width: 0.67;
     -fx-background-radius: 7;
     -fx-border-radius: 7;
-    -fx-padding: 10;
-    -fx-spacing: 6;
-}
-
-.info-icon {
-    -fx-background-color: #0f172a;
-    -fx-background-radius: 10;
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 10;
-    -fx-padding: 1 5;
+    -fx-padding: 10.33;
+    -fx-spacing: 3;
 }
 
 .info-title {
     -fx-text-fill: #e2e8f0;
-    -fx-font-size: 12;
+    -fx-font-size: 12.25;
     -fx-font-weight: 600;
 }
 
@@ -99,7 +73,7 @@
     -fx-background-color: #3b82f6;
     -fx-background-radius: 5;
     -fx-text-fill: #ffffff;
-    -fx-font-size: 12;
+    -fx-font-size: 12.25;
     -fx-font-weight: 600;
     -fx-padding: 8 12;
 }
@@ -108,15 +82,7 @@
     -fx-background-color: #2563eb;
 }
 
-.button-icon {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 12;
-    -fx-font-weight: 600;
-}
-
 .close-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 12;
-    -fx-padding: 2 6;
+    -fx-padding: 0;
 }
