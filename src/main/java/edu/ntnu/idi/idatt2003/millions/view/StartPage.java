@@ -1,12 +1,9 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
-import java.net.URL;
 import java.util.function.UnaryOperator;
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -18,18 +15,16 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
-import javafx.stage.Stage;
 
 /**
  * Start page UI for the Millions stock trading game.
  */
-public class StartPage extends Application {
+public class StartPage {
 
     private static final String TROPHY_PATH = "M2 1 H12 V4 C12 6 10.8 7.5 9 8 V10 H11 V12 H3 V10 H5 V8 C3.2 7.5 2 6 2 4 Z";
     private static final String PLAY_PATH = "M3 2 L12 7 L3 12 Z";
 
-    @Override
-    public void start(Stage stage) {
+    public StackPane createRoot() {
         StackPane root = new StackPane();
         root.getStyleClass().add("start-root");
         root.setPadding(new Insets(40));
@@ -116,20 +111,18 @@ public class StartPage extends Application {
 
         Button closeButton = new Button("x");
         closeButton.getStyleClass().add("close-button");
-        closeButton.setOnAction(event -> stage.close());
+        closeButton.setOnAction(event -> {
+            if (root.getScene() != null && root.getScene().getWindow() != null) {
+                root.getScene().getWindow().hide();
+            }
+        });
 
         card.getChildren().addAll(content, closeButton);
         StackPane.setAlignment(closeButton, Pos.TOP_RIGHT);
         StackPane.setMargin(closeButton, new Insets(10, 10, 0, 0));
 
         root.getChildren().add(card);
-
-        Scene scene = new Scene(root, 1024, 768);
-        scene.getStylesheets().add(resolveStylesheet("/styles/startpage.css"));
-        stage.setTitle("Millions - Stock Trading Game");
-        stage.setScene(scene);
-        stage.setMaximized(true);
-        stage.show();
+        return root;
     }
 
     private static HBox createInputField(Node leadingIcon, TextField textField) {
@@ -158,11 +151,4 @@ public class StartPage extends Application {
         return icon;
     }
 
-    private static String resolveStylesheet(String path) {
-        URL url = StartPage.class.getResource(path);
-        if (url == null) {
-            throw new IllegalStateException("Missing stylesheet: " + path);
-        }
-        return url.toExternalForm();
-    }
 }
