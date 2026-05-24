@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
 import java.net.URL;
+import java.util.function.UnaryOperator;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -68,6 +70,11 @@ public class StartPage extends Application {
         capitalLabel.getStyleClass().add("field-label");
         TextField capitalField = new TextField();
         capitalField.setPromptText("10000");
+        UnaryOperator<TextFormatter.Change> digitsOnly = change -> {
+            String nextText = change.getControlNewText();
+            return nextText.matches("\\d*") ? change : null;
+        };
+        capitalField.setTextFormatter(new TextFormatter<>(digitsOnly));
         Label currencyIcon = new Label("$");
         currencyIcon.getStyleClass().add("icon-label");
         HBox capitalInput = createInputField(currencyIcon, capitalField);
