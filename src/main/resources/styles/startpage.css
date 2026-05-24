@@ -1,9 +1,9 @@
-.app-root {
+.start-root {
     -fx-background-color: #0a0e1a;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.dialog-card {
+.start-card {
     -fx-background-color: #0a0e1a;
     -fx-border-color: #1e293b;
     -fx-border-width: 0.67;
@@ -12,13 +12,13 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 12, 0.2, 0, 6);
 }
 
-.dialog-title {
+.title-text {
     -fx-text-fill: #e2e8f0;
     -fx-font-size: 21;
     -fx-font-weight: 600;
 }
 
-.dialog-subtitle {
+.subtitle-text {
     -fx-text-fill: #94a3b8;
     -fx-font-size: 12.25;
 }
@@ -29,7 +29,7 @@
     -fx-font-weight: 600;
 }
 
-.input-container {
+.input-field {
     -fx-background-color: #1a1f2e;
     -fx-background-radius: 5;
     -fx-border-radius: 5;
@@ -39,7 +39,7 @@
     -fx-spacing: 6;
 }
 
-.input-container .text-field {
+.input-field .text-field {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-padding: 0;
@@ -55,7 +55,6 @@
     -fx-background-radius: 7;
     -fx-border-radius: 7;
     -fx-padding: 10.33 10.67;
-    -fx-spacing: 3;
 }
 
 .info-title {
@@ -69,20 +68,43 @@
     -fx-font-size: 10.5;
 }
 
-.primary-button {
+.primary-action {
     -fx-background-color: #3b82f6;
     -fx-background-radius: 5;
     -fx-text-fill: #ffffff;
     -fx-font-size: 12.25;
     -fx-font-weight: 600;
     -fx-padding: 8 12;
+    -fx-alignment: center;
+    -fx-graphic-text-gap: 6;
 }
 
-.primary-button:hover {
+.primary-action:hover {
     -fx-background-color: #2563eb;
 }
 
 .close-button {
     -fx-background-color: transparent;
     -fx-padding: 0;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11;
+    -fx-opacity: 0.7;
+}
+
+.icon-accent {
+    -fx-fill: #3b82f6;
+}
+
+.icon-muted {
+    -fx-fill: #94a3b8;
+}
+
+.icon-inverse {
+    -fx-fill: #ffffff;
+}
+
+.icon-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11.5;
+    -fx-font-weight: 600;
 }
