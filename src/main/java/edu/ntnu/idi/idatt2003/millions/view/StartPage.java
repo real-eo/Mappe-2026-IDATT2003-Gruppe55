@@ -128,6 +128,7 @@ public class StartPage extends Application {
         scene.getStylesheets().add(resolveStylesheet("/styles/startpage.css"));
         stage.setTitle("Millions - Stock Trading Game");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 
