@@ -1,6 +1,14 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
+import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
+import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -32,9 +40,21 @@ public class DashboardPage {
     private static final String ARROW_UP_PATH = "M12 5 L18 11 H14 V19 H10 V11 H6 Z";
     private static final String ARROW_DOWN_PATH = "M12 19 L6 13 H10 V5 H14 V13 H18 Z";
     private static final String ARROW_RIGHT_PATH = "M5 12 H17 M13 8 L17 12 L13 16";
+    private static final String NEUTRAL_PATH = "M5 12 H19";
     private static final String PIE_PATH = "M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 M12 3 V12 H21 A9 9 0 0 0 12 3";
+    private static final String STOCK_RESOURCE = "data/sp500.csv";
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
-    private record StockInfo(String symbol, String name, String price, String change, boolean positive) {
+    private enum ChangeKind {
+        POSITIVE,
+        NEGATIVE,
+        NEUTRAL
+    }
+
+    private record StockInfo(String symbol, String name, String price, String change, ChangeKind changeKind) {
+    }
+
+    private record StockChange(BigDecimal percent, ChangeKind kind) {
     }
 
     public Parent createRoot() {
@@ -226,15 +246,13 @@ public class DashboardPage {
         cards.getStyleClass().add("stock-list");
         cards.setFillWidth(true);
 
-        List<StockInfo> stocks = List.of(
-            new StockInfo("AAPL", "Apple Inc.", "$178.25", "+3.63%", true),
-            new StockInfo("GOOGL", "Alphabet Inc.", "$142.65", "-0.94%", false),
-            new StockInfo("MSFT", "Microsoft Corporation", "$380.50", "+0.66%", true),
-            new StockInfo("TSLA", "Tesla Inc.", "$242.84", "+2.48%", true)
-        );
-
-        for (StockInfo stock : stocks) {
-            cards.getChildren().add(createStockCard(stock));
+        List<StockInfo> stocks = loadStockInfos();
+        if (stocks.isEmpty()) {
+            cards.getChildren().add(createEmptyStockCard());
+        } else {
+            for (StockInfo stock : stocks) {
+                cards.getChildren().add(createStockCard(stock));
+            }
         }
 
         ScrollPane scrollPane = new ScrollPane(cards);
@@ -277,9 +295,27 @@ public class DashboardPage {
 
         HBox changeRow = new HBox(4);
         changeRow.setAlignment(Pos.CENTER_RIGHT);
-        String changeClass = stock.positive() ? "change-positive" : "change-negative";
-        SVGPath changeIcon = createIcon(stock.positive() ? ARROW_UP_PATH : ARROW_DOWN_PATH,
-            stock.positive() ? "icon-positive" : "icon-negative", 10);
+        String changeClass;
+        String iconClass;
+        String iconPath;
+        switch (stock.changeKind()) {
+            case POSITIVE -> {
+                changeClass = "change-positive";
+                iconClass = "icon-positive";
+                iconPath = ARROW_UP_PATH;
+            }
+            case NEGATIVE -> {
+                changeClass = "change-negative";
+                iconClass = "icon-negative";
+                iconPath = ARROW_DOWN_PATH;
+            }
+            default -> {
+                changeClass = "change-neutral";
+                iconClass = "icon-neutral";
+                iconPath = NEUTRAL_PATH;
+            }
+        }
+        SVGPath changeIcon = createIcon(iconPath, iconClass, 10);
         Label change = new Label(stock.change());
         change.getStyleClass().addAll("stock-change", changeClass);
 
@@ -306,6 +342,85 @@ public class DashboardPage {
 
         card.getChildren().addAll(header, actions);
         return card;
+    }
+
+    private VBox createEmptyStockCard() {
+        VBox card = new VBox(6);
+        card.getStyleClass().addAll("stock-card", "stock-card-empty");
+        card.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label("No stocks loaded");
+        title.getStyleClass().add("stock-empty-title");
+        Label subtitle = new Label("Check that data/sp500.csv is available.");
+        subtitle.getStyleClass().add("stock-empty-subtitle");
+
+        card.getChildren().addAll(title, subtitle);
+        return card;
+    }
+
+    private List<StockInfo> loadStockInfos() {
+        StockCsvLoader loader = new StockCsvLoader();
+        try {
+            List<Stock> stocks = loader.loadFromResource(STOCK_RESOURCE);
+            return stocks.stream()
+                .map(this::toStockInfo)
+                .toList();
+        } catch (IOException exception) {
+            System.err.println("Failed to load stock CSV: " + exception.getMessage());
+            return List.of();
+        }
+    }
+
+    private StockInfo toStockInfo(Stock stock) {
+        StockChange change = calculateChange(stock);
+        return new StockInfo(
+            stock.getSymbol(),
+            stock.getCompanyName(),
+            formatPrice(stock.getSalesPrice()),
+            formatPercent(change),
+            change.kind()
+        );
+    }
+
+    private StockChange calculateChange(Stock stock) {
+        List<BigDecimal> prices = stock.getHistoricalPrices();
+        if (prices.size() < 2) {
+            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
+        }
+
+        BigDecimal latest = prices.get(prices.size() - 1);
+        BigDecimal previous = prices.get(prices.size() - 2);
+        if (previous.compareTo(BigDecimal.ZERO) == 0) {
+            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
+        }
+
+        BigDecimal delta = latest.subtract(previous);
+        BigDecimal percent = delta.divide(previous, 6, RoundingMode.HALF_UP)
+            .multiply(ONE_HUNDRED);
+        ChangeKind kind = percent.signum() > 0
+            ? ChangeKind.POSITIVE
+            : (percent.signum() < 0 ? ChangeKind.NEGATIVE : ChangeKind.NEUTRAL);
+        return new StockChange(percent, kind);
+    }
+
+    private String formatPrice(BigDecimal price) {
+        DecimalFormat format = new DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.US));
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        return "$" + format.format(price);
+    }
+
+    private String formatPercent(StockChange change) {
+        DecimalFormat format = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        BigDecimal value = change.percent().abs().setScale(2, RoundingMode.HALF_UP);
+        String formatted = format.format(value) + "%";
+        if (change.kind() == ChangeKind.POSITIVE) {
+            return "+" + formatted;
+        }
+        if (change.kind() == ChangeKind.NEGATIVE) {
+            return "-" + formatted;
+        }
+        return formatted;
     }
 
     private SVGPath createIcon(String path, String styleClass, double size) {
