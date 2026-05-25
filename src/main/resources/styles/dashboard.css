@@ -236,6 +236,53 @@
     -fx-alignment: center;
 }
 
+.portfolio-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.portfolio-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.portfolio-list {
+    -fx-spacing: 10;
+}
+
+.portfolio-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 12;
+    -fx-spacing: 10;
+}
+
+.portfolio-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.portfolio-name {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.portfolio-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.portfolio-meta {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
 .empty-title {
     -fx-text-fill: #e2e8f0;
     -fx-font-size: 14;
