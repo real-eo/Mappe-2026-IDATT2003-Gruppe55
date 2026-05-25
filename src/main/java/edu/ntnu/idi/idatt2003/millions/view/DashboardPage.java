@@ -1,11 +1,8 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
-import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.PlayerStatus;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
@@ -13,8 +10,6 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -23,11 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -116,7 +109,7 @@ public class DashboardPage {
         root.getStyleClass().add("dashboard-root");
         root.setTop(createHeader());
         dashboardBody = createBody();
-        profileBody = createProfilePage();
+        profileBody = new ProfilePage(controller).createRoot();
         root.setCenter(dashboardBody);
         refreshHeader();
         return root;
@@ -239,26 +232,6 @@ public class DashboardPage {
         return body;
     }
 
-    private Parent createProfilePage() {
-        VBox page = new VBox(16);
-        page.getStyleClass().add("profile-page");
-        page.setAlignment(Pos.CENTER);
-        page.setPadding(new Insets(32));
-
-        Label title = new Label("Profile");
-        title.getStyleClass().add("profile-title");
-
-        Button saveButton = new Button("Save Game");
-        saveButton.getStyleClass().add("primary-button");
-        if (controller == null) {
-            saveButton.setDisable(true);
-        } else {
-            saveButton.setOnAction(event -> saveGame());
-        }
-
-        page.getChildren().addAll(title, saveButton);
-        return page;
-    }
 
     private VBox createLeftPanel() {
         VBox panel = new VBox(10);
@@ -750,59 +723,6 @@ public class DashboardPage {
         root.setCenter(showingProfile ? profileBody : dashboardBody);
     }
 
-    private void saveGame() {
-        if (controller == null) {
-            return;
-        }
-
-        Task<Long> saveTask = new Task<>() {
-            @Override
-            protected Long call() throws Exception {
-                Path databasePath = resolveSavePath();
-                GameRepository repository = new SqliteGameRepository(databasePath);
-                repository.initialize();
-                return repository.save(new GameState(controller.getExchange(), controller.getPlayer()));
-            }
-        };
-
-        saveTask.setOnSucceeded(event -> {
-            Long saveId = saveTask.getValue();
-            showAlert(Alert.AlertType.INFORMATION,
-                "Save Game",
-                "Game saved successfully",
-                "Save ID: " + saveId);
-        });
-
-        saveTask.setOnFailed(event -> {
-            Throwable error = saveTask.getException();
-            String message = error == null ? "Unknown error" : error.getMessage();
-            showAlert(Alert.AlertType.ERROR,
-                "Save Game",
-                "Failed to save game",
-                message);
-        });
-
-        Thread worker = new Thread(saveTask, "save-game-task");
-        worker.setDaemon(true);
-        worker.start();
-    }
-
-    private Path resolveSavePath() throws IOException {
-        Path path = Path.of("saves", "millions.db");
-        Path parent = path.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
-        }
-        return path;
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String header, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     private void refreshPortfolio() {
         if (portfolioList == null || portfolioEmptyState == null || portfolioScroll == null) {
