@@ -36,6 +36,7 @@ public class Main extends Application {
         scene.getStylesheets().add(resolveStylesheet(STARTPAGE_STYLESHEET));
         stage.setTitle("Millions - Stock Trading Game");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 
