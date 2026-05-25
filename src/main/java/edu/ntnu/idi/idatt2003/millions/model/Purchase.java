@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.model;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;

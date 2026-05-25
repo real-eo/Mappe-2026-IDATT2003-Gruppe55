@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
+package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Thrown when a transaction quantity is invalid (e.g. zero or negative).

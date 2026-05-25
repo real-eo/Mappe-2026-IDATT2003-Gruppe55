@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.domain.model;
+package edu.ntnu.idi.idatt2003.millions.domain.model;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InvalidQuantityException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;

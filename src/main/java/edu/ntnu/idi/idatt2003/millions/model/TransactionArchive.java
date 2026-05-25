@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.model;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
