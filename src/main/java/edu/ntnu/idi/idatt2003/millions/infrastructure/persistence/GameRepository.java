@@ -2,6 +2,7 @@ package edu.ntnu.idi.idatt2003.millions.infrastructure.persistence;
 
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,6 +25,14 @@ public interface GameRepository {
      * @throws SQLException if the save fails
      */
     long save(GameState state) throws SQLException;
+
+    /**
+     * Lists available saved games.
+     *
+     * @return list of save summaries
+     * @throws SQLException if listing fails
+     */
+    List<GameSaveSummary> listSaves() throws SQLException;
 
     /**
      * Loads a previously saved game state.

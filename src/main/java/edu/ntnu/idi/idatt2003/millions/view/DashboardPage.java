@@ -81,6 +81,7 @@ public class DashboardPage {
     private Parent dashboardBody;
     private Parent profileBody;
     private boolean showingProfile;
+    private Button profileToggleButton;
     private Label userLabel;
     private Label weekLabel;
     private Label cashValue;
@@ -179,9 +180,9 @@ public class DashboardPage {
         statusBadge.getStyleClass().add("status-badge");
         status.getChildren().addAll(statusLabel, statusBadge);
 
-        Button profileButton = new Button("Profile");
-        profileButton.getStyleClass().add("secondary-button");
-        profileButton.setOnAction(event -> toggleProfileView());
+        profileToggleButton = new Button(resolveProfileToggleLabel());
+        profileToggleButton.getStyleClass().add("secondary-button");
+        profileToggleButton.setOnAction(event -> toggleProfileView());
 
         Button nextWeek = new Button("Next Week");
         nextWeek.getStyleClass().add("primary-action");
@@ -197,7 +198,7 @@ public class DashboardPage {
             });
         }
 
-        right.getChildren().addAll(cash, netWorth, status, profileButton, nextWeek);
+        right.getChildren().addAll(cash, netWorth, status, profileToggleButton, nextWeek);
         return right;
     }
 
@@ -721,6 +722,18 @@ public class DashboardPage {
         }
         showingProfile = !showingProfile;
         root.setCenter(showingProfile ? profileBody : dashboardBody);
+        updateProfileToggleLabel();
+    }
+
+    private String resolveProfileToggleLabel() {
+        return showingProfile ? "Home" : "Profile";
+    }
+
+    private void updateProfileToggleLabel() {
+        if (profileToggleButton == null) {
+            return;
+        }
+        profileToggleButton.setText(resolveProfileToggleLabel());
     }
 
 

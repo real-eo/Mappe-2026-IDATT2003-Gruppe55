@@ -8,6 +8,7 @@ import edu.ntnu.idi.idatt2003.millions.model.Sale;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.Transaction;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameSaveSummary;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,6 +141,31 @@ public class SqliteGameRepository implements GameRepository {
     }
 
     @Override
+    public List<GameSaveSummary> listSaves() throws SQLException {
+        try (Connection connection = openConnection()) {
+            ensureSchema(connection);
+
+            List<GameSaveSummary> saves = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, label, exchange_name, week, created_at"
+                            + " FROM game_save ORDER BY created_at DESC")) {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        long id = resultSet.getLong("id");
+                        String label = resultSet.getString("label");
+                        String exchangeName = resultSet.getString("exchange_name");
+                        int week = resultSet.getInt("week");
+                        String createdAt = resultSet.getString("created_at");
+                        Instant timestamp = parseInstant(createdAt);
+                        saves.add(new GameSaveSummary(id, label, exchangeName, week, timestamp));
+                    }
+                }
+            }
+            return saves;
+        }
+    }
+
+    @Override
     public Optional<GameState> load(long saveId) throws SQLException {
         try (Connection connection = openConnection()) {
             ensureSchema(connection);
@@ -178,6 +205,17 @@ public class SqliteGameRepository implements GameRepository {
             statement.execute(CREATE_STOCK_PRICE_TABLE);
             statement.execute(CREATE_PORTFOLIO_SHARE_TABLE);
             statement.execute(CREATE_TRANSACTION_TABLE);
+        }
+    }
+
+    private Instant parseInstant(String value) {
+        if (value == null || value.isBlank()) {
+            return Instant.EPOCH;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (DateTimeParseException exception) {
+            return Instant.EPOCH;
         }
     }
 

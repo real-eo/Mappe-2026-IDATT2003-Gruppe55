@@ -2,10 +2,9 @@ package edu.ntnu.idi.idatt2003.millions.view;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -66,7 +65,7 @@ public class ProfilePage {
         Task<Long> saveTask = new Task<>() {
             @Override
             protected Long call() throws Exception {
-                Path databasePath = resolveSavePath();
+                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
                 GameRepository repository = new SqliteGameRepository(databasePath);
                 repository.initialize();
                 return repository.save(new GameState(controller.getExchange(), controller.getPlayer()));
@@ -93,15 +92,6 @@ public class ProfilePage {
         Thread worker = new Thread(saveTask, "save-game-task");
         worker.setDaemon(true);
         worker.start();
-    }
-
-    private Path resolveSavePath() throws IOException {
-        Path path = Path.of("saves", "millions.db");
-        Path parent = path.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
-        }
-        return path;
     }
 
     private void showAlert(Alert.AlertType type, String title, String header, String message) {

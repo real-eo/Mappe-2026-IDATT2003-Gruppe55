@@ -3,6 +3,7 @@ package edu.ntnu.idi.idatt2003.millions.view;
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
+import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.io.IOException;
@@ -26,18 +27,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        StartPage startPage = new StartPage();
-        Scene scene = new Scene(
-            startPage.createRoot((name, startingMoney) ->
-                launchDashboard(stage, name, startingMoney)),
-            1024,
-            768
-        );
-        scene.getStylesheets().add(resolveStylesheet(STARTPAGE_STYLESHEET));
+        Scene scene = new Scene(new StartPage().createRoot(null, null), 1024, 768);
         stage.setTitle("Millions - Stock Trading Game");
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
+        showStartPage(stage);
     }
 
     public static void main(String[] args) {
@@ -50,6 +45,38 @@ public class Main extends Application {
             throw new IllegalStateException("Missing stylesheet: " + path);
         }
         return url.toExternalForm();
+    }
+
+    private void showStartPage(Stage stage) {
+        StartPage startPage = new StartPage();
+        Parent root = startPage.createRoot(
+            (name, startingMoney) -> launchDashboard(stage, name, startingMoney),
+            () -> showLoadPage(stage)
+        );
+        Scene scene = stage.getScene();
+        if (scene == null) {
+            showError("No active scene available to load the start page.");
+            return;
+        }
+        scene.setRoot(root);
+        scene.getStylesheets().setAll(resolveStylesheet(STARTPAGE_STYLESHEET));
+        stage.setMaximized(true);
+    }
+
+    private void showLoadPage(Stage stage) {
+        LoadGamePage loadGamePage = new LoadGamePage(
+            state -> launchDashboard(stage, state),
+            () -> showStartPage(stage)
+        );
+        Parent root = loadGamePage.createRoot();
+        Scene scene = stage.getScene();
+        if (scene == null) {
+            showError("No active scene available to load the save list.");
+            return;
+        }
+        scene.setRoot(root);
+        scene.getStylesheets().setAll(resolveStylesheet(STARTPAGE_STYLESHEET));
+        stage.setMaximized(true);
     }
 
     private void launchDashboard(Stage stage, String name, BigDecimal startingMoney) {
@@ -72,7 +99,19 @@ public class Main extends Application {
 
         Exchange exchange = new Exchange("S&P 500", stocks);
         ExchangeController controller = new ExchangeController(exchange, player);
+        showDashboard(stage, controller);
+    }
 
+    private void launchDashboard(Stage stage, GameState state) {
+        if (state == null) {
+            showError("Unable to load the selected save.");
+            return;
+        }
+        ExchangeController controller = new ExchangeController(state.getExchange(), state.getPlayer());
+        showDashboard(stage, controller);
+    }
+
+    private void showDashboard(Stage stage, ExchangeController controller) {
         DashboardPage dashboard = new DashboardPage(controller);
         Parent root = dashboard.createRoot();
         Scene scene = stage.getScene();
