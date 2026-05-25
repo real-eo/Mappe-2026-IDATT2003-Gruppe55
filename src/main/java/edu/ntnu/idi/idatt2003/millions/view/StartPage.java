@@ -1,9 +1,12 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
+import java.math.BigDecimal;
+import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -24,7 +27,7 @@ public class StartPage {
     private static final String TROPHY_PATH = "M2 1 H12 V4 C12 6 10.8 7.5 9 8 V10 H11 V12 H3 V10 H5 V8 C3.2 7.5 2 6 2 4 Z";
     private static final String PLAY_PATH = "M3 2 L12 7 L3 12 Z";
 
-    public StackPane createRoot() {
+    public StackPane createRoot(BiConsumer<String, BigDecimal> onStart) {
         StackPane root = new StackPane();
         root.getStyleClass().add("start-root");
         root.setPadding(new Insets(40));
@@ -106,6 +109,16 @@ public class StartPage {
         startButton.setContentDisplay(ContentDisplay.LEFT);
         startButton.setGraphicTextGap(8);
         startButton.setGraphic(createIcon(PLAY_PATH, "icon-inverse"));
+        startButton.setDefaultButton(true);
+
+        if (onStart == null) {
+            startButton.setDisable(true);
+        } else {
+            Runnable startAction = () -> handleStart(nameField, capitalField, onStart);
+            startButton.setOnAction(event -> startAction.run());
+            nameField.setOnAction(event -> startAction.run());
+            capitalField.setOnAction(event -> startAction.run());
+        }
 
         content.getChildren().addAll(header, form, spacer, startButton);
 
@@ -123,6 +136,44 @@ public class StartPage {
 
         root.getChildren().add(card);
         return root;
+    }
+
+    private void handleStart(TextField nameField, TextField capitalField,
+                             BiConsumer<String, BigDecimal> onStart) {
+        String name = nameField.getText() == null ? "" : nameField.getText().trim();
+        if (name.isEmpty()) {
+            showValidationError("Please enter your name.");
+            return;
+        }
+
+        String capitalText = capitalField.getText() == null ? "" : capitalField.getText().trim();
+        if (capitalText.isEmpty()) {
+            showValidationError("Please enter a starting capital.");
+            return;
+        }
+
+        BigDecimal startingMoney;
+        try {
+            startingMoney = new BigDecimal(capitalText);
+        } catch (NumberFormatException exception) {
+            showValidationError("Starting capital must be a valid number.");
+            return;
+        }
+
+        if (startingMoney.compareTo(BigDecimal.ZERO) <= 0) {
+            showValidationError("Starting capital must be greater than zero.");
+            return;
+        }
+
+        onStart.accept(name, startingMoney);
+    }
+
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Start Game");
+        alert.setHeaderText("Cannot start the game");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private static HBox createInputField(Node leadingIcon, TextField textField) {

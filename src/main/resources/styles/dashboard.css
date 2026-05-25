@@ -151,6 +151,21 @@
     -fx-spacing: 16;
 }
 
+.stock-card-empty {
+    -fx-spacing: 4;
+}
+
+.stock-empty-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.stock-empty-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
 .stock-symbol {
     -fx-text-fill: #e2e8f0;
     -fx-font-size: 12.25;
@@ -180,6 +195,10 @@
 
 .change-negative {
     -fx-text-fill: #ef4444;
+}
+
+.change-neutral {
+    -fx-text-fill: #94a3b8;
 }
 
 .buy-button {
@@ -243,6 +262,13 @@
 
 .icon-negative {
     -fx-fill: #ef4444;
+}
+
+.icon-neutral {
+    -fx-fill: transparent;
+    -fx-stroke: #94a3b8;
+    -fx-stroke-width: 1.4;
+    -fx-stroke-linecap: round;
 }
 
 .icon-outline {
