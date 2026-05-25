@@ -12,8 +12,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -52,6 +54,12 @@ public class DashboardPage {
     private static final String STOCK_RESOURCE = "data/sp500.csv";
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
+    private enum StockTab {
+        ALL,
+        WATCHLIST,
+        MOVERS
+    }
+
     private enum ChangeKind {
         POSITIVE,
         NEGATIVE,
@@ -65,6 +73,8 @@ public class DashboardPage {
     }
 
     private final ExchangeController controller;
+    private final Set<String> watchlistSymbols = new HashSet<>();
+    private StockTab activeStockTab = StockTab.ALL;
     private Label userLabel;
     private Label weekLabel;
     private Label cashValue;
@@ -76,6 +86,9 @@ public class DashboardPage {
     private ScrollPane portfolioScroll;
     private VBox portfolioList;
     private VBox portfolioEmptyState;
+    private Label allStocksTab;
+    private Label watchlistTab;
+    private Label marketMoversTab;
 
     public DashboardPage() {
         this(null);
@@ -212,13 +225,65 @@ public class DashboardPage {
         panel.getStyleClass().add("panel-left");
         panel.setPadding(new Insets(14));
 
-        HBox tabs = createTabBar(List.of("All Stocks", "Watchlist (0)", "Market Movers"), 0);
+        HBox tabs = createStockTabBar();
         HBox search = createSearchField();
         ScrollPane stockList = createStockList();
         VBox.setVgrow(stockList, Priority.ALWAYS);
 
         panel.getChildren().addAll(tabs, search, stockList);
         return panel;
+    }
+
+    private HBox createStockTabBar() {
+        HBox tabs = new HBox(6);
+        tabs.getStyleClass().add("dashboard-tabs");
+        tabs.setAlignment(Pos.CENTER_LEFT);
+
+        allStocksTab = createTabLabel("All Stocks", StockTab.ALL);
+        watchlistTab = createTabLabel(buildWatchlistLabel(), StockTab.WATCHLIST);
+        marketMoversTab = createTabLabel("Market Movers", StockTab.MOVERS);
+
+        tabs.getChildren().addAll(allStocksTab, watchlistTab, marketMoversTab);
+        updateStockTabs();
+        return tabs;
+    }
+
+    private Label createTabLabel(String text, StockTab tab) {
+        Label label = new Label(text);
+        label.getStyleClass().add("dashboard-tab");
+        label.setOnMouseClicked(event -> setActiveStockTab(tab));
+        return label;
+    }
+
+    private void setActiveStockTab(StockTab tab) {
+        activeStockTab = tab;
+        updateStockTabs();
+        refreshStockList();
+    }
+
+    private void updateStockTabs() {
+        if (allStocksTab == null || watchlistTab == null || marketMoversTab == null) {
+            return;
+        }
+
+        watchlistTab.setText(buildWatchlistLabel());
+        updateTabStyle(allStocksTab, activeStockTab == StockTab.ALL);
+        updateTabStyle(watchlistTab, activeStockTab == StockTab.WATCHLIST);
+        updateTabStyle(marketMoversTab, activeStockTab == StockTab.MOVERS);
+    }
+
+    private void updateTabStyle(Label tab, boolean active) {
+        if (active) {
+            if (!tab.getStyleClass().contains("dashboard-tab-active")) {
+                tab.getStyleClass().add("dashboard-tab-active");
+            }
+            return;
+        }
+        tab.getStyleClass().remove("dashboard-tab-active");
+    }
+
+    private String buildWatchlistLabel() {
+        return "Watchlist (" + watchlistSymbols.size() + ")";
     }
 
     private VBox createRightPanel() {
@@ -338,6 +403,13 @@ public class DashboardPage {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         SVGPath star = createIcon(STAR_PATH, "icon-outline", 14);
+        star.getStyleClass().add("star-toggle");
+        boolean isFavorite = watchlistSymbols.contains(stock.getSymbol());
+        updateStarStyle(star, isFavorite);
+        star.setOnMouseClicked(event -> {
+            toggleWatchlist(stock.getSymbol());
+            updateStarStyle(star, watchlistSymbols.contains(stock.getSymbol()));
+        });
 
         symbolRow.getChildren().addAll(symbol, spacer, star);
 
@@ -645,6 +717,11 @@ public class DashboardPage {
         stockListContainer.getChildren().clear();
         String keyword = searchField == null ? "" : searchField.getText();
         List<StockInfo> stocks = loadStockInfos(keyword);
+        if (activeStockTab == StockTab.WATCHLIST) {
+            stocks = stocks.stream()
+                .filter(stock -> watchlistSymbols.contains(stock.stock().getSymbol()))
+                .toList();
+        }
         if (stocks.isEmpty()) {
             stockListContainer.getChildren().add(createEmptyStockCard());
             return;
@@ -665,6 +742,30 @@ public class DashboardPage {
         Window owner = resolveOwnerWindow(source);
         SellStockDialog dialog = new SellStockDialog(controller, stock, this::refreshHeader);
         dialog.show(owner);
+    }
+
+    private void toggleWatchlist(String symbol) {
+        if (symbol == null || symbol.isBlank()) {
+            return;
+        }
+
+        if (watchlistSymbols.contains(symbol)) {
+            watchlistSymbols.remove(symbol);
+        } else {
+            watchlistSymbols.add(symbol);
+        }
+
+        updateStockTabs();
+        if (activeStockTab == StockTab.WATCHLIST) {
+            refreshStockList();
+        }
+    }
+
+    private void updateStarStyle(SVGPath star, boolean favorite) {
+        star.getStyleClass().remove("icon-star-active");
+        if (favorite) {
+            star.getStyleClass().add("icon-star-active");
+        }
     }
 
     private Window resolveOwnerWindow(Button source) {

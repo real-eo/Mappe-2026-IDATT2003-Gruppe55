@@ -326,6 +326,15 @@
     -fx-stroke-linejoin: round;
 }
 
+.icon-star-active {
+    -fx-fill: #facc15;
+    -fx-stroke: #facc15;
+}
+
+.star-toggle {
+    -fx-cursor: hand;
+}
+
 .icon-stroke-muted {
     -fx-fill: transparent;
     -fx-stroke: #94a3b8;
