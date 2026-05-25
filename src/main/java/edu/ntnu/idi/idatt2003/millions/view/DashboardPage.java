@@ -299,6 +299,9 @@ public class DashboardPage {
         searchField.getStyleClass().add("search-field");
         searchField.setPromptText("Search stocks by symbol or name...");
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshStockList());
+        searchField.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+        search.setOnMouseClicked(event -> searchField.requestFocus());
 
         search.getChildren().addAll(icon, searchField);
         return search;
