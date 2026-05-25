@@ -77,6 +77,10 @@
     -fx-background-color: #2563eb;
 }
 
+.button:hover {
+    -fx-cursor: hand;
+}
+
 .dashboard-body {
     -fx-background-color: #0a0e1a;
 }
