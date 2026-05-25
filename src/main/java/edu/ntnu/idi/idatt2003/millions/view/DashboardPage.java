@@ -70,6 +70,7 @@ public class DashboardPage {
     private Label cashValue;
     private Label netWorthValue;
     private Label statusBadge;
+    private TextField searchField;
     private VBox stockListContainer;
     private StackPane portfolioContent;
     private ScrollPane portfolioScroll;
@@ -294,11 +295,12 @@ public class DashboardPage {
         search.setAlignment(Pos.CENTER_LEFT);
 
         SVGPath icon = createIcon(SEARCH_PATH, "icon-stroke-muted", 14);
-        TextField field = new TextField();
-        field.getStyleClass().add("search-field");
-        field.setPromptText("Search stocks by symbol or name...");
+        searchField = new TextField();
+        searchField.getStyleClass().add("search-field");
+        searchField.setPromptText("Search stocks by symbol or name...");
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshStockList());
 
-        search.getChildren().addAll(icon, field);
+        search.getChildren().addAll(icon, searchField);
         return search;
     }
 
@@ -451,9 +453,10 @@ public class DashboardPage {
         return card;
     }
 
-    private List<StockInfo> loadStockInfos() {
+    private List<StockInfo> loadStockInfos(String keyword) {
+        String normalized = keyword == null ? "" : keyword.trim();
         if (controller != null) {
-            List<Stock> stocks = controller.findStocks("");
+            List<Stock> stocks = controller.findStocks(normalized);
             return stocks.stream()
                 .map(this::toStockInfo)
                 .toList();
@@ -462,7 +465,16 @@ public class DashboardPage {
         StockCsvLoader loader = new StockCsvLoader();
         try {
             List<Stock> stocks = loader.loadFromResource(STOCK_RESOURCE);
+            if (normalized.isBlank()) {
+                return stocks.stream()
+                    .map(this::toStockInfo)
+                    .toList();
+            }
+
+            String lower = normalized.toLowerCase(Locale.US);
             return stocks.stream()
+                .filter(stock -> stock.getSymbol().toLowerCase(Locale.US).contains(lower)
+                    || stock.getCompanyName().toLowerCase(Locale.US).contains(lower))
                 .map(this::toStockInfo)
                 .toList();
         } catch (IOException exception) {
@@ -628,7 +640,8 @@ public class DashboardPage {
         }
 
         stockListContainer.getChildren().clear();
-        List<StockInfo> stocks = loadStockInfos();
+        String keyword = searchField == null ? "" : searchField.getText();
+        List<StockInfo> stocks = loadStockInfos(keyword);
         if (stocks.isEmpty()) {
             stockListContainer.getChildren().add(createEmptyStockCard());
             return;
