@@ -1,6 +1,10 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
+import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
+import edu.ntnu.idi.idatt2003.millions.model.Exchange;
+import edu.ntnu.idi.idatt2003.millions.model.Player;
+import edu.ntnu.idi.idatt2003.millions.model.PlayerStatus;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,6 +36,7 @@ import javafx.scene.text.TextAlignment;
 public class DashboardPage {
 
     private static final double ICON_BASE_SIZE = 24.0;
+    private static final BigDecimal DEFAULT_DASHBOARD_AMOUNT = new BigDecimal("10000.00");
 
     private static final String LOGO_PATH = "M3 16 L9 10 L13 14 L20 7 L21 8 L13 16 L9 12 L4 17 Z";
     private static final String CLOCK_PATH = "M12 4 A8 8 0 1 0 12 20 A8 8 0 1 0 12 4 M12 8 V12 L15 14";
@@ -57,11 +62,27 @@ public class DashboardPage {
     private record StockChange(BigDecimal percent, ChangeKind kind) {
     }
 
+    private final ExchangeController controller;
+    private Label userLabel;
+    private Label weekLabel;
+    private Label cashValue;
+    private Label netWorthValue;
+    private Label statusBadge;
+
+    public DashboardPage() {
+        this(null);
+    }
+
+    public DashboardPage(ExchangeController controller) {
+        this.controller = controller;
+    }
+
     public Parent createRoot() {
         BorderPane root = new BorderPane();
         root.getStyleClass().add("dashboard-root");
         root.setTop(createHeader());
         root.setCenter(createBody());
+        refreshHeader();
         return root;
     }
 
@@ -92,9 +113,9 @@ public class DashboardPage {
         title.getStyleClass().add("brand-title");
         brandRow.getChildren().addAll(logo, title);
 
-        Label user = new Label("elias");
-        user.getStyleClass().add("brand-subtitle");
-        brand.getChildren().addAll(brandRow, user);
+        userLabel = new Label(resolvePlayerName());
+        userLabel.getStyleClass().add("brand-subtitle");
+        brand.getChildren().addAll(brandRow, userLabel);
 
         Region divider = new Region();
         divider.getStyleClass().add("header-divider");
@@ -102,7 +123,7 @@ public class DashboardPage {
         HBox weekInfo = new HBox(4);
         weekInfo.setAlignment(Pos.CENTER_LEFT);
         SVGPath clock = createIcon(CLOCK_PATH, "icon-stroke-muted", 14);
-        Label weekLabel = new Label("Week 1");
+        weekLabel = new Label(resolveWeekText());
         weekLabel.getStyleClass().add("header-week");
         weekInfo.getChildren().addAll(clock, weekLabel);
 
@@ -115,28 +136,39 @@ public class DashboardPage {
         right.getStyleClass().add("header-right");
         right.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox cash = createStatBlock("Cash", "$10,000.00", false);
-        VBox netWorth = createStatBlock("Net Worth", "$10,000.00", true);
+        cashValue = new Label(formatMoney(resolveCash()));
+        VBox cash = createStatBlock("Cash", cashValue, false);
+
+        netWorthValue = new Label(formatMoney(resolveNetWorth()));
+        VBox netWorth = createStatBlock("Net Worth", netWorthValue, true);
 
         VBox status = new VBox(2);
         status.setAlignment(Pos.CENTER_RIGHT);
         Label statusLabel = new Label("Status");
         statusLabel.getStyleClass().add("stat-label");
-        Label badge = new Label("Novice");
-        badge.getStyleClass().add("status-badge");
-        status.getChildren().addAll(statusLabel, badge);
+        statusBadge = new Label(resolveStatusText());
+        statusBadge.getStyleClass().add("status-badge");
+        status.getChildren().addAll(statusLabel, statusBadge);
 
         Button nextWeek = new Button("Next Week");
         nextWeek.getStyleClass().add("primary-action");
         nextWeek.setContentDisplay(ContentDisplay.LEFT);
         nextWeek.setGraphicTextGap(6);
         nextWeek.setGraphic(createIcon(ARROW_RIGHT_PATH, "icon-stroke-inverse", 14));
+        if (controller == null) {
+            nextWeek.setDisable(true);
+        } else {
+            nextWeek.setOnAction(event -> {
+                controller.advance();
+                refreshHeader();
+            });
+        }
 
         right.getChildren().addAll(cash, netWorth, status, nextWeek);
         return right;
     }
 
-    private VBox createStatBlock(String labelText, String value, boolean accent) {
+    private VBox createStatBlock(String labelText, Label amount, boolean accent) {
         VBox block = new VBox(2);
         block.setAlignment(Pos.CENTER_RIGHT);
         block.getStyleClass().add("stat-block");
@@ -144,7 +176,6 @@ public class DashboardPage {
         Label label = new Label(labelText);
         label.getStyleClass().add("stat-label");
 
-        Label amount = new Label(value);
         amount.getStyleClass().add("stat-value");
         if (accent) {
             amount.getStyleClass().add("stat-value-accent");
@@ -359,6 +390,13 @@ public class DashboardPage {
     }
 
     private List<StockInfo> loadStockInfos() {
+        if (controller != null) {
+            List<Stock> stocks = controller.findStocks("");
+            return stocks.stream()
+                .map(this::toStockInfo)
+                .toList();
+        }
+
         StockCsvLoader loader = new StockCsvLoader();
         try {
             List<Stock> stocks = loader.loadFromResource(STOCK_RESOURCE);
@@ -409,6 +447,10 @@ public class DashboardPage {
         return "$" + format.format(price);
     }
 
+    private String formatMoney(BigDecimal price) {
+        return formatPrice(price);
+    }
+
     private String formatPercent(StockChange change) {
         DecimalFormat format = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
         format.setRoundingMode(RoundingMode.HALF_UP);
@@ -431,5 +473,62 @@ public class DashboardPage {
         icon.setScaleX(scale);
         icon.setScaleY(scale);
         return icon;
+    }
+
+    private String resolvePlayerName() {
+        if (controller == null) {
+            return "Player";
+        }
+        return controller.getPlayer().getName();
+    }
+
+    private String resolveWeekText() {
+        if (controller == null) {
+            return "Week 1";
+        }
+        Exchange exchange = controller.getExchange();
+        return "Week " + exchange.getWeek();
+    }
+
+    private BigDecimal resolveCash() {
+        if (controller == null) {
+            return DEFAULT_DASHBOARD_AMOUNT;
+        }
+        Player player = controller.getPlayer();
+        return player.getMoney();
+    }
+
+    private BigDecimal resolveNetWorth() {
+        if (controller == null) {
+            return DEFAULT_DASHBOARD_AMOUNT;
+        }
+        Player player = controller.getPlayer();
+        return player.getNetWorth();
+    }
+
+    private String resolveStatusText() {
+        if (controller == null) {
+            return "Novice";
+        }
+        return formatStatus(controller.getPlayer().getStatus());
+    }
+
+    private String formatStatus(PlayerStatus status) {
+        String name = status.name().toLowerCase(Locale.US);
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    }
+
+    private void refreshHeader() {
+        if (controller == null || userLabel == null) {
+            return;
+        }
+        Player player = controller.getPlayer();
+        Exchange exchange = controller.getExchange();
+
+        userLabel.setText(player.getName());
+        weekLabel.setText("Week " + exchange.getWeek());
+        cashValue.setText(formatMoney(player.getMoney()));
+        netWorthValue.setText(formatMoney(player.getNetWorth()));
+        statusBadge.setText(formatStatus(player.getStatus()));
     }
 }
