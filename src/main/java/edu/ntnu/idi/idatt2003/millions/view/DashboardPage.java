@@ -77,6 +77,11 @@ public class DashboardPage {
     private final ExchangeController controller;
     private final Set<String> watchlistSymbols = new HashSet<>();
     private StockTab activeStockTab = StockTab.ALL;
+    private BorderPane root;
+    private Parent dashboardBody;
+    private Parent profileBody;
+    private boolean showingProfile;
+    private Button profileToggleButton;
     private Label userLabel;
     private Label weekLabel;
     private Label cashValue;
@@ -101,10 +106,12 @@ public class DashboardPage {
     }
 
     public Parent createRoot() {
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
         root.getStyleClass().add("dashboard-root");
         root.setTop(createHeader());
-        root.setCenter(createBody());
+        dashboardBody = createBody();
+        profileBody = new ProfilePage(controller).createRoot();
+        root.setCenter(dashboardBody);
         refreshHeader();
         return root;
     }
@@ -173,6 +180,10 @@ public class DashboardPage {
         statusBadge.getStyleClass().add("status-badge");
         status.getChildren().addAll(statusLabel, statusBadge);
 
+        profileToggleButton = new Button(resolveProfileToggleLabel());
+        profileToggleButton.getStyleClass().add("secondary-button");
+        profileToggleButton.setOnAction(event -> toggleProfileView());
+
         Button nextWeek = new Button("Next Week");
         nextWeek.getStyleClass().add("primary-action");
         nextWeek.setContentDisplay(ContentDisplay.LEFT);
@@ -187,7 +198,7 @@ public class DashboardPage {
             });
         }
 
-        right.getChildren().addAll(cash, netWorth, status, nextWeek);
+        right.getChildren().addAll(cash, netWorth, status, profileToggleButton, nextWeek);
         return right;
     }
 
@@ -221,6 +232,7 @@ public class DashboardPage {
         body.getChildren().addAll(leftPanel, rightPanel);
         return body;
     }
+
 
     private VBox createLeftPanel() {
         VBox panel = new VBox(10);
@@ -703,6 +715,27 @@ public class DashboardPage {
         refreshPortfolio();
         refreshStockList();
     }
+
+    private void toggleProfileView() {
+        if (root == null || dashboardBody == null || profileBody == null) {
+            return;
+        }
+        showingProfile = !showingProfile;
+        root.setCenter(showingProfile ? profileBody : dashboardBody);
+        updateProfileToggleLabel();
+    }
+
+    private String resolveProfileToggleLabel() {
+        return showingProfile ? "Home" : "Profile";
+    }
+
+    private void updateProfileToggleLabel() {
+        if (profileToggleButton == null) {
+            return;
+        }
+        profileToggleButton.setText(resolveProfileToggleLabel());
+    }
+
 
     private void refreshPortfolio() {
         if (portfolioList == null || portfolioEmptyState == null || portfolioScroll == null) {

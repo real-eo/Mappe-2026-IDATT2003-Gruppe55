@@ -453,6 +453,18 @@
     -fx-background-color: #111827;
 }
 
+.profile-page {
+    -fx-background-color: #0a0e1a;
+    -fx-alignment: center;
+    -fx-spacing: 16;
+}
+
+.profile-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 18;
+    -fx-font-weight: 700;
+}
+
 .trade-close-button {
     -fx-background-color: transparent;
     -fx-padding: 0;
