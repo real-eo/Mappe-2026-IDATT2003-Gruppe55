@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -519,13 +521,27 @@ public class DashboardPage {
         card.getStyleClass().addAll("stock-card", "stock-card-empty");
         card.setAlignment(Pos.CENTER_LEFT);
 
-        Label title = new Label("No stocks loaded");
+        Label title = new Label(resolveEmptyStockTitle());
         title.getStyleClass().add("stock-empty-title");
-        Label subtitle = new Label("Check that data/sp500.csv is available.");
+        Label subtitle = new Label(resolveEmptyStockSubtitle());
         subtitle.getStyleClass().add("stock-empty-subtitle");
 
         card.getChildren().addAll(title, subtitle);
         return card;
+    }
+
+    private String resolveEmptyStockTitle() {
+        if (activeStockTab == StockTab.WATCHLIST) {
+            return "No watchlist found";
+        }
+        return "No stocks loaded";
+    }
+
+    private String resolveEmptyStockSubtitle() {
+        if (activeStockTab == StockTab.WATCHLIST) {
+            return "Click the star icon to favorite and add stocks to the watchlist.";
+        }
+        return "Check that data/sp500.csv is available.";
     }
 
     private List<StockInfo> loadStockInfos(String keyword) {
@@ -716,11 +732,14 @@ public class DashboardPage {
 
         stockListContainer.getChildren().clear();
         String keyword = searchField == null ? "" : searchField.getText();
-        List<StockInfo> stocks = loadStockInfos(keyword);
+        String searchTerm = activeStockTab == StockTab.MOVERS ? "" : keyword;
+        List<StockInfo> stocks = loadStockInfos(searchTerm);
         if (activeStockTab == StockTab.WATCHLIST) {
             stocks = stocks.stream()
                 .filter(stock -> watchlistSymbols.contains(stock.stock().getSymbol()))
                 .toList();
+        } else if (activeStockTab == StockTab.MOVERS) {
+            stocks = filterMarketMovers(stocks);
         }
         if (stocks.isEmpty()) {
             stockListContainer.getChildren().add(createEmptyStockCard());
@@ -742,6 +761,26 @@ public class DashboardPage {
         Window owner = resolveOwnerWindow(source);
         SellStockDialog dialog = new SellStockDialog(controller, stock, this::refreshHeader);
         dialog.show(owner);
+    }
+
+    private List<StockInfo> filterMarketMovers(List<StockInfo> stocks) {
+        List<StockInfo> gainers = stocks.stream()
+            .filter(info -> info.stock().getLatestPriceChange().compareTo(BigDecimal.ZERO) > 0)
+            .sorted(Comparator.comparing((StockInfo info) -> info.stock().getLatestPriceChange())
+                .reversed())
+            .limit(5)
+            .toList();
+
+        List<StockInfo> losers = stocks.stream()
+            .filter(info -> info.stock().getLatestPriceChange().compareTo(BigDecimal.ZERO) < 0)
+            .sorted(Comparator.comparing(info -> info.stock().getLatestPriceChange()))
+            .limit(5)
+            .toList();
+
+        List<StockInfo> movers = new ArrayList<>(gainers.size() + losers.size());
+        movers.addAll(gainers);
+        movers.addAll(losers);
+        return movers;
     }
 
     private void toggleWatchlist(String symbol) {
