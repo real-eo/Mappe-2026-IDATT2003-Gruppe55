@@ -365,7 +365,6 @@
     -fx-border-width: 0.67;
     -fx-background-radius: 9;
     -fx-border-radius: 9;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 24, 0.25, 0, 8);
 }
 
 .trade-title {
