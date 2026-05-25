@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.domain.calculator;
+package edu.ntnu.idi.idatt2003.millions.domain.calculator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

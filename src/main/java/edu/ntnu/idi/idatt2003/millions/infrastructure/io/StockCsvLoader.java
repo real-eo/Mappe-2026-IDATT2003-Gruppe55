@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.io;
+package edu.ntnu.idi.idatt2003.millions.infrastructure.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;

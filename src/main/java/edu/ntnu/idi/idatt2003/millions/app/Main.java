@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.app;
+package edu.ntnu.idi.idatt2003.millions.app;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
