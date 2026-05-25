@@ -5,6 +5,7 @@ import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.PlayerStatus;
+import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Window;
 
 /**
  * Static dashboard layout based on the Figma desktop design.
@@ -56,7 +58,7 @@ public class DashboardPage {
         NEUTRAL
     }
 
-    private record StockInfo(String symbol, String name, String price, String change, ChangeKind changeKind) {
+    private record StockInfo(Stock stock, String price, String change, ChangeKind changeKind) {
     }
 
     private record StockChange(BigDecimal percent, ChangeKind kind) {
@@ -68,6 +70,11 @@ public class DashboardPage {
     private Label cashValue;
     private Label netWorthValue;
     private Label statusBadge;
+    private VBox stockListContainer;
+    private StackPane portfolioContent;
+    private ScrollPane portfolioScroll;
+    private VBox portfolioList;
+    private VBox portfolioEmptyState;
 
     public DashboardPage() {
         this(null);
@@ -219,9 +226,36 @@ public class DashboardPage {
         panel.setPadding(new Insets(14));
 
         HBox tabs = createTabBar(List.of("Portfolio", "History (0)"), 0);
-        StackPane content = new StackPane();
-        content.getStyleClass().add("portfolio-panel");
+        portfolioContent = new StackPane();
+        portfolioContent.getStyleClass().add("portfolio-panel");
 
+        portfolioScroll = createPortfolioList();
+        portfolioEmptyState = createPortfolioEmptyState();
+
+        portfolioContent.getChildren().addAll(portfolioScroll, portfolioEmptyState);
+        StackPane.setAlignment(portfolioScroll, Pos.TOP_LEFT);
+        StackPane.setAlignment(portfolioEmptyState, Pos.CENTER);
+        VBox.setVgrow(portfolioContent, Priority.ALWAYS);
+        refreshPortfolio();
+
+        panel.getChildren().addAll(tabs, portfolioContent);
+        return panel;
+    }
+
+    private ScrollPane createPortfolioList() {
+        portfolioList = new VBox(10);
+        portfolioList.getStyleClass().add("portfolio-list");
+        portfolioList.setFillWidth(true);
+
+        ScrollPane scrollPane = new ScrollPane(portfolioList);
+        scrollPane.getStyleClass().add("portfolio-scroll");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        return scrollPane;
+    }
+
+    private VBox createPortfolioEmptyState() {
         VBox emptyState = new VBox(10);
         emptyState.getStyleClass().add("empty-state");
         emptyState.setAlignment(Pos.CENTER);
@@ -234,11 +268,7 @@ public class DashboardPage {
         emptySubtitle.setTextAlignment(TextAlignment.CENTER);
 
         emptyState.getChildren().addAll(emptyIcon, emptyTitle, emptySubtitle);
-        content.getChildren().add(emptyState);
-        VBox.setVgrow(content, Priority.ALWAYS);
-
-        panel.getChildren().addAll(tabs, content);
-        return panel;
+        return emptyState;
     }
 
     private HBox createTabBar(List<String> labels, int activeIndex) {
@@ -273,28 +303,20 @@ public class DashboardPage {
     }
 
     private ScrollPane createStockList() {
-        VBox cards = new VBox(10);
-        cards.getStyleClass().add("stock-list");
-        cards.setFillWidth(true);
+        stockListContainer = new VBox(10);
+        stockListContainer.getStyleClass().add("stock-list");
+        stockListContainer.setFillWidth(true);
 
-        List<StockInfo> stocks = loadStockInfos();
-        if (stocks.isEmpty()) {
-            cards.getChildren().add(createEmptyStockCard());
-        } else {
-            for (StockInfo stock : stocks) {
-                cards.getChildren().add(createStockCard(stock));
-            }
-        }
-
-        ScrollPane scrollPane = new ScrollPane(cards);
+        ScrollPane scrollPane = new ScrollPane(stockListContainer);
         scrollPane.getStyleClass().add("stock-scroll");
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        refreshStockList();
         return scrollPane;
     }
 
-    private VBox createStockCard(StockInfo stock) {
+    private VBox createStockCard(StockInfo stockInfo) {
         VBox card = new VBox(16);
         card.getStyleClass().add("stock-card");
 
@@ -305,7 +327,8 @@ public class DashboardPage {
         HBox symbolRow = new HBox(6);
         symbolRow.setAlignment(Pos.CENTER_LEFT);
 
-        Label symbol = new Label(stock.symbol());
+        Stock stock = stockInfo.stock();
+        Label symbol = new Label(stock.getSymbol());
         symbol.getStyleClass().add("stock-symbol");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -313,7 +336,7 @@ public class DashboardPage {
 
         symbolRow.getChildren().addAll(symbol, spacer, star);
 
-        Label company = new Label(stock.name());
+        Label company = new Label(stock.getCompanyName());
         company.getStyleClass().add("stock-name");
 
         left.getChildren().addAll(symbolRow, company);
@@ -321,7 +344,7 @@ public class DashboardPage {
 
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        Label price = new Label(stock.price());
+        Label price = new Label(stockInfo.price());
         price.getStyleClass().add("stock-price");
 
         HBox changeRow = new HBox(4);
@@ -329,7 +352,7 @@ public class DashboardPage {
         String changeClass;
         String iconClass;
         String iconPath;
-        switch (stock.changeKind()) {
+        switch (stockInfo.changeKind()) {
             case POSITIVE -> {
                 changeClass = "change-positive";
                 iconClass = "icon-positive";
@@ -347,7 +370,7 @@ public class DashboardPage {
             }
         }
         SVGPath changeIcon = createIcon(iconPath, iconClass, 10);
-        Label change = new Label(stock.change());
+        Label change = new Label(stockInfo.change());
         change.getStyleClass().addAll("stock-change", changeClass);
 
         changeRow.getChildren().addAll(changeIcon, change);
@@ -362,7 +385,14 @@ public class DashboardPage {
         buy.getStyleClass().add("buy-button");
         Button sell = new Button("Sell");
         sell.getStyleClass().add("sell-button");
-        sell.setDisable(true);
+
+        if (controller == null) {
+            buy.setDisable(true);
+            sell.setDisable(true);
+        } else {
+            buy.setOnAction(event -> openBuyDialog(buy, stock));
+            sell.setOnAction(event -> openSellDialog(sell, stock));
+        }
 
         buy.setMaxWidth(Double.MAX_VALUE);
         sell.setMaxWidth(Double.MAX_VALUE);
@@ -372,6 +402,38 @@ public class DashboardPage {
         actions.getChildren().addAll(buy, sell);
 
         card.getChildren().addAll(header, actions);
+        return card;
+    }
+
+    private VBox createPortfolioCard(Share share) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("portfolio-card");
+
+        Stock stock = share.getStock();
+        BigDecimal quantity = share.getQuantity();
+        BigDecimal totalValue = stock.getSalesPrice().multiply(quantity);
+
+        HBox header = new HBox(12);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox left = new VBox(2);
+        Label symbol = new Label(stock.getSymbol());
+        symbol.getStyleClass().add("portfolio-symbol");
+        Label company = new Label(stock.getCompanyName());
+        company.getStyleClass().add("portfolio-name");
+        left.getChildren().addAll(symbol, company);
+        HBox.setHgrow(left, Priority.ALWAYS);
+
+        VBox right = new VBox(2);
+        right.setAlignment(Pos.CENTER_RIGHT);
+        Label value = new Label(formatPrice(totalValue));
+        value.getStyleClass().add("portfolio-value");
+        Label meta = new Label(formatQuantity(quantity) + " shares @ " + formatPrice(stock.getSalesPrice()));
+        meta.getStyleClass().add("portfolio-meta");
+        right.getChildren().addAll(value, meta);
+
+        header.getChildren().addAll(left, right);
+        card.getChildren().add(header);
         return card;
     }
 
@@ -412,8 +474,7 @@ public class DashboardPage {
     private StockInfo toStockInfo(Stock stock) {
         StockChange change = calculateChange(stock);
         return new StockInfo(
-            stock.getSymbol(),
-            stock.getCompanyName(),
+            stock,
             formatPrice(stock.getSalesPrice()),
             formatPercent(change),
             change.kind()
@@ -445,6 +506,12 @@ public class DashboardPage {
         DecimalFormat format = new DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.US));
         format.setRoundingMode(RoundingMode.HALF_UP);
         return "$" + format.format(price);
+    }
+
+    private String formatQuantity(BigDecimal quantity) {
+        DecimalFormat format = new DecimalFormat("#,##0.####", DecimalFormatSymbols.getInstance(Locale.US));
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        return format.format(quantity);
     }
 
     private String formatMoney(BigDecimal price) {
@@ -530,5 +597,64 @@ public class DashboardPage {
         cashValue.setText(formatMoney(player.getMoney()));
         netWorthValue.setText(formatMoney(player.getNetWorth()));
         statusBadge.setText(formatStatus(player.getStatus()));
+        refreshPortfolio();
+        refreshStockList();
+    }
+
+    private void refreshPortfolio() {
+        if (portfolioList == null || portfolioEmptyState == null || portfolioScroll == null) {
+            return;
+        }
+
+        List<Share> shares = controller == null
+            ? List.of()
+            : controller.getPlayer().getPortfolio().getShares();
+
+        portfolioList.getChildren().clear();
+        for (Share share : shares) {
+            portfolioList.getChildren().add(createPortfolioCard(share));
+        }
+
+        boolean isEmpty = shares.isEmpty();
+        portfolioEmptyState.setVisible(isEmpty);
+        portfolioEmptyState.setManaged(isEmpty);
+        portfolioScroll.setVisible(!isEmpty);
+        portfolioScroll.setManaged(!isEmpty);
+    }
+
+    private void refreshStockList() {
+        if (stockListContainer == null) {
+            return;
+        }
+
+        stockListContainer.getChildren().clear();
+        List<StockInfo> stocks = loadStockInfos();
+        if (stocks.isEmpty()) {
+            stockListContainer.getChildren().add(createEmptyStockCard());
+            return;
+        }
+
+        for (StockInfo stock : stocks) {
+            stockListContainer.getChildren().add(createStockCard(stock));
+        }
+    }
+
+    private void openBuyDialog(Button source, Stock stock) {
+        Window owner = resolveOwnerWindow(source);
+        BuyStockDialog dialog = new BuyStockDialog(controller, stock, this::refreshHeader);
+        dialog.show(owner);
+    }
+
+    private void openSellDialog(Button source, Stock stock) {
+        Window owner = resolveOwnerWindow(source);
+        SellStockDialog dialog = new SellStockDialog(controller, stock, this::refreshHeader);
+        dialog.show(owner);
+    }
+
+    private Window resolveOwnerWindow(Button source) {
+        if (source.getScene() == null) {
+            return null;
+        }
+        return source.getScene().getWindow();
     }
 }
