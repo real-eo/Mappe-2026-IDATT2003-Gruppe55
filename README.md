@@ -118,10 +118,12 @@ mvn test
 ## How to Use the Application
 
 Once the application starts:
-1. **View Available Stocks**: See all stocks with their current prices in the main list
-2. **Buy Shares**: Select a stock, enter quantity, and click "Buy"
-3. **Sell Shares**: Select an owned stock, enter quantity, and click "Sell"  
-4. **Advance Time**: Click "Next Week" to simulate market price changes
-5. **Monitor Portfolio**: View your balance, portfolio value, and transaction history in real-time
+1. **Start or Load a Game**: Enter a player name and starting capital, then click **Start Game**, or choose **Load Game** to resume a saved session.
+2. **Browse the Market**: Use the **All Stocks**, **Watchlist**, and **Market Movers** tabs and the search bar to find stocks by symbol or company name.
+3. **Manage Watchlist**: Click the star icon on a stock card to add or remove it from your watchlist.
+4. **Buy or Sell Shares**: Click **Buy** or **Sell** on a stock card, enter a share quantity, and confirm the trade.
+5. **Advance Time**: Click **Next Week** to progress the simulation and update prices.
+6. **Track Progress**: The header shows cash, net worth, week, and status; the portfolio panel lists current holdings.
+7. **Save Your Game**: Switch to **Profile** and click **Save Game**. Closing the app also auto-saves the active game.
 
-Starting capital is 100,000 NOK. Stock prices fluctuate randomly each week by up to ±5%.
+Starting capital is chosen on the start screen, and prices are shown in USD.
