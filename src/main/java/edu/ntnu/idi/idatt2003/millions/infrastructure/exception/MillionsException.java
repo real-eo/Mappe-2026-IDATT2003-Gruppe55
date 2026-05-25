@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
+package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Base exception for all Millions application errors.

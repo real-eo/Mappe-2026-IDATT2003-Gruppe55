@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.view;
+package edu.ntnu.idi.idatt2003.millions.view;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;

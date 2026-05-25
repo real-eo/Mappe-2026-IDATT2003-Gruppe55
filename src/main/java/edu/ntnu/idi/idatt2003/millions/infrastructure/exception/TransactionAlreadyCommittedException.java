@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
+package edu.ntnu.idi.idatt2003.millions.infrastructure.exception;
 
 /**
  * Thrown when an attempt is made to commit a transaction that has already been committed.

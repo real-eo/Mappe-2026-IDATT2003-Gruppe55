@@ -83,6 +83,10 @@
     -fx-background-color: #2563eb;
 }
 
+.button:hover {
+    -fx-cursor: hand;
+}
+
 .close-button {
     -fx-background-color: transparent;
     -fx-padding: 0;

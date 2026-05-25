@@ -1,4 +1,4 @@
-﻿package edu.ntnu.idi.idatt2003.millions.controller;
+package edu.ntnu.idi.idatt2003.millions.controller;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
