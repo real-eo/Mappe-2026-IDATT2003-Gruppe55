@@ -1,0 +1,450 @@
+.dashboard-root {
+    -fx-background-color: #0a0e1a;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.dashboard-header {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0 0.67 0;
+    -fx-padding: 14 21;
+    -fx-spacing: 18;
+    -fx-min-height: 70;
+}
+
+.header-divider {
+    -fx-background-color: #1e293b;
+    -fx-pref-width: 1;
+    -fx-min-width: 1;
+    -fx-max-width: 1;
+    -fx-min-height: 24;
+}
+
+.brand-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 17.5;
+    -fx-font-weight: 700;
+}
+
+.brand-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12.25;
+}
+
+.header-week {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+}
+
+.stat-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.stat-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 15.75;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.stat-value-accent {
+    -fx-text-fill: #3b82f6;
+}
+
+.status-badge {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 10.5;
+    -fx-font-weight: 600;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 2 8;
+}
+
+.primary-action {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 5;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+}
+
+.primary-action:hover {
+    -fx-background-color: #2563eb;
+}
+
+.dashboard-body {
+    -fx-background-color: #0a0e1a;
+}
+
+.panel-left {
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0.67 0 0;
+    -fx-spacing: 10;
+}
+
+.panel-right {
+    -fx-spacing: 12;
+}
+
+.dashboard-tabs {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 11;
+    -fx-padding: 3.5;
+    -fx-spacing: 6;
+    -fx-alignment: center-left;
+}
+
+.dashboard-tab {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 4 12;
+    -fx-background-radius: 11;
+}
+
+.dashboard-tab-active {
+    -fx-background-color: #111827;
+}
+
+.search-container {
+    -fx-background-color: #1a1f2e;
+    -fx-background-radius: 5;
+    -fx-padding: 4 10;
+    -fx-alignment: center-left;
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-font-size: 12.25;
+}
+
+.stock-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.stock-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.stock-list {
+    -fx-spacing: 10;
+}
+
+.stock-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 14;
+    -fx-spacing: 16;
+}
+
+.stock-card-empty {
+    -fx-spacing: 4;
+}
+
+.stock-empty-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.stock-empty-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.stock-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.stock-name {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.stock-price {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.stock-change {
+    -fx-font-size: 10.5;
+    -fx-font-weight: 600;
+}
+
+.change-positive {
+    -fx-text-fill: #10b981;
+}
+
+.change-negative {
+    -fx-text-fill: #ef4444;
+}
+
+.change-neutral {
+    -fx-text-fill: #94a3b8;
+}
+
+.buy-button {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 5;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+}
+
+.buy-button:hover {
+    -fx-background-color: #2563eb;
+}
+
+.sell-button {
+    -fx-background-color: #0a0e1a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+    -fx-opacity: 0.6;
+}
+
+.sell-button:disabled {
+    -fx-opacity: 0.6;
+}
+
+.portfolio-panel {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.portfolio-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.portfolio-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.portfolio-list {
+    -fx-spacing: 10;
+}
+
+.portfolio-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 12;
+    -fx-spacing: 10;
+}
+
+.portfolio-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.portfolio-name {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.portfolio-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.portfolio-meta {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.empty-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 14;
+    -fx-font-weight: 700;
+}
+
+.empty-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+    -fx-alignment: center;
+}
+
+.icon-fill-accent {
+    -fx-fill: #3b82f6;
+}
+
+.icon-fill-inverse {
+    -fx-fill: #ffffff;
+}
+
+.icon-positive {
+    -fx-fill: #10b981;
+}
+
+.icon-negative {
+    -fx-fill: #ef4444;
+}
+
+.icon-neutral {
+    -fx-fill: transparent;
+    -fx-stroke: #94a3b8;
+    -fx-stroke-width: 1.4;
+    -fx-stroke-linecap: round;
+}
+
+.icon-outline {
+    -fx-fill: transparent;
+    -fx-stroke: #94a3b8;
+    -fx-stroke-width: 1.2;
+    -fx-stroke-linecap: round;
+    -fx-stroke-linejoin: round;
+}
+
+.icon-stroke-muted {
+    -fx-fill: transparent;
+    -fx-stroke: #94a3b8;
+    -fx-stroke-width: 1.4;
+    -fx-stroke-linecap: round;
+    -fx-stroke-linejoin: round;
+}
+
+.icon-stroke-inverse {
+    -fx-fill: transparent;
+    -fx-stroke: #ffffff;
+    -fx-stroke-width: 1.6;
+    -fx-stroke-linecap: round;
+    -fx-stroke-linejoin: round;
+}
+
+.trade-overlay {
+    -fx-background-color: rgba(10, 14, 26, 0.75);
+}
+
+.trade-dialog-card {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 24, 0.25, 0, 8);
+}
+
+.trade-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 14;
+    -fx-font-weight: 700;
+}
+
+.trade-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.trade-price-panel {
+    -fx-background-color: #1a1f2e;
+    -fx-background-radius: 7;
+    -fx-padding: 10 12;
+    -fx-spacing: 2;
+}
+
+.trade-price-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.trade-price-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.trade-field-label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+}
+
+.trade-input-container {
+    -fx-background-color: #1a1f2e;
+    -fx-background-radius: 5;
+    -fx-padding: 4 10;
+    -fx-alignment: center-left;
+}
+
+.trade-input-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-font-size: 12.25;
+}
+
+.trade-actions {
+    -fx-alignment: center-right;
+    -fx-spacing: 10;
+}
+
+.primary-button {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 5;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+}
+
+.primary-button:hover {
+    -fx-background-color: #2563eb;
+}
+
+.secondary-button {
+    -fx-background-color: #0a0e1a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #111827;
+}
+
+.trade-close-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12;
+    -fx-opacity: 0.8;
+}

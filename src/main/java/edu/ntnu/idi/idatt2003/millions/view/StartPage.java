@@ -1,12 +1,12 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
-import java.net.URL;
+import java.math.BigDecimal;
+import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -18,18 +18,16 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
-import javafx.stage.Stage;
 
 /**
  * Start page UI for the Millions stock trading game.
  */
-public class StartPage extends Application {
+public class StartPage {
 
     private static final String TROPHY_PATH = "M2 1 H12 V4 C12 6 10.8 7.5 9 8 V10 H11 V12 H3 V10 H5 V8 C3.2 7.5 2 6 2 4 Z";
     private static final String PLAY_PATH = "M3 2 L12 7 L3 12 Z";
 
-    @Override
-    public void start(Stage stage) {
+    public StackPane createRoot(BiConsumer<String, BigDecimal> onStart) {
         StackPane root = new StackPane();
         root.getStyleClass().add("start-root");
         root.setPadding(new Insets(40));
@@ -111,25 +109,71 @@ public class StartPage extends Application {
         startButton.setContentDisplay(ContentDisplay.LEFT);
         startButton.setGraphicTextGap(8);
         startButton.setGraphic(createIcon(PLAY_PATH, "icon-inverse"));
+        startButton.setDefaultButton(true);
+
+        if (onStart == null) {
+            startButton.setDisable(true);
+        } else {
+            Runnable startAction = () -> handleStart(nameField, capitalField, onStart);
+            startButton.setOnAction(event -> startAction.run());
+            nameField.setOnAction(event -> startAction.run());
+            capitalField.setOnAction(event -> startAction.run());
+        }
 
         content.getChildren().addAll(header, form, spacer, startButton);
 
         Button closeButton = new Button("x");
         closeButton.getStyleClass().add("close-button");
-        closeButton.setOnAction(event -> stage.close());
+        closeButton.setOnAction(event -> {
+            if (root.getScene() != null && root.getScene().getWindow() != null) {
+                root.getScene().getWindow().hide();
+            }
+        });
 
         card.getChildren().addAll(content, closeButton);
         StackPane.setAlignment(closeButton, Pos.TOP_RIGHT);
         StackPane.setMargin(closeButton, new Insets(10, 10, 0, 0));
 
         root.getChildren().add(card);
+        return root;
+    }
 
-        Scene scene = new Scene(root, 1024, 768);
-        scene.getStylesheets().add(resolveStylesheet("/styles/startpage.css"));
-        stage.setTitle("Millions - Stock Trading Game");
-        stage.setScene(scene);
-        stage.setMaximized(true);
-        stage.show();
+    private void handleStart(TextField nameField, TextField capitalField,
+                             BiConsumer<String, BigDecimal> onStart) {
+        String name = nameField.getText() == null ? "" : nameField.getText().trim();
+        if (name.isEmpty()) {
+            showValidationError("Please enter your name.");
+            return;
+        }
+
+        String capitalText = capitalField.getText() == null ? "" : capitalField.getText().trim();
+        if (capitalText.isEmpty()) {
+            showValidationError("Please enter a starting capital.");
+            return;
+        }
+
+        BigDecimal startingMoney;
+        try {
+            startingMoney = new BigDecimal(capitalText);
+        } catch (NumberFormatException exception) {
+            showValidationError("Starting capital must be a valid number.");
+            return;
+        }
+
+        if (startingMoney.compareTo(BigDecimal.ZERO) <= 0) {
+            showValidationError("Starting capital must be greater than zero.");
+            return;
+        }
+
+        onStart.accept(name, startingMoney);
+    }
+
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Start Game");
+        alert.setHeaderText("Cannot start the game");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private static HBox createInputField(Node leadingIcon, TextField textField) {
@@ -158,11 +202,4 @@ public class StartPage extends Application {
         return icon;
     }
 
-    private static String resolveStylesheet(String path) {
-        URL url = StartPage.class.getResource(path);
-        if (url == null) {
-            throw new IllegalStateException("Missing stylesheet: " + path);
-        }
-        return url.toExternalForm();
-    }
 }
