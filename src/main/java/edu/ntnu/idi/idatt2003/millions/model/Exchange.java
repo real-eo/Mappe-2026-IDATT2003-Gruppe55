@@ -38,26 +38,42 @@ public class Exchange {
      * @param name   the exchange name
      * @param stocks the list of stocks available on this exchange
      * @param random the random number generator used for price updates
-     * @throws IllegalArgumentException if name is blank or stocks is null
+     * @param week   the current week (must be positive)
+     * @throws IllegalArgumentException if name is blank, stocks is null, or week is non-positive
      */
-    public Exchange(String name, List<Stock> stocks, Random random) {
+    public Exchange(String name, List<Stock> stocks, Random random, int week) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Exchange name must not be blank");
         }
         if (stocks == null) {
             throw new IllegalArgumentException("Stocks list must not be null");
         }
+        if (week <= 0) {
+            throw new IllegalArgumentException("Week must be positive");
+        }
 
         this.name = name;
         this.random = random;
         this.stocks = new HashMap<>();
-        this.week = 1;
-        
+        this.week = week;
+
         for (Stock stock : stocks) {
             if (stock != null) {
                 this.stocks.put(stock.getSymbol(), stock);
             }
         }
+    }
+
+    /**
+     * Constructs an Exchange with a custom {@link Random} instance (useful for deterministic tests).
+     *
+     * @param name   the exchange name
+     * @param stocks the list of stocks available on this exchange
+     * @param random the random number generator used for price updates
+     * @throws IllegalArgumentException if name is blank or stocks is null
+     */
+    public Exchange(String name, List<Stock> stocks, Random random) {
+        this(name, stocks, random, 1);
     }
 
     /**
@@ -68,7 +84,7 @@ public class Exchange {
      * @throws IllegalArgumentException if name is blank or stocks is null
      */
     public Exchange(String name, List<Stock> stocks) {
-        this(name, stocks, new Random());
+        this(name, stocks, new Random(), 1);
     }
 
 
@@ -88,6 +104,15 @@ public class Exchange {
      */
     public int getWeek() {
         return week;
+    }
+
+    /**
+     * Returns all stocks listed on the exchange.
+     *
+     * @return list of stocks
+     */
+    public List<Stock> getStocks() {
+        return List.copyOf(stocks.values());
     }
 
     /**
