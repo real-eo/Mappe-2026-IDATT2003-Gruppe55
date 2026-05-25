@@ -29,6 +29,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Window;
 
 /**
  * Static dashboard layout based on the Figma desktop design.
@@ -56,7 +57,7 @@ public class DashboardPage {
         NEUTRAL
     }
 
-    private record StockInfo(String symbol, String name, String price, String change, ChangeKind changeKind) {
+    private record StockInfo(Stock stock, String price, String change, ChangeKind changeKind) {
     }
 
     private record StockChange(BigDecimal percent, ChangeKind kind) {
@@ -294,7 +295,7 @@ public class DashboardPage {
         return scrollPane;
     }
 
-    private VBox createStockCard(StockInfo stock) {
+    private VBox createStockCard(StockInfo stockInfo) {
         VBox card = new VBox(16);
         card.getStyleClass().add("stock-card");
 
@@ -305,7 +306,8 @@ public class DashboardPage {
         HBox symbolRow = new HBox(6);
         symbolRow.setAlignment(Pos.CENTER_LEFT);
 
-        Label symbol = new Label(stock.symbol());
+        Stock stock = stockInfo.stock();
+        Label symbol = new Label(stock.getSymbol());
         symbol.getStyleClass().add("stock-symbol");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -313,7 +315,7 @@ public class DashboardPage {
 
         symbolRow.getChildren().addAll(symbol, spacer, star);
 
-        Label company = new Label(stock.name());
+        Label company = new Label(stock.getCompanyName());
         company.getStyleClass().add("stock-name");
 
         left.getChildren().addAll(symbolRow, company);
@@ -321,7 +323,7 @@ public class DashboardPage {
 
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        Label price = new Label(stock.price());
+        Label price = new Label(stockInfo.price());
         price.getStyleClass().add("stock-price");
 
         HBox changeRow = new HBox(4);
@@ -329,7 +331,7 @@ public class DashboardPage {
         String changeClass;
         String iconClass;
         String iconPath;
-        switch (stock.changeKind()) {
+        switch (stockInfo.changeKind()) {
             case POSITIVE -> {
                 changeClass = "change-positive";
                 iconClass = "icon-positive";
@@ -347,7 +349,7 @@ public class DashboardPage {
             }
         }
         SVGPath changeIcon = createIcon(iconPath, iconClass, 10);
-        Label change = new Label(stock.change());
+        Label change = new Label(stockInfo.change());
         change.getStyleClass().addAll("stock-change", changeClass);
 
         changeRow.getChildren().addAll(changeIcon, change);
@@ -362,7 +364,14 @@ public class DashboardPage {
         buy.getStyleClass().add("buy-button");
         Button sell = new Button("Sell");
         sell.getStyleClass().add("sell-button");
-        sell.setDisable(true);
+
+        if (controller == null) {
+            buy.setDisable(true);
+            sell.setDisable(true);
+        } else {
+            buy.setOnAction(event -> openBuyDialog(buy, stock));
+            sell.setOnAction(event -> openSellDialog(sell, stock));
+        }
 
         buy.setMaxWidth(Double.MAX_VALUE);
         sell.setMaxWidth(Double.MAX_VALUE);
@@ -412,8 +421,7 @@ public class DashboardPage {
     private StockInfo toStockInfo(Stock stock) {
         StockChange change = calculateChange(stock);
         return new StockInfo(
-            stock.getSymbol(),
-            stock.getCompanyName(),
+            stock,
             formatPrice(stock.getSalesPrice()),
             formatPercent(change),
             change.kind()
@@ -530,5 +538,24 @@ public class DashboardPage {
         cashValue.setText(formatMoney(player.getMoney()));
         netWorthValue.setText(formatMoney(player.getNetWorth()));
         statusBadge.setText(formatStatus(player.getStatus()));
+    }
+
+    private void openBuyDialog(Button source, Stock stock) {
+        Window owner = resolveOwnerWindow(source);
+        BuyStockDialog dialog = new BuyStockDialog(controller, stock, this::refreshHeader);
+        dialog.show(owner);
+    }
+
+    private void openSellDialog(Button source, Stock stock) {
+        Window owner = resolveOwnerWindow(source);
+        SellStockDialog dialog = new SellStockDialog(controller, stock, this::refreshHeader);
+        dialog.show(owner);
+    }
+
+    private Window resolveOwnerWindow(Button source) {
+        if (source.getScene() == null) {
+            return null;
+        }
+        return source.getScene().getWindow();
     }
 }
