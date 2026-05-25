@@ -70,6 +70,7 @@ public class DashboardPage {
     private Label cashValue;
     private Label netWorthValue;
     private Label statusBadge;
+    private VBox stockListContainer;
     private StackPane portfolioContent;
     private ScrollPane portfolioScroll;
     private VBox portfolioList;
@@ -302,24 +303,16 @@ public class DashboardPage {
     }
 
     private ScrollPane createStockList() {
-        VBox cards = new VBox(10);
-        cards.getStyleClass().add("stock-list");
-        cards.setFillWidth(true);
+        stockListContainer = new VBox(10);
+        stockListContainer.getStyleClass().add("stock-list");
+        stockListContainer.setFillWidth(true);
 
-        List<StockInfo> stocks = loadStockInfos();
-        if (stocks.isEmpty()) {
-            cards.getChildren().add(createEmptyStockCard());
-        } else {
-            for (StockInfo stock : stocks) {
-                cards.getChildren().add(createStockCard(stock));
-            }
-        }
-
-        ScrollPane scrollPane = new ScrollPane(cards);
+        ScrollPane scrollPane = new ScrollPane(stockListContainer);
         scrollPane.getStyleClass().add("stock-scroll");
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        refreshStockList();
         return scrollPane;
     }
 
@@ -605,6 +598,7 @@ public class DashboardPage {
         netWorthValue.setText(formatMoney(player.getNetWorth()));
         statusBadge.setText(formatStatus(player.getStatus()));
         refreshPortfolio();
+        refreshStockList();
     }
 
     private void refreshPortfolio() {
@@ -626,6 +620,23 @@ public class DashboardPage {
         portfolioEmptyState.setManaged(isEmpty);
         portfolioScroll.setVisible(!isEmpty);
         portfolioScroll.setManaged(!isEmpty);
+    }
+
+    private void refreshStockList() {
+        if (stockListContainer == null) {
+            return;
+        }
+
+        stockListContainer.getChildren().clear();
+        List<StockInfo> stocks = loadStockInfos();
+        if (stocks.isEmpty()) {
+            stockListContainer.getChildren().add(createEmptyStockCard());
+            return;
+        }
+
+        for (StockInfo stock : stocks) {
+            stockListContainer.getChildren().add(createStockCard(stock));
+        }
     }
 
     private void openBuyDialog(Button source, Stock stock) {
