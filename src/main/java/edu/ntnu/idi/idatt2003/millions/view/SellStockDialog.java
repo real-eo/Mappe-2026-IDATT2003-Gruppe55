@@ -153,14 +153,7 @@ public final class SellStockDialog {
         content.getChildren().addAll(header, pricePanel, sharesLabel, quantityBox, totalRow, actions);
         card.getChildren().add(content);
 
-        Button closeButton = new Button("x");
-        closeButton.getStyleClass().add("trade-close-button");
-        card.getChildren().add(closeButton);
-        StackPane.setAlignment(closeButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(closeButton, new Insets(10, 12, 0, 0));
-
         cancel.setOnAction(event -> stage.close());
-        closeButton.setOnAction(event -> stage.close());
         confirm.setOnAction(event -> handleConfirm());
         quantityField.setOnAction(event -> handleConfirm());
         quantityField.textProperty().addListener((obs, oldValue, newValue) -> updateTotals());
