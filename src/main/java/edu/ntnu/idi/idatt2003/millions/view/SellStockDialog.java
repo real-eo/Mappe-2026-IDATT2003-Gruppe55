@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -20,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -41,6 +43,7 @@ public final class SellStockDialog {
 
     private Stage stage;
     private TextField quantityField;
+    private Label totalValue;
 
     public SellStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         this.controller = controller;
@@ -117,6 +120,16 @@ public final class SellStockDialog {
         quantityBox.getStyleClass().add("trade-input-container");
         HBox.setHgrow(quantityField, Priority.ALWAYS);
 
+        HBox totalRow = new HBox(10);
+        totalRow.setAlignment(Pos.CENTER_LEFT);
+        Label totalLabel = new Label("Total (after fees & tax)");
+        totalLabel.getStyleClass().add("trade-price-label");
+        totalValue = new Label("--");
+        totalValue.getStyleClass().add("trade-price-value");
+        Region totalSpacer = new Region();
+        HBox.setHgrow(totalSpacer, Priority.ALWAYS);
+        totalRow.getChildren().addAll(totalLabel, totalSpacer, totalValue);
+
         HBox actions = new HBox(10);
         actions.getStyleClass().add("trade-actions");
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -129,7 +142,7 @@ public final class SellStockDialog {
 
         actions.getChildren().addAll(cancel, confirm);
 
-        content.getChildren().addAll(header, pricePanel, sharesLabel, quantityBox, actions);
+        content.getChildren().addAll(header, pricePanel, sharesLabel, quantityBox, totalRow, actions);
         card.getChildren().add(content);
 
         Button closeButton = new Button("x");
@@ -142,6 +155,8 @@ public final class SellStockDialog {
         closeButton.setOnAction(event -> stage.close());
         confirm.setOnAction(event -> handleConfirm());
         quantityField.setOnAction(event -> handleConfirm());
+        quantityField.textProperty().addListener((obs, oldValue, newValue) -> updateTotals());
+        updateTotals();
 
         overlay.getChildren().add(card);
         return overlay;
@@ -190,11 +205,50 @@ public final class SellStockDialog {
         }
     }
 
+    private void updateTotals() {
+        if (totalValue == null || controller == null || stock == null) {
+            return;
+        }
+
+        Optional<Share> share = controller.getPlayer().getPortfolio().findByStock(stock);
+        BigDecimal quantity = parseQuantity(quantityField.getText());
+        if (share.isEmpty() || quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            totalValue.setText("--");
+            return;
+        }
+
+        if (quantity.compareTo(share.get().getQuantity()) > 0) {
+            totalValue.setText("--");
+            return;
+        }
+
+        Share saleShare = new Share(stock, quantity, share.get().getPurchasePrice());
+        SaleCalculator calculator = new SaleCalculator(saleShare);
+        totalValue.setText(formatPrice(calculator.getTotal()));
+    }
+
     private static UnaryOperator<TextFormatter.Change> numericFilter() {
         return change -> {
             String nextText = change.getControlNewText();
             return nextText.matches("\\d*(\\.\\d{0,4})?") ? change : null;
         };
+    }
+
+    private static BigDecimal parseQuantity(String rawQuantity) {
+        if (rawQuantity == null) {
+            return null;
+        }
+
+        String trimmed = rawQuantity.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return new BigDecimal(trimmed);
+        } catch (NumberFormatException exception) {
+            return null;
+        }
     }
 
     private static String formatPrice(BigDecimal price) {
