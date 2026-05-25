@@ -63,19 +63,14 @@ public final class SellStockDialog {
         }
 
         StackPane root = buildRoot();
-        double width = owner == null ? 640 : owner.getWidth();
-        double height = owner == null ? 480 : owner.getHeight();
-        Scene scene = new Scene(root, width, height);
+        Scene scene = new Scene(root);
         scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().add(resolveStylesheet());
 
-        if (owner != null) {
-            stage.setX(owner.getX());
-            stage.setY(owner.getY());
-        }
-
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.sizeToScene();
+        centerStage(owner);
         stage.showAndWait();
     }
 
@@ -88,6 +83,7 @@ public final class SellStockDialog {
         card.getStyleClass().add("trade-dialog-card");
         card.setMaxWidth(520);
         card.setPrefWidth(520);
+        card.setOnMouseClicked(event -> event.consume());
 
         VBox content = new VBox(12);
         content.setPadding(new Insets(18));
@@ -158,8 +154,22 @@ public final class SellStockDialog {
         quantityField.textProperty().addListener((obs, oldValue, newValue) -> updateTotals());
         updateTotals();
 
+        overlay.setOnMouseClicked(event -> stage.close());
+
         overlay.getChildren().add(card);
         return overlay;
+    }
+
+    private void centerStage(Window owner) {
+        if (owner == null) {
+            stage.centerOnScreen();
+            return;
+        }
+
+        double x = owner.getX() + (owner.getWidth() - stage.getWidth()) / 2.0;
+        double y = owner.getY() + (owner.getHeight() - stage.getHeight()) / 2.0;
+        stage.setX(x);
+        stage.setY(y);
     }
 
     private void handleConfirm() {
