@@ -5,8 +5,10 @@ import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.PlayerStatus;
+import edu.ntnu.idi.idatt2003.millions.model.Purchase;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -71,6 +73,11 @@ public class DashboardPage {
         MOVERS
     }
 
+    private enum RightTab {
+        PORTFOLIO,
+        HISTORY
+    }
+
     private enum ChangeKind {
         POSITIVE,
         NEGATIVE,
@@ -116,6 +123,7 @@ public class DashboardPage {
     private final ExchangeController controller;
     private final Set<String> watchlistSymbols = new HashSet<>();
     private StockTab activeStockTab = StockTab.ALL;
+    private RightTab activeRightTab = RightTab.PORTFOLIO;
     private BorderPane root;
     private Parent dashboardBody;
     private Parent profileBody;
@@ -137,6 +145,13 @@ public class DashboardPage {
     private ScrollPane portfolioScroll;
     private VBox portfolioList;
     private VBox portfolioEmptyState;
+    private ScrollPane historyScroll;
+    private VBox historyList;
+    private VBox historyEmptyState;
+    private Label portfolioTab;
+    private Label historyTab;
+    private boolean portfolioEmpty;
+    private boolean historyEmpty;
     private Label allStocksTab;
     private Label watchlistTab;
     private Label marketMoversTab;
@@ -353,18 +368,25 @@ public class DashboardPage {
         panel.getStyleClass().add("panel-right");
         panel.setPadding(new Insets(14));
 
-        HBox tabs = createTabBar(List.of("Portfolio", "History (0)"), 0);
+        HBox tabs = createRightTabBar();
         portfolioContent = new StackPane();
         portfolioContent.getStyleClass().add("portfolio-panel");
 
         portfolioScroll = createPortfolioList();
         portfolioEmptyState = createPortfolioEmptyState();
+        historyScroll = createHistoryList();
+        historyEmptyState = createHistoryEmptyState();
 
-        portfolioContent.getChildren().addAll(portfolioScroll, portfolioEmptyState);
+        portfolioContent.getChildren().addAll(portfolioScroll, portfolioEmptyState, historyScroll, historyEmptyState);
         StackPane.setAlignment(portfolioScroll, Pos.TOP_LEFT);
         StackPane.setAlignment(portfolioEmptyState, Pos.CENTER);
+        StackPane.setAlignment(historyScroll, Pos.TOP_LEFT);
+        StackPane.setAlignment(historyEmptyState, Pos.CENTER);
         VBox.setVgrow(portfolioContent, Priority.ALWAYS);
         refreshPortfolio();
+        refreshHistory();
+        updateRightPanelVisibility();
+        updateRightTabs();
 
         panel.getChildren().addAll(tabs, portfolioContent);
         return panel;
@@ -399,6 +421,35 @@ public class DashboardPage {
         return emptyState;
     }
 
+    private ScrollPane createHistoryList() {
+        historyList = new VBox(10);
+        historyList.getStyleClass().add("history-list");
+        historyList.setFillWidth(true);
+
+        ScrollPane scrollPane = new ScrollPane(historyList);
+        scrollPane.getStyleClass().add("history-scroll");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        return scrollPane;
+    }
+
+    private VBox createHistoryEmptyState() {
+        VBox emptyState = new VBox(10);
+        emptyState.getStyleClass().add("empty-state");
+        emptyState.setAlignment(Pos.CENTER);
+
+        SVGPath emptyIcon = createIcon(CLOCK_PATH, "icon-stroke-muted", 48);
+        Label emptyTitle = new Label("No History");
+        emptyTitle.getStyleClass().add("empty-title");
+        Label emptySubtitle = new Label("Buy or sell stocks to see your activity here.");
+        emptySubtitle.getStyleClass().add("empty-subtitle");
+        emptySubtitle.setTextAlignment(TextAlignment.CENTER);
+
+        emptyState.getChildren().addAll(emptyIcon, emptyTitle, emptySubtitle);
+        return emptyState;
+    }
+
     private HBox createTabBar(List<String> labels, int activeIndex) {
         HBox tabs = new HBox(6);
         tabs.getStyleClass().add("dashboard-tabs");
@@ -414,6 +465,46 @@ public class DashboardPage {
         }
 
         return tabs;
+    }
+
+    private HBox createRightTabBar() {
+        HBox tabs = new HBox(6);
+        tabs.getStyleClass().add("dashboard-tabs");
+        tabs.setAlignment(Pos.CENTER_LEFT);
+
+        portfolioTab = new Label("Portfolio");
+        portfolioTab.getStyleClass().add("dashboard-tab");
+        portfolioTab.setOnMouseClicked(event -> setActiveRightTab(RightTab.PORTFOLIO));
+
+        historyTab = new Label(buildHistoryLabel());
+        historyTab.getStyleClass().add("dashboard-tab");
+        historyTab.setOnMouseClicked(event -> setActiveRightTab(RightTab.HISTORY));
+
+        tabs.getChildren().addAll(portfolioTab, historyTab);
+        updateRightTabs();
+        return tabs;
+    }
+
+    private void setActiveRightTab(RightTab tab) {
+        activeRightTab = tab;
+        updateRightTabs();
+        updateRightPanelVisibility();
+    }
+
+    private void updateRightTabs() {
+        if (portfolioTab == null || historyTab == null) {
+            return;
+        }
+        historyTab.setText(buildHistoryLabel());
+        updateTabStyle(portfolioTab, activeRightTab == RightTab.PORTFOLIO);
+        updateTabStyle(historyTab, activeRightTab == RightTab.HISTORY);
+    }
+
+    private String buildHistoryLabel() {
+        int total = controller == null
+            ? 0
+            : controller.getPlayer().getTransactionArchive().getTransactions().size();
+        return "History (" + total + ")";
     }
 
     private HBox createSearchField() {
@@ -665,6 +756,66 @@ public class DashboardPage {
         return card;
     }
 
+    private VBox createHistoryCard(Transaction transaction) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("history-card");
+
+        Stock stock = transaction.getShare().getStock();
+        BigDecimal quantity = transaction.getShare().getQuantity();
+        boolean isPurchase = transaction instanceof Purchase;
+        String typeText = isPurchase ? "Purchase" : "Sale";
+
+        HBox header = new HBox(12);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox left = new VBox(4);
+        left.setAlignment(Pos.CENTER_LEFT);
+
+        HBox titleRow = new HBox(8);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        Label type = new Label(typeText);
+        type.getStyleClass().add("history-type");
+        type.getStyleClass().add(isPurchase ? "history-type-buy" : "history-type-sell");
+        Label symbol = new Label(stock.getSymbol());
+        symbol.getStyleClass().add("history-symbol");
+        titleRow.getChildren().addAll(type, symbol);
+
+        Label company = new Label(stock.getCompanyName());
+        company.getStyleClass().add("history-company");
+        left.getChildren().addAll(titleRow, company);
+        HBox.setHgrow(left, Priority.ALWAYS);
+
+        VBox right = new VBox(2);
+        right.setAlignment(Pos.CENTER_RIGHT);
+        Label value = new Label(formatPrice(transaction.getCalculator().getTotal()));
+        value.getStyleClass().add("history-value");
+        Label meta = new Label(buildHistoryMeta(transaction, quantity));
+        meta.getStyleClass().add("history-meta");
+        right.getChildren().addAll(value, meta);
+
+        header.getChildren().addAll(left, right);
+        card.getChildren().add(header);
+        return card;
+    }
+
+    private String buildHistoryMeta(Transaction transaction, BigDecimal quantity) {
+        BigDecimal price = resolveTransactionPrice(transaction, quantity);
+        return "Week " + transaction.getWeek()
+            + " | " + formatQuantity(quantity)
+            + " shares @ " + formatPrice(price);
+    }
+
+    private BigDecimal resolveTransactionPrice(Transaction transaction, BigDecimal quantity) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        if (transaction instanceof Purchase) {
+            return transaction.getShare().getPurchasePrice();
+        }
+        BigDecimal gross = transaction.getCalculator().getGross();
+        return gross.divide(quantity, 2, RoundingMode.HALF_UP);
+    }
+
     private VBox createEmptyStockCard() {
         VBox card = new VBox(6);
         card.getStyleClass().addAll("stock-card", "stock-card-empty");
@@ -851,6 +1002,8 @@ public class DashboardPage {
         netWorthValue.setText(formatMoney(player.getNetWorth()));
         statusBadge.setText(formatStatus(player.getStatus()));
         refreshPortfolio();
+        refreshHistory();
+        updateRightTabs();
         refreshStockList();
     }
 
@@ -892,11 +1045,44 @@ public class DashboardPage {
             portfolioList.getChildren().add(createPortfolioCard(share));
         }
 
-        boolean isEmpty = shares.isEmpty();
-        portfolioEmptyState.setVisible(isEmpty);
-        portfolioEmptyState.setManaged(isEmpty);
-        portfolioScroll.setVisible(!isEmpty);
-        portfolioScroll.setManaged(!isEmpty);
+        portfolioEmpty = shares.isEmpty();
+        updateRightPanelVisibility();
+    }
+
+    private void refreshHistory() {
+        if (historyList == null || historyEmptyState == null || historyScroll == null) {
+            return;
+        }
+
+        List<Transaction> transactions = controller == null
+            ? List.of()
+            : controller.getPlayer().getTransactionArchive().getTransactions();
+
+        historyList.getChildren().clear();
+        transactions.stream()
+            .sorted(Comparator.comparingInt(Transaction::getWeek).reversed())
+            .forEach(transaction -> historyList.getChildren().add(createHistoryCard(transaction)));
+
+        historyEmpty = transactions.isEmpty();
+        updateRightPanelVisibility();
+    }
+
+    private void updateRightPanelVisibility() {
+        updatePanelVisibility(portfolioScroll, portfolioEmptyState, activeRightTab == RightTab.PORTFOLIO,
+            portfolioEmpty);
+        updatePanelVisibility(historyScroll, historyEmptyState, activeRightTab == RightTab.HISTORY, historyEmpty);
+    }
+
+    private void updatePanelVisibility(ScrollPane scroll, VBox emptyState, boolean active, boolean empty) {
+        if (scroll == null || emptyState == null) {
+            return;
+        }
+        boolean showScroll = active && !empty;
+        boolean showEmpty = active && empty;
+        scroll.setVisible(showScroll);
+        scroll.setManaged(showScroll);
+        emptyState.setVisible(showEmpty);
+        emptyState.setManaged(showEmpty);
     }
 
     private void refreshStockList() {

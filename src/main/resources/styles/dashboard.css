@@ -352,6 +352,71 @@
     -fx-font-size: 10.5;
 }
 
+.history-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.history-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.history-list {
+    -fx-spacing: 10;
+}
+
+.history-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 12;
+    -fx-spacing: 8;
+}
+
+.history-type {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 10;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 2 6;
+}
+
+.history-type-buy {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #60a5fa;
+}
+
+.history-type-sell {
+    -fx-background-color: rgba(248, 113, 113, 0.2);
+    -fx-text-fill: #f87171;
+}
+
+.history-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.history-company {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.history-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.history-meta {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
 .empty-title {
     -fx-text-fill: #e2e8f0;
     -fx-font-size: 14;
