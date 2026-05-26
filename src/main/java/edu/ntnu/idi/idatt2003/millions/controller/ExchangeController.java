@@ -1,16 +1,27 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
+import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
+import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
+import edu.ntnu.idi.idatt2003.millions.model.Purchase;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.PurchaseCalculator;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Controller that mediates between the view and the Exchange / Player model.
@@ -154,6 +165,140 @@ public class ExchangeController {
      */
     public Exchange getExchange() {
         return exchange;
+    }
+
+    /**
+     * Returns the shares currently held in the player's portfolio.
+     *
+     * @return list of shares
+     */
+    public List<Share> getPortfolioShares() {
+        return player.getPortfolio().getShares();
+    }
+
+    /**
+     * Returns all transactions in the player's history, sorted by week descending.
+     *
+     * @return sorted list of transactions
+     */
+    public List<Transaction> getSortedTransactionHistory() {
+        return player.getTransactionArchive().getTransactions().stream()
+                .sorted(Comparator.comparingInt(Transaction::getWeek).reversed())
+                .toList();
+    }
+
+    /**
+     * Returns the total number of transactions in the player's history.
+     *
+     * @return transaction count
+     */
+    public int getTransactionCount() {
+        return player.getTransactionArchive().getTransactions().size();
+    }
+
+    /**
+     * Returns the current market value of a portfolio share (price × quantity).
+     *
+     * @param share the share to value
+     * @return total value
+     */
+    public BigDecimal getPortfolioItemValue(Share share) {
+        return share.getStock().getSalesPrice().multiply(share.getQuantity());
+    }
+
+    /**
+     * Returns the effective unit sale price for a transaction.
+     * For purchases this is the purchase price; for sales it is gross ÷ quantity.
+     *
+     * @param transaction the transaction
+     * @param qty         the quantity sold/bought
+     * @return unit price
+     */
+    public BigDecimal getUnitSalePrice(Transaction transaction, BigDecimal qty) {
+        if (qty == null || qty.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        if (transaction instanceof Purchase) {
+            return transaction.getShare().getPurchasePrice();
+        }
+        return transaction.getCalculator().getGross().divide(qty, 2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Searches for stocks by keyword and optional price bounds.
+     * Null bounds mean no limit. Inverted bounds are normalised internally.
+     *
+     * @param keyword  the search term
+     * @param minPrice minimum price inclusive, or null
+     * @param maxPrice maximum price inclusive, or null
+     * @return matching stocks
+     */
+    public List<Stock> findStocks(String keyword, BigDecimal minPrice, BigDecimal maxPrice) {
+        BigDecimal lo = minPrice;
+        BigDecimal hi = maxPrice;
+        if (lo != null && hi != null && lo.compareTo(hi) > 0) {
+            BigDecimal tmp = lo;
+            lo = hi;
+            hi = tmp;
+        }
+        final BigDecimal finalLo = lo;
+        final BigDecimal finalHi = hi;
+        List<Stock> base = exchange.findStocks(keyword);
+        if (finalLo == null && finalHi == null) {
+            return base;
+        }
+        return base.stream()
+                .filter(s -> {
+                    BigDecimal price = s.getSalesPrice();
+                    if (finalLo != null && price.compareTo(finalLo) < 0) {
+                        return false;
+                    }
+                    if (finalHi != null && price.compareTo(finalHi) > 0) {
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+
+    /**
+     * Returns up to {@code limit} gainers followed by up to {@code limit} losers.
+     *
+     * @param limit maximum entries per side
+     * @return combined market movers list
+     */
+    public List<Stock> getMarketMovers(int limit) {
+        List<Stock> result = new ArrayList<>();
+        result.addAll(exchange.getGainers(limit));
+        result.addAll(exchange.getLosers(limit));
+        return result;
+    }
+
+    /**
+     * Saves the current game state asynchronously.
+     *
+     * @param onSuccess called with the save ID on success
+     * @param onFailure called with an error message on failure
+     */
+    public void saveGame(Consumer<Long> onSuccess, Consumer<String> onFailure) {
+        Thread worker = new Thread(() -> {
+            try {
+                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
+                GameRepository repository = new SqliteGameRepository(databasePath);
+                repository.initialize();
+                long saveId = repository.save(new GameState(exchange, player));
+                if (onSuccess != null) {
+                    javafx.application.Platform.runLater(() -> onSuccess.accept(saveId));
+                }
+            } catch (Exception e) {
+                String message = e.getMessage() == null ? "Unknown error" : e.getMessage();
+                if (onFailure != null) {
+                    javafx.application.Platform.runLater(() -> onFailure.accept(message));
+                }
+            }
+        }, "save-game-task");
+        worker.setDaemon(true);
+        worker.start();
     }
 }
 

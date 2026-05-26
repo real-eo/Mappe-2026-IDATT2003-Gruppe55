@@ -5,7 +5,6 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.view.dialog.BuyStockDialog;
 import edu.ntnu.idi.idatt2003.millions.view.dialog.SellStockDialog;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -70,8 +69,6 @@ final class DashboardLeftPanel {
 
     private record StockInfo(Stock stock, String price, String change,
                              ChangeKind changeKind, BigDecimal changePercent) {}
-
-    private record PriceRange(BigDecimal min, BigDecimal max) {}
 
     private final ExchangeController controller;
     private final Runnable onRefresh;
@@ -273,15 +270,17 @@ final class DashboardLeftPanel {
         if (stockListContainer == null) {
             return;
         }
-        String keyword = searchField == null ? "" : searchField.getText();
-        List<StockInfo> stocks = activeTab == StockTab.MOVERS ? loadMarketMovers() : loadStockInfos(keyword);
-        if (activeTab == StockTab.WATCHLIST) {
-            stocks = stocks.stream().filter(s -> watchlist.contains(s.stock().getSymbol())).toList();
-        }
-
-        PriceRange range = priceRange();
-        if (range.min() != null || range.max() != null) {
-            stocks = stocks.stream().filter(s -> inRange(s.stock().getSalesPrice(), range)).toList();
+        List<StockInfo> stocks;
+        if (activeTab == StockTab.MOVERS) {
+            stocks = loadMarketMovers();
+        } else {
+            String keyword = searchField == null ? "" : searchField.getText();
+            BigDecimal minPrice = parsePrice(minPriceField);
+            BigDecimal maxPrice = parsePrice(maxPriceField);
+            stocks = loadStockInfos(keyword, minPrice, maxPrice);
+            if (activeTab == StockTab.WATCHLIST) {
+                stocks = stocks.stream().filter(s -> watchlist.contains(s.stock().getSymbol())).toList();
+            }
         }
         stocks = stocks.stream().sorted(activeSort.comparator()).toList();
 
@@ -293,22 +292,21 @@ final class DashboardLeftPanel {
         }
     }
 
-    private List<StockInfo> loadStockInfos(String keyword) {
+    private List<StockInfo> loadStockInfos(String keyword, BigDecimal minPrice, BigDecimal maxPrice) {
         if (controller == null) {
             return List.of();
         }
         String normalized = keyword == null ? "" : keyword.trim();
-        return controller.findStocks(normalized).stream().map(this::toStockInfo).toList();
+        return controller.findStocks(normalized, minPrice, maxPrice).stream()
+                .map(this::toStockInfo).toList();
     }
 
     private List<StockInfo> loadMarketMovers() {
         if (controller == null) {
             return List.of();
         }
-        List<StockInfo> result = new ArrayList<>();
-        controller.getGainers(MARKET_MOVERS_LIMIT).stream().map(this::toStockInfo).forEach(result::add);
-        controller.getLosers(MARKET_MOVERS_LIMIT).stream().map(this::toStockInfo).forEach(result::add);
-        return result;
+        return controller.getMarketMovers(MARKET_MOVERS_LIMIT).stream()
+                .map(this::toStockInfo).toList();
     }
 
     private StockInfo toStockInfo(Stock stock) {
@@ -409,28 +407,6 @@ final class DashboardLeftPanel {
     }
 
     // ── Filter / sort ─────────────────────────────────────────────────────────
-
-    private boolean inRange(BigDecimal price, PriceRange range) {
-        if (price == null) {
-            return false;
-        }
-        if (range.min() != null && price.compareTo(range.min()) < 0) {
-            return false;
-        }
-        if (range.max() != null && price.compareTo(range.max()) > 0) {
-            return false;
-        }
-        return true;
-    }
-
-    private PriceRange priceRange() {
-        BigDecimal min = parsePrice(minPriceField);
-        BigDecimal max = parsePrice(maxPriceField);
-        if (min != null && max != null && min.compareTo(max) > 0) {
-            return new PriceRange(max, min);
-        }
-        return new PriceRange(min, max);
-    }
 
     private static BigDecimal parsePrice(TextField field) {
         if (field == null) {

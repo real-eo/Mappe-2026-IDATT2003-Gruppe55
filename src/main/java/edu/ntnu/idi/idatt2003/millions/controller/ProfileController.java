@@ -1,13 +1,8 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
-import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Sale;
 import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -80,26 +75,7 @@ public class ProfileController {
      * @param onFailure called with an error message on failure
      */
     public void saveGame(Consumer<Long> onSuccess, Consumer<String> onFailure) {
-        Thread worker = new Thread(() -> {
-            try {
-                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
-                GameRepository repository = new SqliteGameRepository(databasePath);
-                repository.initialize();
-                long saveId = repository.save(new GameState(
-                        exchangeController.getExchange(),
-                        exchangeController.getPlayer()));
-                if (onSuccess != null) {
-                    javafx.application.Platform.runLater(() -> onSuccess.accept(saveId));
-                }
-            } catch (Exception e) {
-                String message = e.getMessage() == null ? "Unknown error" : e.getMessage();
-                if (onFailure != null) {
-                    javafx.application.Platform.runLater(() -> onFailure.accept(message));
-                }
-            }
-        }, "save-game-task");
-        worker.setDaemon(true);
-        worker.start();
+        exchangeController.saveGame(onSuccess, onFailure);
     }
 
     private List<OutcomeEntry> resolveSaleOutcomes(boolean wins, int limit) {

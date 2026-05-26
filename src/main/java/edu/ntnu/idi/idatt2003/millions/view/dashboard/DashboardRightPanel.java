@@ -6,8 +6,6 @@ import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Comparator;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -124,8 +122,7 @@ final class DashboardRightPanel {
     }
 
     private String historyLabel() {
-        int count = controller == null ? 0
-                : controller.getPlayer().getTransactionArchive().getTransactions().size();
+        int count = controller == null ? 0 : controller.getTransactionCount();
         return "History (" + count + ")";
     }
 
@@ -133,8 +130,7 @@ final class DashboardRightPanel {
         if (portfolioList == null) {
             return;
         }
-        List<Share> shares = controller == null ? List.of()
-                : controller.getPlayer().getPortfolio().getShares();
+        List<Share> shares = controller == null ? List.of() : controller.getPortfolioShares();
         portfolioList.getChildren().clear();
         shares.forEach(s -> portfolioList.getChildren().add(buildPortfolioCard(s)));
         portfolioEmpty = shares.isEmpty();
@@ -145,11 +141,9 @@ final class DashboardRightPanel {
             return;
         }
         List<Transaction> txns = controller == null ? List.of()
-                : controller.getPlayer().getTransactionArchive().getTransactions();
+                : controller.getSortedTransactionHistory();
         historyList.getChildren().clear();
-        txns.stream()
-                .sorted(Comparator.comparingInt(Transaction::getWeek).reversed())
-                .forEach(t -> historyList.getChildren().add(buildHistoryCard(t)));
+        txns.forEach(t -> historyList.getChildren().add(buildHistoryCard(t)));
         historyEmpty = txns.isEmpty();
     }
 
@@ -161,7 +155,7 @@ final class DashboardRightPanel {
     private VBox buildPortfolioCard(Share share) {
         Stock stock = share.getStock();
         BigDecimal qty = share.getQuantity();
-        BigDecimal total = stock.getSalesPrice().multiply(qty);
+        BigDecimal total = controller.getPortfolioItemValue(share);
 
         VBox left = new VBox(2);
         left.getChildren().addAll(
@@ -203,7 +197,7 @@ final class DashboardRightPanel {
         left.getChildren().addAll(titleRow, label(stock.getCompanyName(), "history-company"));
         HBox.setHgrow(left, Priority.ALWAYS);
 
-        BigDecimal unitPrice = resolveUnitPrice(transaction, qty);
+        BigDecimal unitPrice = controller.getUnitSalePrice(transaction, qty);
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
         right.getChildren().addAll(
@@ -220,16 +214,6 @@ final class DashboardRightPanel {
         card.getStyleClass().add("history-card");
         card.getChildren().add(header);
         return card;
-    }
-
-    private static BigDecimal resolveUnitPrice(Transaction transaction, BigDecimal qty) {
-        if (qty == null || qty.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
-        }
-        if (transaction instanceof Purchase) {
-            return transaction.getShare().getPurchasePrice();
-        }
-        return transaction.getCalculator().getGross().divide(qty, 2, RoundingMode.HALF_UP);
     }
 
     private static VBox createEmptyState(String iconPath, String title, String subtitle) {

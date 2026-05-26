@@ -1,18 +1,13 @@
 package edu.ntnu.idi.idatt2003.millions.view.page;
 
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
+import edu.ntnu.idi.idatt2003.millions.controller.LoadGameController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameSaveSummary;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -35,6 +30,7 @@ public class LoadGamePage {
         .ofPattern("yyyy-MM-dd HH:mm")
         .withZone(ZoneId.systemDefault());
 
+    private final LoadGameController loadController;
     private final Consumer<GameState> onLoad;
     private final Runnable onBack;
     private VBox listContainer;
@@ -42,10 +38,12 @@ public class LoadGamePage {
     /**
      * Constructs the load game page.
      *
-     * @param onLoad callback for loading a selected game
-     * @param onBack callback for returning to the start page
+     * @param loadController controller handling persistence operations
+     * @param onLoad         callback for loading a selected game
+     * @param onBack         callback for returning to the start page
      */
-    public LoadGamePage(Consumer<GameState> onLoad, Runnable onBack) {
+    public LoadGamePage(LoadGameController loadController, Consumer<GameState> onLoad, Runnable onBack) {
+        this.loadController = loadController;
         this.onLoad = onLoad;
         this.onBack = onBack;
     }
@@ -111,27 +109,13 @@ public class LoadGamePage {
     }
 
     private void loadSaves() {
-        Task<List<GameSaveSummary>> task = new Task<>() {
-            @Override
-            protected List<GameSaveSummary> call() throws Exception {
-                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
-                GameRepository repository = new SqliteGameRepository(databasePath);
-                repository.initialize();
-                return repository.listSaves();
+        loadController.loadSaves(
+            this::populateSaves,
+            error -> {
+                showAlert(Alert.AlertType.ERROR, "Load Game", "Failed to list saves", error);
+                populateSaves(List.of());
             }
-        };
-
-        task.setOnSucceeded(event -> populateSaves(task.getValue()));
-        task.setOnFailed(event -> {
-            Throwable error = task.getException();
-            String message = error == null ? "Unknown error" : error.getMessage();
-            showAlert(Alert.AlertType.ERROR, "Load Game", "Failed to list saves", message);
-            populateSaves(List.of());
-        });
-
-        Thread worker = new Thread(task, "load-saves-task");
-        worker.setDaemon(true);
-        worker.start();
+        );
     }
 
     private void populateSaves(List<GameSaveSummary> saves) {
@@ -184,32 +168,15 @@ public class LoadGamePage {
     }
 
     private void loadSave(long saveId) {
-        Task<GameState> task = new Task<>() {
-            @Override
-            protected GameState call() throws Exception {
-                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
-                GameRepository repository = new SqliteGameRepository(databasePath);
-                repository.initialize();
-                Optional<GameState> state = repository.load(saveId);
-                return state.orElseThrow(() -> new IllegalStateException("Save not found: " + saveId));
-            }
-        };
-
-        task.setOnSucceeded(event -> {
-            if (onLoad != null) {
-                onLoad.accept(task.getValue());
-            }
-        });
-
-        task.setOnFailed(event -> {
-            Throwable error = task.getException();
-            String message = error == null ? "Unknown error" : error.getMessage();
-            showAlert(Alert.AlertType.ERROR, "Load Game", "Failed to load save", message);
-        });
-
-        Thread worker = new Thread(task, "load-save-task");
-        worker.setDaemon(true);
-        worker.start();
+        loadController.loadSave(
+            saveId,
+            state -> {
+                if (onLoad != null) {
+                    onLoad.accept(state);
+                }
+            },
+            error -> showAlert(Alert.AlertType.ERROR, "Load Game", "Failed to load save", error)
+        );
     }
 
     private String formatTimestamp(Instant instant) {

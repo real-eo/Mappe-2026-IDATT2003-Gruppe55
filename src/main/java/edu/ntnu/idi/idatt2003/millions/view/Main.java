@@ -1,25 +1,21 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
+import edu.ntnu.idi.idatt2003.millions.controller.LoadGameController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
-import edu.ntnu.idi.idatt2003.millions.view.dashboard.DashboardPage;
-import edu.ntnu.idi.idatt2003.millions.view.page.LoadGamePage;
-import edu.ntnu.idi.idatt2003.millions.view.page.StartPage;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
-import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.view.dashboard.DashboardPage;
+import edu.ntnu.idi.idatt2003.millions.view.page.LoadGamePage;
+import edu.ntnu.idi.idatt2003.millions.view.page.StartPage;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.net.URL;
 import java.util.List;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -78,7 +74,9 @@ public class Main extends Application {
 
     private void showLoadPage(Stage stage) {
         activeController = null;
+        LoadGameController loadController = new LoadGameController();
         LoadGamePage loadGamePage = new LoadGamePage(
+            loadController,
             state -> launchDashboard(stage, state),
             () -> showStartPage(stage)
         );
@@ -155,29 +153,13 @@ public class Main extends Application {
             Platform.exit();
             return;
         }
-
-        Task<Void> saveTask = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
-                GameRepository repository = new SqliteGameRepository(databasePath);
-                repository.initialize();
-                repository.save(new GameState(controller.getExchange(), controller.getPlayer()));
-                return null;
+        controller.saveGame(
+            id -> Platform.exit(),
+            error -> {
+                System.err.println("Auto-save failed: " + error);
+                Platform.exit();
             }
-        };
-
-        saveTask.setOnSucceeded(event -> Platform.exit());
-        saveTask.setOnFailed(event -> {
-            Throwable error = saveTask.getException();
-            String message = error == null ? "Unknown error" : error.getMessage();
-            System.err.println("Auto-save failed: " + message);
-            Platform.exit();
-        });
-
-        Thread worker = new Thread(saveTask, "auto-save-task");
-        worker.setDaemon(false);
-        worker.start();
+        );
     }
 
     private void showError(String message) {
