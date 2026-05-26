@@ -70,6 +70,32 @@ class SqliteGameRepositoryTest {
     }
 
     @Test
+    void save_and_load_roundtrip_preservesNetWorthHistory() throws Exception {
+        Path db = Files.createTempFile("millions-nwh-", ".db");
+        try {
+            SqliteGameRepository repository = new SqliteGameRepository(db);
+            repository.initialize();
+
+            Stock stock = new Stock("EQ", "Equity", new BigDecimal("100.00"));
+            Exchange exchange = new Exchange("E", List.of(stock));
+            Player player = new Player("Alice", new BigDecimal("1000.00"));
+
+            var history = List.of(
+                    new edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot(1, new BigDecimal("1000.00")),
+                    new edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot(2, new BigDecimal("1050.00"))
+            );
+
+            long id = repository.save(new edu.ntnu.idi.idatt2003.millions.model.GameState(exchange, player, history));
+            var loaded = repository.load(id);
+            assertTrue(loaded.isPresent());
+            assertEquals(2, loaded.get().getNetWorthHistory().size());
+            assertEquals(new BigDecimal("1050.00"), loaded.get().getNetWorthHistory().get(1).netWorth());
+        } finally {
+            Files.deleteIfExists(db);
+        }
+    }
+
+    @Test
     void load_throws_whenUnsupportedTransactionType_presentInDatabase() throws Exception {
         Path db = Files.createTempFile("millions-test-", ".db");
         String jdbcUrl = "jdbc:sqlite:" + db.toAbsolutePath();

@@ -46,6 +46,12 @@ class ProfileControllerTest {
     }
 
     @Test
+    void getNetWorthHistory_returnsHistoryFromController() {
+        assertNotNull(profileController.getNetWorthHistory());
+        assertFalse(profileController.getNetWorthHistory().isEmpty());
+    }
+
+    @Test
     void topWins_and_topLosses_returnCorrectEntries() {
         Stock s = exchange.getStocks().get(0);
         // create two sales with different profits for symbol X
