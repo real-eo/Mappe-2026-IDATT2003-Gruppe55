@@ -376,8 +376,28 @@ final class DashboardLeftPanel {
 
         VBox card = new VBox(16);
         card.getStyleClass().add("stock-card");
-        card.getChildren().addAll(header, actions);
+        card.getChildren().addAll(header, buildHighLowRow(stock), actions);
         return card;
+    }
+
+    private HBox buildHighLowRow(Stock stock) {
+        Label hLabel = new Label("H");
+        hLabel.getStyleClass().add("stock-hl-label");
+        Label hValue = new Label(DashboardFormatters.formatPrice(stock.getHighestPrice()));
+        hValue.getStyleClass().addAll("stock-hl-value", "stock-hl-high");
+
+        Label sep = new Label("·");
+        sep.getStyleClass().add("stock-hl-sep");
+
+        Label lLabel = new Label("L");
+        lLabel.getStyleClass().add("stock-hl-label");
+        Label lValue = new Label(DashboardFormatters.formatPrice(stock.getLowestPrice()));
+        lValue.getStyleClass().addAll("stock-hl-value", "stock-hl-low");
+
+        HBox row = new HBox(6);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getChildren().addAll(hLabel, hValue, sep, lLabel, lValue);
+        return row;
     }
 
     private Button actionButton(String text, String styleClass, Stock stock, boolean isBuy) {
