@@ -46,6 +46,17 @@ class ExchangeControllerTest {
     }
 
     @Test
+    void calculateSellTotal_returnsTotal_whenPlayerOwnsStock() {
+        Stock s = exchange.getStocks().get(0);
+        Share owned = new Share(s, new BigDecimal("4"), new BigDecimal("10.00"));
+        player.getPortfolio().add(owned);
+        Optional<BigDecimal> result = controller.calculateSellTotal(s, new BigDecimal("2"));
+        assertTrue(result.isPresent());
+        // gross = 200, commission = 2.00, costBasis = 20.00, profit = 178.00, tax = 53.40, total = 144.60
+        assertEquals(new BigDecimal("144.60"), result.get());
+    }
+
+    @Test
     void getUnitSalePrice_returnsZero_forNullOrZeroQty() {
         Share share = new Share(exchange.getStocks().get(0), new BigDecimal("1"), new BigDecimal("100.00"));
         Purchase purchase = new Purchase(share, 1);
