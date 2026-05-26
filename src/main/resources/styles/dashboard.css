@@ -538,11 +538,53 @@
     -fx-border-radius: 11;
     -fx-padding: 16 20;
     -fx-spacing: 10;
-    -fx-min-width: 260;
+    -fx-min-width: 520;
 }
 
 .profile-stat-row {
     -fx-alignment: center-left;
+}
+
+.profile-stats-columns {
+    -fx-spacing: 24;
+    -fx-alignment: center-left;
+}
+
+.profile-section-title {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+    -fx-font-weight: 600;
+}
+
+.profile-list-item {
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.profile-list-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+}
+
+.profile-list-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.profile-list-value-positive {
+    -fx-text-fill: #22c55e;
+}
+
+.profile-list-value-negative {
+    -fx-text-fill: #f87171;
+}
+
+.profile-list-empty {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
 }
 
 .trade-close-button {
