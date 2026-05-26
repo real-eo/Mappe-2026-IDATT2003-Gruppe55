@@ -31,6 +31,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -420,6 +422,11 @@ public class DashboardPage {
         searchField.getStyleClass().add("search-field");
         searchField.setPromptText("Search stocks by symbol or name...");
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshStockList());
+        searchField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                event.consume();
+            }
+        });
         searchField.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(searchField, Priority.ALWAYS);
         search.setOnMouseClicked(event -> searchField.requestFocus());
