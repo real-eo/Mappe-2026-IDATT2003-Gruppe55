@@ -673,3 +673,50 @@
     -fx-text-fill: #f1f5f9;
     -fx-font-size: 13.5;
 }
+
+/* Styled Alerts and error dialogs to match the app theme */
+.dialog-pane.millions-alert {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-padding: 12;
+}
+
+.dialog-pane.millions-alert .header-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 8 12 6 12;
+}
+
+.dialog-pane.millions-alert .content {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-padding: 8 12 12 12;
+}
+
+.dialog-pane.millions-alert .label {
+    -fx-text-fill: #e2e8f0;
+}
+
+/* Emphasize headers for error alerts */
+.dialog-pane.millions-alert.millions-error-alert .header-panel .label {
+    -fx-text-fill: #f87171;
+    -fx-font-weight: 700;
+}
+
+.dialog-pane.millions-alert .button {
+    -fx-background-radius: 6;
+    -fx-background-color: #1a1f2e;
+    -fx-text-fill: #e2e8f0;
+    -fx-padding: 6 10;
+}
+
+.dialog-pane.millions-alert .button:hover {
+    -fx-background-color: #111827;
+}
+
+.dialog-pane.millions-alert .button:default {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}

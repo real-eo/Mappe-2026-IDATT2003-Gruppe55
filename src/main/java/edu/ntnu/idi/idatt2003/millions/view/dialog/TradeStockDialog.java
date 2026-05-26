@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -125,6 +126,12 @@ public abstract class TradeStockDialog extends MillionsDialog {
         alert.setTitle(errorTitle());
         alert.setHeaderText(errorHeader());
         alert.setContentText(message);
+        DialogPane pane = alert.getDialogPane();
+        var url = getClass().getResource("/styles/dashboard.css");
+        if (url != null) {
+            pane.getStylesheets().add(url.toExternalForm());
+        }
+        pane.getStyleClass().addAll("millions-alert", "millions-error-alert");
         alert.showAndWait();
     }
 
