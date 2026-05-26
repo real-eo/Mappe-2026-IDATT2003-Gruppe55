@@ -1,15 +1,13 @@
-package edu.ntnu.idi.idatt2003.millions.view;
+package edu.ntnu.idi.idatt2003.millions.view.dialog;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
-import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
-import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.UnaryOperator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -31,9 +29,9 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 /**
- * Modal dialog for selling shares of a stock.
+ * Modal dialog for buying shares of a stock.
  */
-public final class SellStockDialog {
+public final class BuyStockDialog {
 
     private static final String STYLESHEET_PATH = "/styles/dashboard.css";
 
@@ -45,7 +43,7 @@ public final class SellStockDialog {
     private TextField quantityField;
     private Label totalValue;
 
-    public SellStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
+    public BuyStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         this.controller = controller;
         this.stock = stock;
         this.onTradeComplete = onTradeComplete;
@@ -102,7 +100,7 @@ public final class SellStockDialog {
         content.setFillWidth(true);
 
         VBox header = new VBox(4);
-        Label title = new Label("Sell " + stock.getSymbol());
+        Label title = new Label("Buy " + stock.getSymbol());
         title.getStyleClass().add("trade-title");
         Label subtitle = new Label(stock.getCompanyName());
         subtitle.getStyleClass().add("trade-subtitle");
@@ -130,7 +128,7 @@ public final class SellStockDialog {
 
         HBox totalRow = new HBox(10);
         totalRow.setAlignment(Pos.CENTER_LEFT);
-        Label totalLabel = new Label("Total (after fees & tax)");
+        Label totalLabel = new Label("Total (incl. fees & tax)");
         totalLabel.getStyleClass().add("trade-price-label");
         totalValue = new Label("--");
         totalValue.getStyleClass().add("trade-price-value");
@@ -144,7 +142,7 @@ public final class SellStockDialog {
 
         Button cancel = new Button("Cancel");
         cancel.getStyleClass().add("secondary-button");
-        Button confirm = new Button("Confirm Sale");
+        Button confirm = new Button("Confirm Purchase");
         confirm.getStyleClass().add("primary-button");
         confirm.setDefaultButton(true);
 
@@ -169,10 +167,25 @@ public final class SellStockDialog {
         stage.centerOnScreen();
     }
 
+    private void updateTotals() {
+        if (totalValue == null || stock == null) {
+            return;
+        }
+
+        BigDecimal quantity = parseQuantity(quantityField.getText());
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            totalValue.setText("--");
+            return;
+        }
+
+        Optional<BigDecimal> total = controller.calculateBuyTotal(stock.getSymbol(), quantity);
+        totalValue.setText(total.map(BuyStockDialog::formatPrice).orElse("--"));
+    }
+
     private void handleConfirm() {
         String rawQuantity = quantityField.getText() == null ? "" : quantityField.getText().trim();
         if (rawQuantity.isEmpty()) {
-            showValidationError("Please enter the number of shares to sell.");
+            showValidationError("Please enter the number of shares to buy.");
             return;
         }
 
@@ -189,20 +202,8 @@ public final class SellStockDialog {
             return;
         }
 
-        Optional<Share> share = controller.getPlayer().getPortfolio().findByStock(stock);
-        if (share.isEmpty()) {
-            showValidationError("You do not own any shares of " + stock.getSymbol() + ".");
-            return;
-        }
-
-        if (quantity.compareTo(share.get().getQuantity()) > 0) {
-            showValidationError("You only own " + share.get().getQuantity() + " shares of "
-                + stock.getSymbol() + ".");
-            return;
-        }
-
         try {
-            controller.sell(share.get(), quantity);
+            controller.buy(stock.getSymbol(), quantity);
             if (onTradeComplete != null) {
                 onTradeComplete.run();
             }
@@ -210,28 +211,6 @@ public final class SellStockDialog {
         } catch (MillionsException exception) {
             showValidationError(exception.getMessage());
         }
-    }
-
-    private void updateTotals() {
-        if (totalValue == null || controller == null || stock == null) {
-            return;
-        }
-
-        Optional<Share> share = controller.getPlayer().getPortfolio().findByStock(stock);
-        BigDecimal quantity = parseQuantity(quantityField.getText());
-        if (share.isEmpty() || quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            totalValue.setText("--");
-            return;
-        }
-
-        if (quantity.compareTo(share.get().getQuantity()) > 0) {
-            totalValue.setText("--");
-            return;
-        }
-
-        Share saleShare = new Share(stock, quantity, share.get().getPurchasePrice());
-        SaleCalculator calculator = new SaleCalculator(saleShare);
-        totalValue.setText(formatPrice(calculator.getTotal()));
     }
 
     private static UnaryOperator<TextFormatter.Change> numericFilter() {
@@ -264,7 +243,7 @@ public final class SellStockDialog {
     }
 
     private static String resolveStylesheet() {
-        var url = SellStockDialog.class.getResource(STYLESHEET_PATH);
+        var url = BuyStockDialog.class.getResource(STYLESHEET_PATH);
         if (url == null) {
             throw new IllegalStateException("Missing stylesheet: " + STYLESHEET_PATH);
         }
@@ -273,8 +252,8 @@ public final class SellStockDialog {
 
     private static void showValidationError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Sell Shares");
-        alert.setHeaderText("Unable to complete the sale");
+        alert.setTitle("Buy Shares");
+        alert.setHeaderText("Unable to complete the purchase");
         alert.setContentText(message);
         alert.showAndWait();
     }

@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.view;
+package edu.ntnu.idi.idatt2003.millions.view.page;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameSaveSummary;

@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions.view;
+package edu.ntnu.idi.idatt2003.millions.view.page;
 
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;

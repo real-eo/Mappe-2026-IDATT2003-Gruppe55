@@ -2,6 +2,9 @@ package edu.ntnu.idi.idatt2003.millions.view;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
+import edu.ntnu.idi.idatt2003.millions.view.dashboard.DashboardPage;
+import edu.ntnu.idi.idatt2003.millions.view.page.LoadGamePage;
+import edu.ntnu.idi.idatt2003.millions.view.page.StartPage;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
