@@ -122,6 +122,71 @@
     -fx-alignment: center-left;
 }
 
+.filter-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 2 6;
+}
+
+.filter-button:hover {
+    -fx-background-color: #111827;
+}
+
+.filter-popup {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-padding: 12;
+    -fx-spacing: 10;
+}
+
+.filter-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+    -fx-font-weight: 600;
+}
+
+.filter-dropdown {
+    -fx-background-color: #1a1f2e;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-font-size: 12.25;
+}
+
+.filter-dropdown .list-cell {
+    -fx-text-fill: #e2e8f0;
+    -fx-background-color: transparent;
+    -fx-padding: 6 8;
+}
+
+.filter-dropdown .list-view {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+}
+
+.filter-range {
+    -fx-alignment: center-left;
+}
+
+.filter-input {
+    -fx-background-color: #1a1f2e;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-font-size: 12.25;
+}
+
 .search-field {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
@@ -283,6 +348,71 @@
 }
 
 .portfolio-meta {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.history-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.history-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.history-list {
+    -fx-spacing: 10;
+}
+
+.history-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 12;
+    -fx-spacing: 8;
+}
+
+.history-type {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 10;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 2 6;
+}
+
+.history-type-buy {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #60a5fa;
+}
+
+.history-type-sell {
+    -fx-background-color: rgba(248, 113, 113, 0.2);
+    -fx-text-fill: #f87171;
+}
+
+.history-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+}
+
+.history-company {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+}
+
+.history-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.history-meta {
     -fx-text-fill: #94a3b8;
     -fx-font-size: 10.5;
 }
@@ -463,6 +593,63 @@
     -fx-text-fill: #e2e8f0;
     -fx-font-size: 18;
     -fx-font-weight: 700;
+}
+
+.profile-stats {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 16 20;
+    -fx-spacing: 10;
+    -fx-min-width: 520;
+}
+
+.profile-stat-row {
+    -fx-alignment: center-left;
+}
+
+.profile-stats-columns {
+    -fx-spacing: 24;
+    -fx-alignment: center-left;
+}
+
+.profile-section-title {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
+    -fx-font-weight: 600;
+}
+
+.profile-list-item {
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.profile-list-symbol {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 600;
+}
+
+.profile-list-value {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12.25;
+    -fx-font-weight: 700;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.profile-list-value-positive {
+    -fx-text-fill: #22c55e;
+}
+
+.profile-list-value-negative {
+    -fx-text-fill: #f87171;
+}
+
+.profile-list-empty {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 10.5;
 }
 
 .trade-close-button {

@@ -26,4 +26,18 @@ final class DashboardFormatters {
         format.setRoundingMode(RoundingMode.HALF_UP);
         return format.format(quantity);
     }
+
+    static String formatSignedPercent(BigDecimal percent) {
+        DecimalFormat format = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
+        format.setRoundingMode(RoundingMode.HALF_UP);
+        BigDecimal value = percent.abs().setScale(2, RoundingMode.HALF_UP);
+        String formatted = format.format(value) + "%";
+        if (percent.signum() > 0) {
+            return "+" + formatted;
+        }
+        if (percent.signum() < 0) {
+            return "-" + formatted;
+        }
+        return formatted;
+    }
 }

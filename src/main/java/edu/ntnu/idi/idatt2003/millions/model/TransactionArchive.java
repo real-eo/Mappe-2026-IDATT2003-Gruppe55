@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt2003.millions.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +88,30 @@ public class TransactionArchive {
                 .mapToInt(Transaction::getWeek)
                 .distinct()
                 .count();
+    }
+
+    /**
+     * Returns the total quantity of shares purchased across all transactions.
+     *
+     * @return total purchased share quantity
+     */
+    public BigDecimal getTotalPurchasedQuantity() {
+        return transactions.stream()
+                .filter(transaction -> transaction instanceof Purchase)
+                .map(transaction -> transaction.getShare().getQuantity())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Returns the total quantity of shares sold across all transactions.
+     *
+     * @return total sold share quantity
+     */
+    public BigDecimal getTotalSoldQuantity() {
+        return transactions.stream()
+                .filter(transaction -> transaction instanceof Sale)
+                .map(transaction -> transaction.getShare().getQuantity())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
 

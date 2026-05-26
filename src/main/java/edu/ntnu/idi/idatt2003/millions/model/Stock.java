@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt2003.millions.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
  * the most recently added entry.</p>
  */
 public class Stock {
+
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     private final String symbol;
     private final String companyName;
@@ -114,6 +117,28 @@ public class Stock {
         BigDecimal latest = prices.get(prices.size() - 1);
         BigDecimal previous = prices.get(prices.size() - 2);
         return latest.subtract(previous);
+    }
+
+    /**
+     * Returns the latest percent change: (latest - previous) / previous * 100.
+     * If only one price has been registered or the previous price is zero, the change is zero.
+     *
+     * @return latest percent change
+     */
+    public BigDecimal getLatestPriceChangePercent() {
+        if (prices.size() < 2) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal latest = prices.get(prices.size() - 1);
+        BigDecimal previous = prices.get(prices.size() - 2);
+        if (previous.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal delta = latest.subtract(previous);
+        return delta.divide(previous, 6, RoundingMode.HALF_UP)
+            .multiply(ONE_HUNDRED);
     }
 
     /**
