@@ -2,6 +2,7 @@ package edu.ntnu.idi.idatt2003.millions.infrastructure.persistence;
 
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
+import edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Purchase;
 import edu.ntnu.idi.idatt2003.millions.model.Sale;
@@ -98,6 +99,17 @@ public class SqliteGameRepository implements GameRepository {
             )
             """;
 
+    private static final String CREATE_NET_WORTH_HISTORY_TABLE = """
+            CREATE TABLE IF NOT EXISTS net_worth_history (
+                save_id INTEGER NOT NULL,
+                position INTEGER NOT NULL,
+                week INTEGER NOT NULL,
+                net_worth TEXT NOT NULL,
+                PRIMARY KEY (save_id, position),
+                FOREIGN KEY(save_id) REFERENCES game_save(id) ON DELETE CASCADE
+            )
+            """;
+
     private final String jdbcUrl;
 
     /**
@@ -134,6 +146,7 @@ public class SqliteGameRepository implements GameRepository {
             insertStockPrices(connection, saveId, stocks);
             insertPortfolioShares(connection, saveId, player.getPortfolio().getShares());
             insertTransactions(connection, saveId, player.getTransactionArchive().getTransactions());
+            insertNetWorthHistory(connection, saveId, state.getNetWorthHistory());
 
             connection.commit();
             return saveId;
@@ -184,8 +197,9 @@ public class SqliteGameRepository implements GameRepository {
             Player player = loadPlayer(connection, saveId);
             populatePortfolio(connection, saveId, player, stocks);
             populateTransactions(connection, saveId, player, stocks);
+            List<NetWorthSnapshot> history = loadNetWorthHistory(connection, saveId);
 
-            return Optional.of(new GameState(exchange, player));
+            return Optional.of(new GameState(exchange, player, history));
         }
     }
 
@@ -205,6 +219,7 @@ public class SqliteGameRepository implements GameRepository {
             statement.execute(CREATE_STOCK_PRICE_TABLE);
             statement.execute(CREATE_PORTFOLIO_SHARE_TABLE);
             statement.execute(CREATE_TRANSACTION_TABLE);
+            statement.execute(CREATE_NET_WORTH_HISTORY_TABLE);
         }
     }
 
@@ -439,6 +454,40 @@ public class SqliteGameRepository implements GameRepository {
                 }
             }
         }
+    }
+
+    private void insertNetWorthHistory(Connection connection, long saveId,
+                                       List<NetWorthSnapshot> history) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO net_worth_history (save_id, position, week, net_worth) VALUES (?, ?, ?, ?)")) {
+            for (int i = 0; i < history.size(); i++) {
+                NetWorthSnapshot snapshot = history.get(i);
+                statement.setLong(1, saveId);
+                statement.setInt(2, i);
+                statement.setInt(3, snapshot.week());
+                statement.setString(4, snapshot.netWorth().toPlainString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    private List<NetWorthSnapshot> loadNetWorthHistory(Connection connection, long saveId)
+            throws SQLException {
+        List<NetWorthSnapshot> history = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT week, net_worth FROM net_worth_history WHERE save_id = ?"
+                        + " ORDER BY position")) {
+            statement.setLong(1, saveId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int week = resultSet.getInt("week");
+                    BigDecimal netWorth = new BigDecimal(resultSet.getString("net_worth"));
+                    history.add(new NetWorthSnapshot(week, netWorth));
+                }
+            }
+        }
+        return history;
     }
 
     private Stock requireStock(Map<String, Stock> stocks, String symbol) throws SQLException {

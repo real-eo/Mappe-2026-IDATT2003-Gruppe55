@@ -13,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -48,6 +47,7 @@ public class ProfilePage {
         title.getStyleClass().add("profile-title");
 
         VBox stats = createStatsCard();
+        VBox chartCard = createNetWorthCard();
 
         Button saveButton = new Button("Save Game");
         saveButton.getStyleClass().add("primary-button");
@@ -57,18 +57,18 @@ public class ProfilePage {
             saveButton.setOnAction(event -> handleSave());
         }
 
-        page.getChildren().addAll(title, stats, saveButton);
+        page.getChildren().addAll(title, stats, chartCard, saveButton);
         return page;
     }
 
     private VBox createStatsCard() {
         VBox stats = new VBox(10);
         stats.getStyleClass().add("profile-stats");
-        stats.setAlignment(Pos.CENTER_LEFT);
+        stats.setAlignment(Pos.CENTER);
 
         HBox columns = new HBox(24);
         columns.getStyleClass().add("profile-stats-columns");
-        columns.setAlignment(Pos.CENTER_LEFT);
+        columns.setAlignment(Pos.CENTER);
 
         BigDecimal totalPurchased = profileController == null
                 ? BigDecimal.ZERO : profileController.getTotalPurchased();
@@ -80,7 +80,7 @@ public class ProfilePage {
                 ? List.of() : profileController.getTopLosses(MAX_OUTCOMES);
 
         VBox totals = new VBox(8);
-        totals.setAlignment(Pos.CENTER_LEFT);
+        totals.setAlignment(Pos.CENTER);
         totals.getChildren().addAll(
                 createStatRow("Shares purchased", totalPurchased),
                 createStatRow("Shares sold", totalSold));
@@ -93,9 +93,30 @@ public class ProfilePage {
         return stats;
     }
 
+    private VBox createNetWorthCard() {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("profile-stats");
+
+        Label title = new Label("Net Worth Over Time");
+        title.getStyleClass().add("profile-section-title");
+
+        NetWorthChart chart = new NetWorthChart();
+        chart.setPrefHeight(200);
+        chart.setMinWidth(520);
+        chart.setMaxWidth(Double.MAX_VALUE);
+        VBox.setVgrow(chart, Priority.ALWAYS);
+
+        if (profileController != null) {
+            chart.setData(profileController.getNetWorthHistory());
+        }
+
+        card.getChildren().addAll(title, chart);
+        return card;
+    }
+
     private VBox createOutcomeColumn(String titleText, List<OutcomeEntry> outcomes, String emptyLabel) {
         VBox column = new VBox(8);
-        column.setAlignment(Pos.CENTER_LEFT);
+        column.setAlignment(Pos.CENTER);
 
         Label title = new Label(titleText);
         title.getStyleClass().add("profile-section-title");
@@ -111,7 +132,7 @@ public class ProfilePage {
         for (OutcomeEntry outcome : outcomes) {
             HBox row = new HBox(8);
             row.getStyleClass().add("profile-list-item");
-            row.setAlignment(Pos.CENTER_LEFT);
+            row.setAlignment(Pos.CENTER);
 
             Label symbol = new Label(outcome.symbol());
             symbol.getStyleClass().add("profile-list-symbol");
@@ -134,7 +155,7 @@ public class ProfilePage {
     private HBox createStatRow(String labelText, BigDecimal value) {
         HBox row = new HBox(12);
         row.getStyleClass().add("profile-stat-row");
-        row.setAlignment(Pos.CENTER_LEFT);
+        row.setAlignment(Pos.CENTER);
 
         Label label = new Label(labelText);
         label.getStyleClass().add("stat-label");
@@ -142,10 +163,7 @@ public class ProfilePage {
         Label valueLabel = new Label(DashboardFormatters.formatQuantity(value));
         valueLabel.getStyleClass().add("stat-value");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        row.getChildren().addAll(label, spacer, valueLabel);
+        row.getChildren().addAll(label, valueLabel);
         return row;
     }
 
