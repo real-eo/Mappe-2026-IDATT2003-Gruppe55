@@ -36,3 +36,4 @@ maven-status
 # Docs
 *.tmp
 ~*.*
+*.md
