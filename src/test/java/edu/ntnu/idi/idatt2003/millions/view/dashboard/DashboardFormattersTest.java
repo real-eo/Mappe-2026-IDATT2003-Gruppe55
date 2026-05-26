@@ -24,4 +24,10 @@ class DashboardFormattersTest {
         assertEquals("-5.50%", DashboardFormatters.formatSignedPercent(new BigDecimal("-5.5")));
         assertEquals("0.00%", DashboardFormatters.formatSignedPercent(BigDecimal.ZERO));
     }
+
+    @Test
+    void formatMoney_delegatesToFormatPrice() {
+        assertEquals(DashboardFormatters.formatPrice(new BigDecimal("500.00")),
+                DashboardFormatters.formatMoney(new BigDecimal("500.00")));
+    }
 }

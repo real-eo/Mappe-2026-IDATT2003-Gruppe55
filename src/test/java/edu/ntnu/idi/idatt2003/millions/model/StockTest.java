@@ -78,4 +78,47 @@ class StockTest {
         // from 100 to 110 -> +10%
         assertEquals(new BigDecimal("10.000000"), stock.getLatestPriceChangePercent());
     }
+
+    @Test
+    void constructor_throwsOnBlankSymbol() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("", "Equinor", new BigDecimal("100")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock(null, "Equinor", new BigDecimal("100")));
+    }
+
+    @Test
+    void constructor_throwsOnBlankCompanyName() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "", new BigDecimal("100")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", null, new BigDecimal("100")));
+    }
+
+    @Test
+    void constructor_throwsOnNonPositivePrice() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "Equinor", BigDecimal.ZERO));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "Equinor", null));
+    }
+
+    @Test
+    void addPrice_throwsOnNullOrNonPositive() {
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(null));
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(BigDecimal.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(new BigDecimal("-1")));
+    }
+
+    @Test
+    void getters_returnConstructedValues() {
+        assertEquals("EQNR", stock.getSymbol());
+        assertEquals("Equinor", stock.getCompanyName());
+        assertEquals(new BigDecimal("100.00"), stock.getSalesPrice());
+    }
+
+    @Test
+    void getPrices_delegatesToGetHistoricalPrices() {
+        assertEquals(stock.getHistoricalPrices(), stock.getPrices());
+    }
 }

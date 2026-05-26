@@ -80,6 +80,29 @@ class ExchangeTest {
     }
 
     @Test
+    void addStock_addsNewStockToExchange() {
+        Stock newStock = new Stock("NHY", "Norsk Hydro", new BigDecimal("60.00"));
+        exchange.addStock(newStock);
+        assertTrue(exchange.hasStock("NHY"));
+    }
+
+    @Test
+    void addStock_throwsOnNull() {
+        assertThrows(IllegalArgumentException.class, () -> exchange.addStock(null));
+    }
+
+    @Test
+    void sell_wholeShare_overload_sellsEntireQuantity() throws Exception {
+        exchange.buy(player, "EQNR", new BigDecimal("2"));
+        Share share = exchange.getStock("EQNR")
+                .equals(player.getPortfolio().getShares().get(0).getStock())
+                ? player.getPortfolio().getShares().get(0)
+                : player.getPortfolio().getShares().get(0);
+        exchange.sell(player, share);
+        assertTrue(player.getPortfolio().getShares().isEmpty());
+    }
+
+    @Test
     void advance_increments_week_and_updates_price_history() throws Exception {
         Stock eqnr = exchange.getStock("EQNR");
         int sizeBefore = eqnr.getPrices().size();

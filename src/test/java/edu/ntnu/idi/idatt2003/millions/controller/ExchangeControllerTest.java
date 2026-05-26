@@ -134,4 +134,35 @@ class ExchangeControllerTest {
         BigDecimal expectedValue = s.getSalesPrice().multiply(new BigDecimal("3"));
         assertEquals(0, controller.getPortfolioItemValue(owned.get()).compareTo(expectedValue));
     }
+
+    @Test
+    void advance_appendsNetWorthSnapshot() {
+        int before = controller.getNetWorthHistory().size();
+        controller.advance();
+        assertEquals(before + 1, controller.getNetWorthHistory().size());
+        assertEquals(exchange.getWeek(), controller.getNetWorthHistory().getLast().week());
+    }
+
+    @Test
+    void constructor_withSavedHistory_usesProvidedHistory() {
+        var snapshot = new edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot(1, new BigDecimal("9999"));
+        ExchangeController c = new ExchangeController(exchange, player, List.of(snapshot));
+        assertEquals(1, c.getNetWorthHistory().size());
+        assertEquals(new BigDecimal("9999"), c.getNetWorthHistory().get(0).netWorth());
+    }
+
+    @Test
+    void getExchange_and_getPlayer_returnProvidedInstances() {
+        assertSame(exchange, controller.getExchange());
+        assertSame(player, controller.getPlayer());
+    }
+
+    @Test
+    void sell_delegatesToExchange() throws Exception {
+        controller.buy("A", new BigDecimal("2"));
+        Stock s = exchange.getStocks().stream().filter(st -> st.getSymbol().equals("A")).findFirst().orElseThrow();
+        Share share = controller.getOwnedShare(s).orElseThrow();
+        controller.sell(share, share.getQuantity());
+        assertTrue(controller.getPortfolioShares().isEmpty());
+    }
 }
