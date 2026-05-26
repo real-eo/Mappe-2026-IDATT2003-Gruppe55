@@ -6,6 +6,7 @@ import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorag
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
+import edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
 import edu.ntnu.idi.idatt2003.millions.model.Purchase;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
@@ -30,6 +31,7 @@ public class ExchangeController {
 
     private final Exchange exchange;
     private final Player player;
+    private final List<NetWorthSnapshot> netWorthHistory = new ArrayList<>();
 
     /**
      * Constructs an ExchangeController.
@@ -40,6 +42,7 @@ public class ExchangeController {
     public ExchangeController(Exchange exchange, Player player) {
         this.exchange = exchange;
         this.player = player;
+        netWorthHistory.add(new NetWorthSnapshot(exchange.getWeek(), player.getNetWorth()));
     }
 
     /**
@@ -69,6 +72,16 @@ public class ExchangeController {
      */
     public void advance() {
         exchange.advance();
+        netWorthHistory.add(new NetWorthSnapshot(exchange.getWeek(), player.getNetWorth()));
+    }
+
+    /**
+     * Returns the net worth history recorded since this controller was created.
+     *
+     * @return immutable list of net worth snapshots ordered by week
+     */
+    public List<NetWorthSnapshot> getNetWorthHistory() {
+        return List.copyOf(netWorthHistory);
     }
 
     /**
