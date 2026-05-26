@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,5 +67,9 @@ class PortfolioTest {
     void addNull_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> portfolio.add(null));
     }
-}
 
+    @Test
+    void removeNull_returnsFalse() {
+        assertFalse(portfolio.remove(null));
+    }
+}

@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
@@ -79,6 +79,10 @@ class TransactionTest {
 
         assertFalse(player.getPortfolio().contains(share));
         assertTrue(sale.isCommitted());
+
+        // Confirm player's money equals initial - purchase + sale proceeds
+        // initial 10000 - 1005 = 8995; sale proceeds = 1000 - 10 (1% commission) = 990; => 9985
+        assertEquals(new BigDecimal("9985.00"), player.getMoney());
     }
 
     @Test
@@ -101,4 +105,3 @@ class TransactionTest {
         assertThrows(TransactionAlreadyCommittedException.class, () -> sale.commit(player));
     }
 }
-

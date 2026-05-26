@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +58,8 @@ class TransactionArchiveTest {
         var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
         exchange.sell(player, share);
         assertEquals(2, player.getTransactionArchive().getTransactions().size());
+
+        // First transaction should be a Purchase committed in week 1
+        assertEquals(1, player.getTransactionArchive().getTransactions().get(0).getWeek());
     }
 }
-

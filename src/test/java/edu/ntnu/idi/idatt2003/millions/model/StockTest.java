@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,7 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StockTest {
 
@@ -72,5 +71,11 @@ class StockTest {
 
         assertEquals(new BigDecimal("-5.50"), stock.getLatestPriceChange());
     }
-}
 
+    @Test
+    void getLatestPriceChangePercent_calculatesPercentChange() {
+        stock.addPrice(new BigDecimal("110.00"));
+        // from 100 to 110 -> +10%
+        assertEquals(new BigDecimal("10.000000"), stock.getLatestPriceChangePercent());
+    }
+}

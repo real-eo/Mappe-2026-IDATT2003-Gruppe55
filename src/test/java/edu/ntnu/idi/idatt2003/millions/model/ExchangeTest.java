@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
@@ -62,6 +62,9 @@ class ExchangeTest {
         var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
         exchange.sell(player, share, new BigDecimal("10"));
         assertTrue(player.getPortfolio().getShares().isEmpty());
+
+        // Verify player's money increased after sale (purchase -> sale proceeds)
+        assertTrue(player.getMoney().compareTo(new BigDecimal("48995.00")) > 0);
     }
 
     @Test
