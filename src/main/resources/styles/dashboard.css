@@ -530,6 +530,21 @@
     -fx-font-weight: 700;
 }
 
+.profile-stats {
+    -fx-background-color: #111827;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0.67;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-padding: 16 20;
+    -fx-spacing: 10;
+    -fx-min-width: 260;
+}
+
+.profile-stat-row {
+    -fx-alignment: center-left;
+}
+
 .trade-close-button {
     -fx-background-color: transparent;
     -fx-padding: 0;

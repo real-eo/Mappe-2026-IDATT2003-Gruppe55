@@ -154,10 +154,14 @@ public class DashboardPage {
         root.getStyleClass().add("dashboard-root");
         root.setTop(createHeader());
         dashboardBody = createBody();
-        profileBody = new ProfilePage(controller).createRoot();
+        profileBody = createProfileBody();
         root.setCenter(dashboardBody);
         refreshHeader();
         return root;
+    }
+
+    private Parent createProfileBody() {
+        return new ProfilePage(controller).createRoot();
     }
 
     private HBox createHeader() {
@@ -851,10 +855,13 @@ public class DashboardPage {
     }
 
     private void toggleProfileView() {
-        if (root == null || dashboardBody == null || profileBody == null) {
+        if (root == null || dashboardBody == null) {
             return;
         }
         showingProfile = !showingProfile;
+        if (showingProfile) {
+            profileBody = createProfileBody();
+        }
         root.setCenter(showingProfile ? profileBody : dashboardBody);
         updateProfileToggleLabel();
     }

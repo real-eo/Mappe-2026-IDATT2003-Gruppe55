@@ -5,6 +5,7 @@ import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.GameRepository
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SaveGameStorage;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.persistence.SqliteGameRepository;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -13,6 +14,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -45,6 +49,8 @@ public class ProfilePage {
         Label title = new Label("Profile");
         title.getStyleClass().add("profile-title");
 
+        VBox stats = createStatsCard();
+
         Button saveButton = new Button("Save Game");
         saveButton.getStyleClass().add("primary-button");
         if (controller == null) {
@@ -53,8 +59,52 @@ public class ProfilePage {
             saveButton.setOnAction(event -> saveGame());
         }
 
-        page.getChildren().addAll(title, saveButton);
+        page.getChildren().addAll(title, stats, saveButton);
         return page;
+    }
+
+    private VBox createStatsCard() {
+        VBox stats = new VBox(10);
+        stats.getStyleClass().add("profile-stats");
+        stats.setAlignment(Pos.CENTER_LEFT);
+
+        stats.getChildren().addAll(
+                createStatRow("Shares purchased", resolveTotalPurchased()),
+                createStatRow("Shares sold", resolveTotalSold()));
+
+        return stats;
+    }
+
+    private HBox createStatRow(String labelText, BigDecimal value) {
+        HBox row = new HBox(12);
+        row.getStyleClass().add("profile-stat-row");
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        Label label = new Label(labelText);
+        label.getStyleClass().add("stat-label");
+
+        Label valueLabel = new Label(DashboardFormatters.formatQuantity(value));
+        valueLabel.getStyleClass().add("stat-value");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        row.getChildren().addAll(label, spacer, valueLabel);
+        return row;
+    }
+
+    private BigDecimal resolveTotalPurchased() {
+        if (controller == null) {
+            return BigDecimal.ZERO;
+        }
+        return controller.getPlayer().getTransactionArchive().getTotalPurchasedQuantity();
+    }
+
+    private BigDecimal resolveTotalSold() {
+        if (controller == null) {
+            return BigDecimal.ZERO;
+        }
+        return controller.getPlayer().getTransactionArchive().getTotalSoldQuantity();
     }
 
     private void saveGame() {
