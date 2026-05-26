@@ -110,4 +110,28 @@ class ExchangeControllerTest {
         assertTrue(movers.stream().anyMatch(s -> s.getSymbol().equals("UP")));
         assertTrue(movers.stream().anyMatch(s -> s.getSymbol().equals("DOWN")));
     }
+
+    @Test
+    void transactionHistory_and_count_reflect_committed_transactions() throws Exception {
+        // perform two purchases in different weeks
+        controller.buy("A", new BigDecimal("1")); // week 1
+        exchange.advance(); // week 2
+        controller.buy("B", new BigDecimal("2")); // week 2
+
+        List<Transaction> history = controller.getSortedTransactionHistory();
+        assertEquals(2, history.size());
+        // sorted by week descending -> first entry should be week 2
+        assertEquals(2, history.get(0).getWeek());
+        assertEquals(2, controller.getTransactionCount());
+    }
+
+    @Test
+    void portfolioValue_and_ownedShare_lookup() throws Exception {
+        controller.buy("A", new BigDecimal("3"));
+        Stock s = exchange.getStocks().get(0);
+        var owned = controller.getOwnedShare(s);
+        assertTrue(owned.isPresent());
+        BigDecimal expectedValue = s.getSalesPrice().multiply(new BigDecimal("3"));
+        assertEquals(0, controller.getPortfolioItemValue(owned.get()).compareTo(expectedValue));
+    }
 }

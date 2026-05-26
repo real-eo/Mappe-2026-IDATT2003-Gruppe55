@@ -3,20 +3,12 @@ package edu.ntnu.idi.idatt2003.millions.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import edu.ntnu.idi.idatt2003.millions.model.Exchange;
-import edu.ntnu.idi.idatt2003.millions.model.Player;
-import edu.ntnu.idi.idatt2003.millions.model.Stock;
-import edu.ntnu.idi.idatt2003.millions.model.TransactionArchive;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for {@link TransactionArchive#countDistinctWeeks()}.
- */
 class TransactionArchiveTest {
 
     private Exchange exchange;
@@ -29,6 +21,59 @@ class TransactionArchiveTest {
 
         exchange = new Exchange("Test Exchange", List.of(EQNR, DNB), new Random(0));
         player = new Player("Alice", new BigDecimal("1000000"));
+    }
+
+    @Test
+    void add_null_throws() {
+        TransactionArchive archive = new TransactionArchive();
+        assertThrows(IllegalArgumentException.class, () -> archive.add(null));
+    }
+
+    @Test
+    void add_and_query_purchases_and_sales() {
+        TransactionArchive archive = new TransactionArchive();
+
+        Stock s1 = new Stock("AAA", "A Corp", new BigDecimal("10.00"));
+        Stock s2 = new Stock("BBB", "B Corp", new BigDecimal("20.00"));
+
+        Share share1 = new Share(s1, new BigDecimal("5"), s1.getSalesPrice());
+        Share share2 = new Share(s2, new BigDecimal("3"), s2.getSalesPrice());
+
+        Purchase p1 = new Purchase(share1, 1);
+        Sale s = new Sale(share2, 2);
+        Purchase p2 = new Purchase(share2, 2);
+
+        assertTrue(archive.isEmpty());
+
+        archive.add(p1);
+        archive.add(s);
+        archive.add(p2);
+
+        assertFalse(archive.isEmpty());
+
+        List<Purchase> week1Purchases = archive.getPurchases(1);
+        assertEquals(1, week1Purchases.size());
+
+        List<Sale> week2Sales = archive.getSales(2);
+        assertEquals(1, week2Sales.size());
+
+        assertEquals(2, archive.countDistinctWeeks());
+
+        // total purchased quantity = p1(5) + p2(3) = 8
+        assertEquals(new BigDecimal("8"), archive.getTotalPurchasedQuantity());
+
+        // total sold quantity = s(3)
+        assertEquals(new BigDecimal("3"), archive.getTotalSoldQuantity());
+    }
+
+    @Test
+    void getTransactions_returns_unmodifiable_list() {
+        TransactionArchive archive = new TransactionArchive();
+        Stock s = new Stock("X", "X Corp", new BigDecimal("1.00"));
+        Purchase p = new Purchase(new Share(s, new BigDecimal("1"), s.getSalesPrice()), 1);
+        archive.add(p);
+        List<Transaction> list = archive.getTransactions();
+        assertThrows(UnsupportedOperationException.class, () -> list.add(p));
     }
 
     @Test
