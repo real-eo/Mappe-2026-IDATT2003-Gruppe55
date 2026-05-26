@@ -2,9 +2,13 @@ package edu.ntnu.idi.idatt2003.millions.view.dialog;
 
 import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
+import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.calculator.PurchaseCalculator;
 import java.math.BigDecimal;
 import java.util.Optional;
+import javafx.application.Platform;
+import javafx.stage.Window;
 
 public final class BuyStockDialog extends TradeStockDialog {
 
@@ -76,10 +80,16 @@ public final class BuyStockDialog extends TradeStockDialog {
 
         try {
             controller.buy(stock.getSymbol(), quantity);
-            if (onTradeComplete != null) {
-                onTradeComplete.run();
-            }
+            PurchaseCalculator calc = new PurchaseCalculator(
+                new Share(stock, quantity, stock.getSalesPrice()));
+            Window owner = stage.getOwner();
             close();
+            Platform.runLater(() -> {
+                new TradeReceiptDialog(true, stock, quantity, stock.getSalesPrice(), calc).show(owner);
+                if (onTradeComplete != null) {
+                    onTradeComplete.run();
+                }
+            });
         } catch (MillionsException exception) {
             showValidationError(exception.getMessage());
         }
