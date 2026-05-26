@@ -48,6 +48,7 @@ public class ProfilePage {
         title.getStyleClass().add("profile-title");
 
         VBox stats = createStatsCard();
+        VBox chartCard = createNetWorthCard();
 
         Button saveButton = new Button("Save Game");
         saveButton.getStyleClass().add("primary-button");
@@ -57,7 +58,7 @@ public class ProfilePage {
             saveButton.setOnAction(event -> handleSave());
         }
 
-        page.getChildren().addAll(title, stats, saveButton);
+        page.getChildren().addAll(title, stats, chartCard, saveButton);
         return page;
     }
 
@@ -91,6 +92,27 @@ public class ProfilePage {
         columns.getChildren().addAll(totals, winsColumn, lossesColumn);
         stats.getChildren().add(columns);
         return stats;
+    }
+
+    private VBox createNetWorthCard() {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("profile-stats");
+
+        Label title = new Label("Net Worth Over Time");
+        title.getStyleClass().add("profile-section-title");
+
+        NetWorthChart chart = new NetWorthChart();
+        chart.setPrefHeight(200);
+        chart.setMinWidth(520);
+        chart.setMaxWidth(Double.MAX_VALUE);
+        VBox.setVgrow(chart, Priority.ALWAYS);
+
+        if (profileController != null) {
+            chart.setData(profileController.getNetWorthHistory());
+        }
+
+        card.getChildren().addAll(title, chart);
+        return card;
     }
 
     private VBox createOutcomeColumn(String titleText, List<OutcomeEntry> outcomes, String emptyLabel) {
