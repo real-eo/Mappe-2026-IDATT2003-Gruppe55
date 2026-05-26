@@ -612,7 +612,7 @@
 
 .profile-stats-columns {
     -fx-spacing: 24;
-    -fx-alignment: center-left;
+    -fx-alignment: center;
 }
 
 .profile-section-title {
