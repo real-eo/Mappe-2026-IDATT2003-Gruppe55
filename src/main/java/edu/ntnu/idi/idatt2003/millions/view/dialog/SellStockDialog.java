@@ -7,6 +7,7 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 import java.math.BigDecimal;
 import java.util.Optional;
+import javafx.application.Platform;
 import javafx.stage.Window;
 
 public final class SellStockDialog extends TradeStockDialog {
@@ -102,10 +103,12 @@ public final class SellStockDialog extends TradeStockDialog {
             controller.sell(share.get(), quantity);
             Window owner = stage.getOwner();
             close();
-            new TradeReceiptDialog(false, stock, quantity, pricePerShare, calc).show(owner);
-            if (onTradeComplete != null) {
-                onTradeComplete.run();
-            }
+            Platform.runLater(() -> {
+                new TradeReceiptDialog(false, stock, quantity, pricePerShare, calc).show(owner);
+                if (onTradeComplete != null) {
+                    onTradeComplete.run();
+                }
+            });
         } catch (MillionsException exception) {
             showValidationError(exception.getMessage());
         }
