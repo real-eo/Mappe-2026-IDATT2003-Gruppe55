@@ -12,8 +12,6 @@ import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -51,20 +49,8 @@ import javafx.stage.Window;
  */
 public class DashboardPage {
 
-    private static final double ICON_BASE_SIZE = 24.0;
     private static final BigDecimal DEFAULT_DASHBOARD_AMOUNT = new BigDecimal("10000.00");
-
-    private static final String LOGO_PATH = "M3 16 L9 10 L13 14 L20 7 L21 8 L13 16 L9 12 L4 17 Z";
-    private static final String CLOCK_PATH = "M12 4 A8 8 0 1 0 12 20 A8 8 0 1 0 12 4 M12 8 V12 L15 14";
-    private static final String SEARCH_PATH = "M11 4 A7 7 0 1 0 11 18 A7 7 0 1 0 11 4 M16 16 L20 20";
-    private static final String STAR_PATH = "M12 3 L14.8 8.6 L21 9.2 L16 13.2 L17.4 19.2 L12 16 L6.6 19.2 L8 13.2 L3 9.2 L9.2 8.6 Z";
-    private static final String ARROW_UP_PATH = "M12 5 L18 11 H14 V19 H10 V11 H6 Z";
-    private static final String ARROW_DOWN_PATH = "M12 19 L6 13 H10 V5 H14 V13 H18 Z";
-    private static final String ARROW_RIGHT_PATH = "M5 12 H17 M13 8 L17 12 L13 16";
-    private static final String NEUTRAL_PATH = "M5 12 H19";
-    private static final String PIE_PATH = "M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 M12 3 V12 H21 A9 9 0 0 0 12 3";
     private static final String STOCK_RESOURCE = "data/sp500.csv";
-    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final double FILTER_POPUP_WIDTH = 240.0;
 
     private enum StockTab {
@@ -201,7 +187,7 @@ public class DashboardPage {
         VBox brand = new VBox(2);
         HBox brandRow = new HBox(6);
         brandRow.setAlignment(Pos.CENTER_LEFT);
-        SVGPath logo = createIcon(LOGO_PATH, "icon-fill-accent", 16);
+        SVGPath logo = DashboardIcons.createIcon(DashboardIcons.LOGO_PATH, "icon-fill-accent", 16);
         Label title = new Label("Millions");
         title.getStyleClass().add("brand-title");
         brandRow.getChildren().addAll(logo, title);
@@ -215,7 +201,7 @@ public class DashboardPage {
 
         HBox weekInfo = new HBox(4);
         weekInfo.setAlignment(Pos.CENTER_LEFT);
-        SVGPath clock = createIcon(CLOCK_PATH, "icon-stroke-muted", 14);
+        SVGPath clock = DashboardIcons.createIcon(DashboardIcons.CLOCK_PATH, "icon-stroke-muted", 14);
         weekLabel = new Label(resolveWeekText());
         weekLabel.getStyleClass().add("header-week");
         weekInfo.getChildren().addAll(clock, weekLabel);
@@ -229,10 +215,10 @@ public class DashboardPage {
         right.getStyleClass().add("header-right");
         right.setAlignment(Pos.CENTER_RIGHT);
 
-        cashValue = new Label(formatMoney(resolveCash()));
+        cashValue = new Label(DashboardFormatters.formatMoney(resolveCash()));
         VBox cash = createStatBlock("Cash", cashValue, false);
 
-        netWorthValue = new Label(formatMoney(resolveNetWorth()));
+        netWorthValue = new Label(DashboardFormatters.formatMoney(resolveNetWorth()));
         VBox netWorth = createStatBlock("Net Worth", netWorthValue, true);
 
         VBox status = new VBox(2);
@@ -251,7 +237,7 @@ public class DashboardPage {
         nextWeek.getStyleClass().add("primary-action");
         nextWeek.setContentDisplay(ContentDisplay.LEFT);
         nextWeek.setGraphicTextGap(6);
-        nextWeek.setGraphic(createIcon(ARROW_RIGHT_PATH, "icon-stroke-inverse", 14));
+        nextWeek.setGraphic(DashboardIcons.createIcon(DashboardIcons.ARROW_RIGHT_PATH, "icon-stroke-inverse", 14));
         if (controller == null) {
             nextWeek.setDisable(true);
         } else {
@@ -410,7 +396,7 @@ public class DashboardPage {
         emptyState.getStyleClass().add("empty-state");
         emptyState.setAlignment(Pos.CENTER);
 
-        SVGPath emptyIcon = createIcon(PIE_PATH, "icon-stroke-muted", 48);
+        SVGPath emptyIcon = DashboardIcons.createIcon(DashboardIcons.PIE_PATH, "icon-stroke-muted", 48);
         Label emptyTitle = new Label("No Holdings");
         emptyTitle.getStyleClass().add("empty-title");
         Label emptySubtitle = new Label("Your portfolio is empty. Start buying stocks to build\nyour wealth.");
@@ -439,7 +425,7 @@ public class DashboardPage {
         emptyState.getStyleClass().add("empty-state");
         emptyState.setAlignment(Pos.CENTER);
 
-        SVGPath emptyIcon = createIcon(CLOCK_PATH, "icon-stroke-muted", 48);
+        SVGPath emptyIcon = DashboardIcons.createIcon(DashboardIcons.CLOCK_PATH, "icon-stroke-muted", 48);
         Label emptyTitle = new Label("No History");
         emptyTitle.getStyleClass().add("empty-title");
         Label emptySubtitle = new Label("Buy or sell stocks to see your activity here.");
@@ -512,7 +498,7 @@ public class DashboardPage {
         search.getStyleClass().add("search-container");
         search.setAlignment(Pos.CENTER_LEFT);
 
-        SVGPath icon = createIcon(SEARCH_PATH, "icon-stroke-muted", 14);
+        SVGPath icon = DashboardIcons.createIcon(DashboardIcons.SEARCH_PATH, "icon-stroke-muted", 14);
         searchField = new TextField();
         searchField.getStyleClass().add("search-field");
         searchField.setPromptText("Search stocks by symbol or name...");
@@ -644,7 +630,7 @@ public class DashboardPage {
         symbol.getStyleClass().add("stock-symbol");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        SVGPath star = createIcon(STAR_PATH, "icon-outline", 14);
+        SVGPath star = DashboardIcons.createIcon(DashboardIcons.STAR_PATH, "icon-outline", 14);
         star.getStyleClass().add("star-toggle");
         boolean isFavorite = watchlistSymbols.contains(stock.getSymbol());
         updateStarStyle(star, isFavorite);
@@ -675,20 +661,20 @@ public class DashboardPage {
             case POSITIVE -> {
                 changeClass = "change-positive";
                 iconClass = "icon-positive";
-                iconPath = ARROW_UP_PATH;
+                iconPath = DashboardIcons.ARROW_UP_PATH;
             }
             case NEGATIVE -> {
                 changeClass = "change-negative";
                 iconClass = "icon-negative";
-                iconPath = ARROW_DOWN_PATH;
+                iconPath = DashboardIcons.ARROW_DOWN_PATH;
             }
             default -> {
                 changeClass = "change-neutral";
                 iconClass = "icon-neutral";
-                iconPath = NEUTRAL_PATH;
+                iconPath = DashboardIcons.NEUTRAL_PATH;
             }
         }
-        SVGPath changeIcon = createIcon(iconPath, iconClass, 10);
+        SVGPath changeIcon = DashboardIcons.createIcon(iconPath, iconClass, 10);
         Label change = new Label(stockInfo.change());
         change.getStyleClass().addAll("stock-change", changeClass);
 
@@ -745,9 +731,10 @@ public class DashboardPage {
 
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        Label value = new Label(formatPrice(totalValue));
+        Label value = new Label(DashboardFormatters.formatPrice(totalValue));
         value.getStyleClass().add("portfolio-value");
-        Label meta = new Label(formatQuantity(quantity) + " shares @ " + formatPrice(stock.getSalesPrice()));
+        Label meta = new Label(DashboardFormatters.formatQuantity(quantity)
+            + " shares @ " + DashboardFormatters.formatPrice(stock.getSalesPrice()));
         meta.getStyleClass().add("portfolio-meta");
         right.getChildren().addAll(value, meta);
 
@@ -787,7 +774,7 @@ public class DashboardPage {
 
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        Label value = new Label(formatPrice(transaction.getCalculator().getTotal()));
+        Label value = new Label(DashboardFormatters.formatPrice(transaction.getCalculator().getTotal()));
         value.getStyleClass().add("history-value");
         Label meta = new Label(buildHistoryMeta(transaction, quantity));
         meta.getStyleClass().add("history-meta");
@@ -801,8 +788,8 @@ public class DashboardPage {
     private String buildHistoryMeta(Transaction transaction, BigDecimal quantity) {
         BigDecimal price = resolveTransactionPrice(transaction, quantity);
         return "Week " + transaction.getWeek()
-            + " | " + formatQuantity(quantity)
-            + " shares @ " + formatPrice(price);
+            + " | " + DashboardFormatters.formatQuantity(quantity)
+            + " shares @ " + DashboardFormatters.formatPrice(price);
     }
 
     private BigDecimal resolveTransactionPrice(Transaction transaction, BigDecimal quantity) {
@@ -878,72 +865,28 @@ public class DashboardPage {
         StockChange change = calculateChange(stock);
         return new StockInfo(
             stock,
-            formatPrice(stock.getSalesPrice()),
-            formatPercent(change),
+            DashboardFormatters.formatPrice(stock.getSalesPrice()),
+            DashboardFormatters.formatSignedPercent(change.percent()),
             change.kind(),
             change.percent()
         );
     }
 
     private StockChange calculateChange(Stock stock) {
-        List<BigDecimal> prices = stock.getHistoricalPrices();
-        if (prices.size() < 2) {
-            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
-        }
-
-        BigDecimal latest = prices.get(prices.size() - 1);
-        BigDecimal previous = prices.get(prices.size() - 2);
-        if (previous.compareTo(BigDecimal.ZERO) == 0) {
-            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
-        }
-
-        BigDecimal delta = latest.subtract(previous);
-        BigDecimal percent = delta.divide(previous, 6, RoundingMode.HALF_UP)
-            .multiply(ONE_HUNDRED);
-        ChangeKind kind = percent.signum() > 0
-            ? ChangeKind.POSITIVE
-            : (percent.signum() < 0 ? ChangeKind.NEGATIVE : ChangeKind.NEUTRAL);
+        BigDecimal percent = stock.getLatestPriceChangePercent();
+        ChangeKind kind = resolveChangeKind(percent);
         return new StockChange(percent, kind);
     }
 
-    private String formatPrice(BigDecimal price) {
-        DecimalFormat format = new DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.US));
-        format.setRoundingMode(RoundingMode.HALF_UP);
-        return "$" + format.format(price);
-    }
-
-    private String formatQuantity(BigDecimal quantity) {
-        DecimalFormat format = new DecimalFormat("#,##0.####", DecimalFormatSymbols.getInstance(Locale.US));
-        format.setRoundingMode(RoundingMode.HALF_UP);
-        return format.format(quantity);
-    }
-
-    private String formatMoney(BigDecimal price) {
-        return formatPrice(price);
-    }
-
-    private String formatPercent(StockChange change) {
-        DecimalFormat format = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
-        format.setRoundingMode(RoundingMode.HALF_UP);
-        BigDecimal value = change.percent().abs().setScale(2, RoundingMode.HALF_UP);
-        String formatted = format.format(value) + "%";
-        if (change.kind() == ChangeKind.POSITIVE) {
-            return "+" + formatted;
+    private ChangeKind resolveChangeKind(BigDecimal percent) {
+        int sign = percent.signum();
+        if (sign > 0) {
+            return ChangeKind.POSITIVE;
         }
-        if (change.kind() == ChangeKind.NEGATIVE) {
-            return "-" + formatted;
+        if (sign < 0) {
+            return ChangeKind.NEGATIVE;
         }
-        return formatted;
-    }
-
-    private SVGPath createIcon(String path, String styleClass, double size) {
-        SVGPath icon = new SVGPath();
-        icon.setContent(path);
-        icon.getStyleClass().add(styleClass);
-        double scale = size / ICON_BASE_SIZE;
-        icon.setScaleX(scale);
-        icon.setScaleY(scale);
-        return icon;
+        return ChangeKind.NEUTRAL;
     }
 
     private String resolvePlayerName() {
@@ -998,8 +941,8 @@ public class DashboardPage {
 
         userLabel.setText(player.getName());
         weekLabel.setText("Week " + exchange.getWeek());
-        cashValue.setText(formatMoney(player.getMoney()));
-        netWorthValue.setText(formatMoney(player.getNetWorth()));
+        cashValue.setText(DashboardFormatters.formatMoney(player.getMoney()));
+        netWorthValue.setText(DashboardFormatters.formatMoney(player.getNetWorth()));
         statusBadge.setText(formatStatus(player.getStatus()));
         refreshPortfolio();
         refreshHistory();

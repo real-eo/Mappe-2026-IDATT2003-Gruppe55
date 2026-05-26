@@ -5,14 +5,10 @@ import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,8 +26,6 @@ import javafx.stage.Window;
 final class DashboardStockPanel {
 
     private static final String STOCK_RESOURCE = "data/sp500.csv";
-    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
-
     private enum StockTab {
         ALL,
         WATCHLIST,
@@ -45,9 +39,6 @@ final class DashboardStockPanel {
     }
 
     private record StockInfo(Stock stock, String price, String change, ChangeKind changeKind) {
-    }
-
-    private record StockChange(BigDecimal percent, ChangeKind kind) {
     }
 
     private final ExchangeController controller;
@@ -324,48 +315,25 @@ final class DashboardStockPanel {
     }
 
     private StockInfo toStockInfo(Stock stock) {
-        StockChange change = calculateChange(stock);
+        BigDecimal percent = stock.getLatestPriceChangePercent();
+        ChangeKind kind = resolveChangeKind(percent);
         return new StockInfo(
             stock,
             DashboardFormatters.formatPrice(stock.getSalesPrice()),
-            formatPercent(change),
-            change.kind()
+            DashboardFormatters.formatSignedPercent(percent),
+            kind
         );
     }
 
-    private StockChange calculateChange(Stock stock) {
-        List<BigDecimal> prices = stock.getHistoricalPrices();
-        if (prices.size() < 2) {
-            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
+    private ChangeKind resolveChangeKind(BigDecimal percent) {
+        int sign = percent.signum();
+        if (sign > 0) {
+            return ChangeKind.POSITIVE;
         }
-
-        BigDecimal latest = prices.get(prices.size() - 1);
-        BigDecimal previous = prices.get(prices.size() - 2);
-        if (previous.compareTo(BigDecimal.ZERO) == 0) {
-            return new StockChange(BigDecimal.ZERO, ChangeKind.NEUTRAL);
+        if (sign < 0) {
+            return ChangeKind.NEGATIVE;
         }
-
-        BigDecimal delta = latest.subtract(previous);
-        BigDecimal percent = delta.divide(previous, 6, RoundingMode.HALF_UP)
-            .multiply(ONE_HUNDRED);
-        ChangeKind kind = percent.signum() > 0
-            ? ChangeKind.POSITIVE
-            : (percent.signum() < 0 ? ChangeKind.NEGATIVE : ChangeKind.NEUTRAL);
-        return new StockChange(percent, kind);
-    }
-
-    private String formatPercent(StockChange change) {
-        DecimalFormat format = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
-        format.setRoundingMode(RoundingMode.HALF_UP);
-        BigDecimal value = change.percent().abs().setScale(2, RoundingMode.HALF_UP);
-        String formatted = format.format(value) + "%";
-        if (change.kind() == ChangeKind.POSITIVE) {
-            return "+" + formatted;
-        }
-        if (change.kind() == ChangeKind.NEGATIVE) {
-            return "-" + formatted;
-        }
-        return formatted;
+        return ChangeKind.NEUTRAL;
     }
 
     private void refreshStockList() {
