@@ -34,15 +34,30 @@ public class ExchangeController {
     private final List<NetWorthSnapshot> netWorthHistory = new ArrayList<>();
 
     /**
-     * Constructs an ExchangeController.
+     * Constructs an ExchangeController seeded with existing net worth history (e.g. from a load).
+     *
+     * @param exchange        the exchange to operate on
+     * @param player          the active player
+     * @param savedHistory    previously recorded snapshots; empty list starts fresh
+     */
+    public ExchangeController(Exchange exchange, Player player, List<NetWorthSnapshot> savedHistory) {
+        this.exchange = exchange;
+        this.player = player;
+        if (savedHistory != null && !savedHistory.isEmpty()) {
+            netWorthHistory.addAll(savedHistory);
+        } else {
+            netWorthHistory.add(new NetWorthSnapshot(exchange.getWeek(), player.getNetWorth()));
+        }
+    }
+
+    /**
+     * Constructs an ExchangeController for a new game.
      *
      * @param exchange the exchange to operate on
      * @param player   the active player
      */
     public ExchangeController(Exchange exchange, Player player) {
-        this.exchange = exchange;
-        this.player = player;
-        netWorthHistory.add(new NetWorthSnapshot(exchange.getWeek(), player.getNetWorth()));
+        this(exchange, player, List.of());
     }
 
     /**
@@ -299,7 +314,7 @@ public class ExchangeController {
                 Path databasePath = SaveGameStorage.resolveDefaultDatabasePath();
                 GameRepository repository = new SqliteGameRepository(databasePath);
                 repository.initialize();
-                long saveId = repository.save(new GameState(exchange, player));
+                long saveId = repository.save(new GameState(exchange, player, getNetWorthHistory()));
                 if (onSuccess != null) {
                     javafx.application.Platform.runLater(() -> onSuccess.accept(saveId));
                 }
