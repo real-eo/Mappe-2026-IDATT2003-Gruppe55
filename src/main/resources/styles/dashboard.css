@@ -659,3 +659,17 @@
     -fx-font-size: 12;
     -fx-opacity: 0.8;
 }
+
+.receipt-success-title {
+    -fx-text-fill: #22c55e;
+}
+
+.receipt-separator {
+    -fx-background-color: #1e293b;
+    -fx-padding: 0.5 0;
+}
+
+.receipt-total-value {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 13.5;
+}
