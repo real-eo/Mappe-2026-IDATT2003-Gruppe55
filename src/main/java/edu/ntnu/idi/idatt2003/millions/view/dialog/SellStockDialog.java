@@ -4,8 +4,10 @@ import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.MillionsException;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
+import edu.ntnu.idi.idatt2003.millions.model.calculator.SaleCalculator;
 import java.math.BigDecimal;
 import java.util.Optional;
+import javafx.stage.Window;
 
 public final class SellStockDialog extends TradeStockDialog {
 
@@ -94,11 +96,16 @@ public final class SellStockDialog extends TradeStockDialog {
         }
 
         try {
+            Share saleShare = new Share(stock, quantity, share.get().getPurchasePrice());
+            SaleCalculator calc = new SaleCalculator(saleShare);
+            BigDecimal pricePerShare = stock.getSalesPrice();
             controller.sell(share.get(), quantity);
+            Window owner = stage.getOwner();
+            close();
+            new TradeReceiptDialog(false, stock, quantity, pricePerShare, calc).show(owner);
             if (onTradeComplete != null) {
                 onTradeComplete.run();
             }
-            close();
         } catch (MillionsException exception) {
             showValidationError(exception.getMessage());
         }
