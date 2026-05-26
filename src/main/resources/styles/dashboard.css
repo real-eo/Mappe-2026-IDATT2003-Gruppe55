@@ -258,6 +258,30 @@
     -fx-font-weight: 600;
 }
 
+.stock-hl-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10;
+    -fx-font-weight: 600;
+}
+
+.stock-hl-value {
+    -fx-font-size: 10;
+    -fx-font-family: "Consolas", "SF Mono", monospace;
+}
+
+.stock-hl-high {
+    -fx-text-fill: #10b981;
+}
+
+.stock-hl-low {
+    -fx-text-fill: #ef4444;
+}
+
+.stock-hl-sep {
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 10;
+}
+
 .change-positive {
     -fx-text-fill: #10b981;
 }

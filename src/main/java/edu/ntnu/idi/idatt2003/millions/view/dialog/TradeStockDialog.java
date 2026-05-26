@@ -54,6 +54,11 @@ public abstract class TradeStockDialog extends MillionsDialog {
         subtitle.getStyleClass().add("trade-subtitle");
         header.getChildren().addAll(title, subtitle);
 
+        StockPriceChart chart = new StockPriceChart();
+        chart.setPrefHeight(140);
+        chart.setMaxWidth(Double.MAX_VALUE);
+        chart.setPrices(stock.getHistoricalPrices());
+
         VBox pricePanel = new VBox(2);
         pricePanel.getStyleClass().add("trade-price-panel");
         Label priceLabel = new Label("Current Price");
@@ -96,7 +101,7 @@ public abstract class TradeStockDialog extends MillionsDialog {
 
         actions.getChildren().addAll(cancel, confirm);
 
-        content.getChildren().addAll(header, pricePanel, sharesLabel, quantityBox, totalRow, actions);
+        content.getChildren().addAll(header, chart, pricePanel, sharesLabel, quantityBox, totalRow, actions);
 
         cancel.setOnAction(event -> close());
         confirm.setOnAction(event -> handleConfirm());
