@@ -18,14 +18,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.UnaryOperator;
+import javafx.collections.FXCollections;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -34,6 +39,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Popup;
 import javafx.stage.Window;
 
 /**
@@ -55,6 +61,7 @@ public class DashboardPage {
     private static final String PIE_PATH = "M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 M12 3 V12 H21 A9 9 0 0 0 12 3";
     private static final String STOCK_RESOURCE = "data/sp500.csv";
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+    private static final double FILTER_POPUP_WIDTH = 240.0;
 
     private enum StockTab {
         ALL,
@@ -68,7 +75,37 @@ public class DashboardPage {
         NEUTRAL
     }
 
-    private record StockInfo(Stock stock, String price, String change, ChangeKind changeKind) {
+    private enum SortOption {
+        ALPHA_ASC("Alphabetical (A-Z)", Comparator.comparing(
+            (StockInfo info) -> info.stock().getSymbol(), String.CASE_INSENSITIVE_ORDER)),
+        ALPHA_DESC("Alphabetical (Z-A)", Comparator.comparing(
+            (StockInfo info) -> info.stock().getSymbol(), String.CASE_INSENSITIVE_ORDER).reversed()),
+        PRICE_ASC("Price: Low to High", Comparator.comparing(info -> info.stock().getSalesPrice())),
+        PRICE_DESC("Price: High to Low",
+            Comparator.comparing((StockInfo info) -> info.stock().getSalesPrice()).reversed()),
+        CHANGE_ASC("Change: Low to High", Comparator.comparing(StockInfo::changePercent)),
+        CHANGE_DESC("Change: High to Low", Comparator.comparing(StockInfo::changePercent).reversed());
+
+        private final String label;
+        private final Comparator<StockInfo> comparator;
+
+        SortOption(String label, Comparator<StockInfo> comparator) {
+            this.label = label;
+            this.comparator = comparator;
+        }
+
+        Comparator<StockInfo> comparator() {
+            return comparator;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    private record StockInfo(Stock stock, String price, String change, ChangeKind changeKind,
+                             BigDecimal changePercent) {
     }
 
     private record StockChange(BigDecimal percent, ChangeKind kind) {
@@ -88,6 +125,11 @@ public class DashboardPage {
     private Label netWorthValue;
     private Label statusBadge;
     private TextField searchField;
+    private TextField minPriceField;
+    private TextField maxPriceField;
+    private ComboBox<SortOption> sortDropdown;
+    private Popup filterPopup;
+    private SortOption activeSort = SortOption.ALPHA_ASC;
     private VBox stockListContainer;
     private StackPane portfolioContent;
     private ScrollPane portfolioScroll;
@@ -382,8 +424,92 @@ public class DashboardPage {
         HBox.setHgrow(searchField, Priority.ALWAYS);
         search.setOnMouseClicked(event -> searchField.requestFocus());
 
-        search.getChildren().addAll(icon, searchField);
+        filterPopup = createFilterPopup();
+        FilterButton filterButton = new FilterButton();
+        filterButton.setOnAction(event -> toggleFilterPopup(filterButton));
+
+        search.getChildren().addAll(icon, searchField, filterButton);
         return search;
+    }
+
+    private Popup createFilterPopup() {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+
+        VBox content = new VBox(10);
+        content.getStyleClass().add("filter-popup");
+        content.setPrefWidth(FILTER_POPUP_WIDTH);
+
+        Label sortLabel = new Label("Sort by");
+        sortLabel.getStyleClass().add("filter-label");
+
+        sortDropdown = new ComboBox<>(FXCollections.observableArrayList(SortOption.values()));
+        sortDropdown.getStyleClass().add("filter-dropdown");
+        sortDropdown.setMaxWidth(Double.MAX_VALUE);
+        sortDropdown.setValue(activeSort);
+        sortDropdown.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                activeSort = newValue;
+                refreshStockList();
+            }
+        });
+
+        Label rangeLabel = new Label("Price range");
+        rangeLabel.getStyleClass().add("filter-label");
+
+        HBox rangeRow = new HBox(8);
+        rangeRow.getStyleClass().add("filter-range");
+        minPriceField = createNumberField("Min");
+        maxPriceField = createNumberField("Max");
+        HBox.setHgrow(minPriceField, Priority.ALWAYS);
+        HBox.setHgrow(maxPriceField, Priority.ALWAYS);
+        rangeRow.getChildren().addAll(minPriceField, maxPriceField);
+
+        content.getChildren().addAll(sortLabel, sortDropdown, rangeLabel, rangeRow);
+        popup.getContent().add(content);
+        return popup;
+    }
+
+    private TextField createNumberField(String prompt) {
+        TextField field = new TextField();
+        field.getStyleClass().add("filter-input");
+        field.setPromptText(prompt);
+        field.setTextFormatter(createNumericFormatter());
+        field.textProperty().addListener((obs, oldValue, newValue) -> refreshStockList());
+        return field;
+    }
+
+    private TextFormatter<String> createNumericFormatter() {
+        UnaryOperator<TextFormatter.Change> filter = change -> {
+            String text = change.getControlNewText();
+            if (text.isBlank()) {
+                return change;
+            }
+            if (text.matches("\\d*(\\.\\d{0,2})?")) {
+                return change;
+            }
+            return null;
+        };
+        return new TextFormatter<>(filter);
+    }
+
+    private void toggleFilterPopup(Button anchor) {
+        if (filterPopup == null || anchor == null) {
+            return;
+        }
+        if (filterPopup.isShowing()) {
+            filterPopup.hide();
+            return;
+        }
+
+        Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
+        if (bounds == null) {
+            return;
+        }
+        double x = bounds.getMaxX() - FILTER_POPUP_WIDTH;
+        double y = bounds.getMaxY() + 6;
+        filterPopup.show(anchor, x, y);
     }
 
     private ScrollPane createStockList() {
@@ -592,7 +718,8 @@ public class DashboardPage {
             stock,
             formatPrice(stock.getSalesPrice()),
             formatPercent(change),
-            change.kind()
+            change.kind(),
+            change.percent()
         );
     }
 
@@ -774,6 +901,8 @@ public class DashboardPage {
         } else if (activeStockTab == StockTab.MOVERS) {
             stocks = filterMarketMovers(stocks);
         }
+        stocks = applyPriceFilter(stocks);
+        stocks = applySort(stocks);
         if (stocks.isEmpty()) {
             stockListContainer.getChildren().add(createEmptyStockCard());
             return;
@@ -781,6 +910,65 @@ public class DashboardPage {
 
         for (StockInfo stock : stocks) {
             stockListContainer.getChildren().add(createStockCard(stock));
+        }
+    }
+
+    private List<StockInfo> applyPriceFilter(List<StockInfo> stocks) {
+        PriceRange range = resolvePriceRange();
+        if (range.min() == null && range.max() == null) {
+            return stocks;
+        }
+
+        return stocks.stream()
+            .filter(info -> withinRange(info.stock().getSalesPrice(), range.min(), range.max()))
+            .toList();
+    }
+
+    private List<StockInfo> applySort(List<StockInfo> stocks) {
+        if (activeSort == null) {
+            return stocks;
+        }
+        return stocks.stream()
+            .sorted(activeSort.comparator())
+            .toList();
+    }
+
+    private boolean withinRange(BigDecimal price, BigDecimal min, BigDecimal max) {
+        if (price == null) {
+            return false;
+        }
+        if (min != null && price.compareTo(min) < 0) {
+            return false;
+        }
+        if (max != null && price.compareTo(max) > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private PriceRange resolvePriceRange() {
+        BigDecimal min = parsePriceField(minPriceField);
+        BigDecimal max = parsePriceField(maxPriceField);
+        if (min != null && max != null && min.compareTo(max) > 0) {
+            BigDecimal temp = min;
+            min = max;
+            max = temp;
+        }
+        return new PriceRange(min, max);
+    }
+
+    private BigDecimal parsePriceField(TextField field) {
+        if (field == null) {
+            return null;
+        }
+        String text = field.getText();
+        if (text == null || text.isBlank() || text.equals(".")) {
+            return null;
+        }
+        try {
+            return new BigDecimal(text);
+        } catch (NumberFormatException exception) {
+            return null;
         }
     }
 
@@ -838,6 +1026,9 @@ public class DashboardPage {
         if (favorite) {
             star.getStyleClass().add("icon-star-active");
         }
+    }
+
+    private record PriceRange(BigDecimal min, BigDecimal max) {
     }
 
     private Window resolveOwnerWindow(Button source) {
