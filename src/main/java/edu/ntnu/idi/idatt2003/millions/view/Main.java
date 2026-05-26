@@ -119,7 +119,8 @@ public class Main extends Application {
             showError("Unable to load the selected save.");
             return;
         }
-        ExchangeController controller = new ExchangeController(state.getExchange(), state.getPlayer());
+        ExchangeController controller = new ExchangeController(
+                state.getExchange(), state.getPlayer(), state.getNetWorthHistory());
         showDashboard(stage, controller);
     }
 
