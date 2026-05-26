@@ -355,9 +355,12 @@ final class DashboardLeftPanel {
         changeRow.setAlignment(Pos.CENTER_RIGHT);
         changeRow.getChildren().addAll(DashboardIcons.createIcon(cs.iconPath(), cs.iconCss(), 10), changeLabel);
 
+        HBox hlRow = buildHighLowRow(stock);
+        hlRow.setAlignment(Pos.CENTER_RIGHT);
+
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        right.getChildren().addAll(label(info.price(), "stock-price"), changeRow);
+        right.getChildren().addAll(label(info.price(), "stock-price"), changeRow, hlRow);
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -376,7 +379,7 @@ final class DashboardLeftPanel {
 
         VBox card = new VBox(16);
         card.getStyleClass().add("stock-card");
-        card.getChildren().addAll(header, buildHighLowRow(stock), actions);
+        card.getChildren().addAll(header, actions);
         return card;
     }
 
