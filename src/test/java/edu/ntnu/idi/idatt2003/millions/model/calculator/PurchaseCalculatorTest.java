@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model.calculator;
 
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
@@ -48,5 +48,13 @@ class PurchaseCalculatorTest {
         // 1000 + 5 = 1005
         assertEquals(new BigDecimal("1005.00"), calc.getTotal());
     }
-}
 
+    @Test
+    void largeQuantity_roundsCorrectly() {
+        Stock stock = new Stock("BIG", "Big Co", new BigDecimal("0.1234"));
+        Share share = new Share(stock, new BigDecimal("10000"), new BigDecimal("0.1234"));
+        PurchaseCalculator calc = new PurchaseCalculator(share);
+        // coarse check that gross scales
+        assertEquals(new BigDecimal("1234.00"), calc.getGross());
+    }
+}
