@@ -31,13 +31,16 @@ public class StartPage {
 
     /**
      * Callback invoked when the player starts a new game.
-     *
-     * @param name        the player's name
-     * @param capital     the starting capital
-     * @param csvPath     path to a custom stock CSV file, or {@code null} to use the default S&P 500
      */
     @FunctionalInterface
     public interface OnStartGame {
+        /**
+         * Called when the player starts a new game.
+         *
+         * @param name        the player's name
+         * @param capital     the starting capital
+         * @param csvPath     path to a custom stock CSV file, or {@code null} to use the default S&amp;P 500
+         */
         void accept(String name, BigDecimal capital, Path csvPath);
     }
 
