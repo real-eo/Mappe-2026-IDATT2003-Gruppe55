@@ -61,6 +61,26 @@ class ProfilePageTest {
         });
     }
 
+    @Test
+    void createRoot_withProfitableSale_marksOutcomeAsPositive() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
+            Exchange exchange = new Exchange("OSE", List.of(stock));
+            Player player = new Player("Alice", new BigDecimal("10000.00"));
+            ExchangeController exchangeController = new ExchangeController(exchange, player);
+            ProfileController profileController = new ProfileController(exchangeController);
+
+            Share soldAtGain = new Share(stock, new BigDecimal("1"), new BigDecimal("50.00"));
+            player.getTransactionArchive().add(new Sale(soldAtGain, 1));
+
+            ProfilePage page = new ProfilePage(profileController);
+            Parent root = page.createRoot();
+
+            assertNotNull(findLabelContaining(root, "$"));
+            assertTrue(findLabelContaining(root, "Top wins") != null);
+        });
+    }
+
     private static Button findButtonWithText(Node node, String text) {
         if (node instanceof Button button && text.equals(button.getText())) {
             return button;

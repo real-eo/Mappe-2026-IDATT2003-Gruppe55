@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,6 +57,32 @@ class BuyStockDialogTest {
             quantityField.setText("2");
             dialog.updateTotals();
             assertEquals("$201.00", totalValue.getText());
+
+            quantityField.setText("0");
+            dialog.updateTotals();
+            assertEquals("--", totalValue.getText());
+        });
+    }
+
+    @Test
+    void updateTotals_showsPlaceholder_whenControllerReturnsNoEstimate() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
+            ExchangeController controller = new ExchangeController(
+                    new Exchange("OSE", List.of(stock)),
+                    new Player("Alice", new BigDecimal("1000.00"))) {
+                @Override
+                public java.util.Optional<BigDecimal> calculateBuyTotal(String symbol, BigDecimal quantity) {
+                    return Optional.empty();
+                }
+            };
+            BuyStockDialog dialog = new BuyStockDialog(controller, stock, null);
+            dialog.buildContent();
+
+            dialog.quantityField.setText("2");
+            dialog.updateTotals();
+
+            assertEquals("--", dialog.totalValue.getText());
         });
     }
 

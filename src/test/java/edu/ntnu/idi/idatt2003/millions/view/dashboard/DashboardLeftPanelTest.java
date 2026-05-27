@@ -148,6 +148,28 @@ class DashboardLeftPanelTest {
         assertEquals(1, infos.size());
     }
 
+    @Test
+    void selectTab_marketMoversWithNullController_keepsEmptyStateRenderable() throws Exception {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                DashboardLeftPanel panel = new DashboardLeftPanel(null, null);
+                VBox root = panel.createPanel();
+
+                Class<?> tabClass = Class.forName(DashboardLeftPanel.class.getName() + "$StockTab");
+                @SuppressWarnings("unchecked")
+                Enum<?> movers = Enum.valueOf((Class<Enum>) tabClass, "MOVERS");
+
+                Method selectTab = DashboardLeftPanel.class.getDeclaredMethod("selectTab", tabClass);
+                selectTab.setAccessible(true);
+                selectTab.invoke(panel, movers);
+
+                assertNotNull(findLabelWithText(root, "No stocks loaded"));
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
     private static Label findLabelWithText(Node node, String text) {
         if (node instanceof Label label && text.equals(label.getText())) {
             return label;

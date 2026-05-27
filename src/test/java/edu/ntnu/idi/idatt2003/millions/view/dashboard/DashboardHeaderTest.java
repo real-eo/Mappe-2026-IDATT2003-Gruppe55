@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,6 +65,40 @@ class DashboardHeaderTest {
             header.updateProfileToggleLabel(false);
             Button profileButton = findButtonWithText(root, "Profile");
             assertNotNull(profileButton);
+        });
+    }
+
+    @Test
+    void nextWeekButton_advancesControllerAndRefreshesHeader() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
+            Exchange exchange = new Exchange("OSE", List.of(stock));
+            Player player = new Player("Alice", new BigDecimal("1000.00"));
+            ExchangeController controller = new ExchangeController(exchange, player);
+
+            DashboardHeader header = new DashboardHeader(controller, null, null);
+            HBox root = header.createHeader();
+            Button nextWeek = findButtonWithText(root, "Next Week");
+
+            assertNotNull(nextWeek);
+            nextWeek.fire();
+
+            assertTrue(findLabelWithText(root, "Week 2") != null);
+        });
+    }
+
+    @Test
+    void profileToggleButton_invokesCallbackWhenPresent() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            AtomicBoolean toggled = new AtomicBoolean(false);
+            DashboardHeader header = new DashboardHeader(null, () -> toggled.set(true), null);
+            HBox root = header.createHeader();
+            Button profile = findButtonWithText(root, "Profile");
+
+            assertNotNull(profile);
+            profile.fire();
+
+            assertTrue(toggled.get());
         });
     }
 

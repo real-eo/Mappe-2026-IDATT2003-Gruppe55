@@ -68,6 +68,47 @@ class LoadGamePageTest {
     }
 
     @Test
+    void createRoot_withEmptySaveList_showsPlaceholderMessage() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            LoadGameController stubController = new LoadGameController() {
+                @Override
+                public void loadSaves(java.util.function.Consumer<List<GameSaveSummary>> onSuccess,
+                                      java.util.function.Consumer<String> onError) {
+                    onSuccess.accept(List.of());
+                }
+            };
+
+            LoadGamePage page = new LoadGamePage(stubController, state -> { }, () -> { });
+            Parent root = page.createRoot();
+
+            assertNotNull(findLabelWithText(root, "No saved games found."));
+        });
+    }
+
+    @Test
+    void createRoot_withNullTimestampAndNoLoadCallback_disablesLoadButton() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            LoadGameController stubController = new LoadGameController() {
+                @Override
+                public void loadSaves(java.util.function.Consumer<List<GameSaveSummary>> onSuccess,
+                                      java.util.function.Consumer<String> onError) {
+                    onSuccess.accept(List.of(
+                            new GameSaveSummary(7L, "Mystery Save", "OSE", 3, null)
+                    ));
+                }
+            };
+
+            LoadGamePage page = new LoadGamePage(stubController, null, () -> { });
+            Parent root = page.createRoot();
+
+            assertNotNull(findLabelWithText(root, "Saved: Unknown"));
+            Button load = findButtonWithText(root, "Load");
+            assertNotNull(load);
+            assertTrue(load.isDisabled());
+        });
+    }
+
+    @Test
     void loadButton_triggersLoadSaveCallback() {
         FxTestUtils.runOnFxThreadAndWait(() -> {
             AtomicLong loadedId = new AtomicLong(-1);

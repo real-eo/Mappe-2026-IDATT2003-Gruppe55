@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +63,22 @@ class StartPageTest {
 
             assertEquals("Alice", receivedName.get());
             assertEquals(new BigDecimal("15000"), receivedCapital.get());
+        });
+    }
+
+    @Test
+    void loadButton_invokesOnLoadCallback() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            StartPage page = new StartPage();
+            AtomicBoolean loaded = new AtomicBoolean(false);
+
+            StackPane root = page.createRoot((name, capital) -> { }, () -> loaded.set(true));
+            Button load = findButtonWithText(root, "Load Game");
+
+            assertNotNull(load);
+            load.fire();
+
+            assertTrue(loaded.get());
         });
     }
 

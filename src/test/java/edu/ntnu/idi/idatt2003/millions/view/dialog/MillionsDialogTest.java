@@ -5,7 +5,10 @@ import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MillionsDialogTest {
@@ -56,5 +59,22 @@ class MillionsDialogTest {
 
             assertTrue(invoked[0]);
         });
+    }
+
+    @Test
+    void resolveStylesheet_returnsDashboardStylesheetUrl() throws Exception {
+        MillionsDialog dialog = new MillionsDialog() {
+            @Override
+            protected Node buildContent() {
+                return new StackPane();
+            }
+        };
+
+        Method resolveStylesheet = MillionsDialog.class.getDeclaredMethod("resolveStylesheet");
+        resolveStylesheet.setAccessible(true);
+
+        String stylesheet = (String) resolveStylesheet.invoke(dialog);
+        assertNotNull(stylesheet);
+        assertTrue(stylesheet.contains("dashboard.css"));
     }
 }

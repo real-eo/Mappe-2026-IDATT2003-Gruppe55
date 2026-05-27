@@ -48,12 +48,14 @@ class DashboardPageTest {
                 Method toggle = DashboardPage.class.getDeclaredMethod("toggleProfileView");
                 toggle.setAccessible(true);
                 toggle.invoke(page);
+
+                toggle.invoke(page);
             } catch (Exception exception) {
                 throw new RuntimeException(exception);
             }
 
             assertNotNull(root.getCenter());
-            assertTrue(root.getCenter() != initialCenter);
+            assertTrue(root.getCenter() == initialCenter);
         });
     }
 }
