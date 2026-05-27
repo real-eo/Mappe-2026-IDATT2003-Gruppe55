@@ -42,16 +42,6 @@ public final class BuyStockDialog extends TradeStockDialog {
     }
 
     @Override
-    protected String errorTitle() {
-        return "Buy Shares";
-    }
-
-    @Override
-    protected String errorHeader() {
-        return "Unable to complete the purchase";
-    }
-
-    @Override
     protected void updateTotals() {
         if (totalValue == null || stock == null) {
             return;
@@ -71,7 +61,7 @@ public final class BuyStockDialog extends TradeStockDialog {
     protected void handleConfirm() {
         String rawQuantity = quantityField.getText() == null ? "" : quantityField.getText().trim();
         if (rawQuantity.isEmpty()) {
-            showValidationError("Please enter the number of shares to buy.");
+            showValidationError("Enter the number of shares you'd like to buy.");
             return;
         }
 
@@ -79,12 +69,12 @@ public final class BuyStockDialog extends TradeStockDialog {
         try {
             quantity = new BigDecimal(rawQuantity);
         } catch (NumberFormatException exception) {
-            showValidationError("Share quantity must be a valid number.");
+            showValidationError("Please enter a valid number of shares.");
             return;
         }
 
         if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            showValidationError("Share quantity must be greater than zero.");
+            showValidationError("Number of shares must be greater than zero.");
             return;
         }
 
