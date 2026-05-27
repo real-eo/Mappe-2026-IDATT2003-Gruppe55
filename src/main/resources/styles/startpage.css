@@ -180,3 +180,29 @@
     -fx-font-size: 11;
     -fx-wrap-text: true;
 }
+
+.csv-radio {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12.25;
+}
+
+.csv-radio:selected {
+    -fx-text-fill: #e2e8f0;
+}
+
+.csv-radio .radio {
+    -fx-background-color: #1a1f2e;
+    -fx-border-color: #475569;
+    -fx-border-width: 1;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+}
+
+.csv-radio:selected .radio {
+    -fx-border-color: #3b82f6;
+}
+
+.csv-radio:selected .radio .dot {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 50%;
+}
