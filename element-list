@@ -1,0 +1,12 @@
+edu.ntnu.idi.idatt2003.millions.controller
+edu.ntnu.idi.idatt2003.millions.domain.calculator
+edu.ntnu.idi.idatt2003.millions.domain.model
+edu.ntnu.idi.idatt2003.millions.infrastructure.exception
+edu.ntnu.idi.idatt2003.millions.infrastructure.io
+edu.ntnu.idi.idatt2003.millions.infrastructure.persistence
+edu.ntnu.idi.idatt2003.millions.model
+edu.ntnu.idi.idatt2003.millions.model.calculator
+edu.ntnu.idi.idatt2003.millions.view
+edu.ntnu.idi.idatt2003.millions.view.dashboard
+edu.ntnu.idi.idatt2003.millions.view.dialog
+edu.ntnu.idi.idatt2003.millions.view.page
