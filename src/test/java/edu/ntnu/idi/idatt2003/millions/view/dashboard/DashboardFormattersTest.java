@@ -30,4 +30,15 @@ class DashboardFormattersTest {
         assertEquals(DashboardFormatters.formatPrice(new BigDecimal("500.00")),
                 DashboardFormatters.formatMoney(new BigDecimal("500.00")));
     }
+
+    @Test
+    void formatPrice_handlesVeryLargeNumbers() {
+        assertEquals("$9,999,999,999.99",
+                DashboardFormatters.formatPrice(new BigDecimal("9999999999.99")));
+    }
+
+    @Test
+    void formatQuantity_handlesVerySmallDecimals() {
+        assertEquals("0.0001", DashboardFormatters.formatQuantity(new BigDecimal("0.0001")));
+    }
 }

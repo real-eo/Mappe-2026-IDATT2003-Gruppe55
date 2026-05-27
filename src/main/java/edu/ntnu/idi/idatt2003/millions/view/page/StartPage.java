@@ -27,6 +27,19 @@ public class StartPage {
     private static final String TROPHY_PATH = "M2 1 H12 V4 C12 6 10.8 7.5 9 8 V10 H11 V12 H3 V10 H5 V8 C3.2 7.5 2 6 2 4 Z";
     private static final String PLAY_PATH = "M3 2 L12 7 L3 12 Z";
 
+    /**
+     * Creates the start page component.
+     */
+    public StartPage() {
+    }
+
+    /**
+     * Builds the start page root node.
+     *
+     * @param onStart callback triggered when user starts a new game
+     * @param onLoad callback triggered when user chooses to load a game
+     * @return configured root pane for the start page
+     */
     public StackPane createRoot(BiConsumer<String, BigDecimal> onStart, Runnable onLoad) {
         StackPane root = new StackPane();
         root.getStyleClass().add("start-root");

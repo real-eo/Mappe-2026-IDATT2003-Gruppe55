@@ -22,10 +22,18 @@ public class DashboardPage {
     private DashboardLeftPanel leftPanel;
     private DashboardRightPanel rightPanel;
 
+    /**
+     * Creates a dashboard page without an attached controller.
+     */
     public DashboardPage() {
         this(null);
     }
 
+    /**
+     * Creates a dashboard page backed by the given exchange controller.
+     *
+     * @param controller controller used to drive dashboard actions and data
+     */
     public DashboardPage(ExchangeController controller) {
         this.controller = controller;
     }

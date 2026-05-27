@@ -42,4 +42,25 @@ class ShareTest {
         assertTrue(s.contains("3"));
         assertTrue(s.contains("EQNR"));
     }
+
+    @Test
+    void constructor_throwsOnNullQuantity() {
+        Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100"));
+        assertThrows(IllegalArgumentException.class,
+        () -> new Share(stock, null, new BigDecimal("10")));
+    }
+
+    @Test
+    void constructor_throwsOnNullPurchasePrice() {
+        Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100"));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Share(stock, new BigDecimal("1"), null));
+    }
+
+    @Test
+    void toString_containsPurchasePrice() {
+        Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100"));
+        Share share = new Share(stock, new BigDecimal("3"), new BigDecimal("90"));
+        assertTrue(share.toString().contains("90"));
+    }
 }

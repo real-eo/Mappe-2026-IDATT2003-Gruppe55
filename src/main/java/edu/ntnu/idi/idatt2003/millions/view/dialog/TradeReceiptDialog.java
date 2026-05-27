@@ -17,6 +17,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+/**
+ * Dialog showing a completed trade receipt with fee and tax breakdown.
+ */
 public class TradeReceiptDialog extends MillionsDialog {
 
     private final boolean isBuy;
@@ -25,6 +28,15 @@ public class TradeReceiptDialog extends MillionsDialog {
     private final BigDecimal pricePerShare;
     private final TransactionCalculator calculator;
 
+    /**
+     * Creates a trade receipt dialog.
+     *
+     * @param isBuy true when representing a buy transaction, false for a sale
+     * @param stock stock involved in the trade
+     * @param quantity traded share quantity
+     * @param pricePerShare execution price per share
+     * @param calculator calculator containing computed totals, fees, and tax
+     */
     public TradeReceiptDialog(boolean isBuy, Stock stock, BigDecimal quantity,
         BigDecimal pricePerShare, TransactionCalculator calculator) {
         this.isBuy = isBuy;

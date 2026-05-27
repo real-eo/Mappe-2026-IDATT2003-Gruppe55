@@ -10,8 +10,18 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.stage.Window;
 
+/**
+ * Dialog for selling owned shares of a selected stock.
+ */
 public final class SellStockDialog extends TradeStockDialog {
 
+    /**
+     * Creates a sell dialog bound to the given controller and stock.
+     *
+     * @param controller the exchange controller used to execute sales
+     * @param stock the stock that will be sold
+     * @param onTradeComplete callback invoked after a successful trade (may be null)
+     */
     public SellStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         super(controller, stock, onTradeComplete);
     }

@@ -71,4 +71,36 @@ class ProfileControllerTest {
         // may be empty if no negative outcomes
         assertNotNull(losses);
     }
+
+    @Test
+    void getTopWins_returnsEmpty_whenOnlyLossesExist() {
+        Stock s = exchange.getStocks().get(0);
+        Share lossShare = new Share(s, new BigDecimal("2"), new BigDecimal("100.00"));
+        player.getTransactionArchive().add(new Sale(lossShare, 1));
+
+        List<ProfileController.OutcomeEntry> wins = profileController.getTopWins(3);
+        assertTrue(wins.isEmpty());
+    }
+
+    @Test
+    void getTopLosses_returnsEmpty_whenOnlyWinsExist() {
+        Stock s = exchange.getStocks().get(0);
+        Share winShare = new Share(s, new BigDecimal("2"), new BigDecimal("1.00"));
+        player.getTransactionArchive().add(new Sale(winShare, 1));
+
+        List<ProfileController.OutcomeEntry> losses = profileController.getTopLosses(3);
+        assertTrue(losses.isEmpty());
+    }
+
+    @Test
+    void getTopWins_respectsLimit_whenMultipleWinningSymbolsExist() {
+        Stock s1 = exchange.getStocks().get(0);
+        Stock s2 = exchange.getStocks().get(1);
+
+        player.getTransactionArchive().add(new Sale(new Share(s1, new BigDecimal("1"), new BigDecimal("1.00")), 1));
+        player.getTransactionArchive().add(new Sale(new Share(s2, new BigDecimal("1"), new BigDecimal("1.00")), 1));
+
+        List<ProfileController.OutcomeEntry> wins = profileController.getTopWins(1);
+        assertEquals(1, wins.size());
+    }
 }

@@ -21,6 +21,12 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 public class StockCsvLoader {
 
     /**
+     * Creates a CSV stock loader.
+     */
+    public StockCsvLoader() {
+    }
+
+    /**
      * Loads stocks from a CSV file on disk.
      *
      * @param path path to CSV file

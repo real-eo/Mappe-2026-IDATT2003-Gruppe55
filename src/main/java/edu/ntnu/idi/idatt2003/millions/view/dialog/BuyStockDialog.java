@@ -10,8 +10,18 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.stage.Window;
 
+/**
+ * Dialog for buying shares of a selected stock.
+ */
 public final class BuyStockDialog extends TradeStockDialog {
 
+    /**
+     * Creates a buy dialog bound to the given controller and stock.
+     *
+     * @param controller the exchange controller used to execute purchases
+     * @param stock the stock that will be purchased
+     * @param onTradeComplete callback invoked after a successful trade (may be null)
+     */
     public BuyStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         super(controller, stock, onTradeComplete);
     }

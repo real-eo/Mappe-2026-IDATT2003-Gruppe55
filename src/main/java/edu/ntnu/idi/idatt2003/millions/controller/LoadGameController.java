@@ -16,6 +16,12 @@ import java.util.function.Consumer;
 public class LoadGameController {
 
     /**
+     * Creates a controller for loading saved games.
+     */
+    public LoadGameController() {
+    }
+
+    /**
      * Lists all saved games asynchronously.
      *
      * @param onSuccess called with the list of save summaries on success

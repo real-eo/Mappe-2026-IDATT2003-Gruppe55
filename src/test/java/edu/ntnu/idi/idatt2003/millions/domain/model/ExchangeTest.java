@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -74,6 +75,11 @@ class ExchangeTest {
     }
 
     @Test
+    void findStocks_returnsAll_whenKeywordIsNull() {
+        assertEquals(2, exchange.findStocks(null).size());
+    }
+
+    @Test
     void gainers_and_losers_return_empty_for_non_positive_limit() {
         assertTrue(exchange.getGainers(0).isEmpty());
         assertTrue(exchange.getLosers(-1).isEmpty());
@@ -89,6 +95,20 @@ class ExchangeTest {
     @Test
     void addStock_throwsOnNull() {
         assertThrows(IllegalArgumentException.class, () -> exchange.addStock(null));
+    }
+
+    @Test
+    void constructor_ignoresNullStocksInInputList() {
+        Stock eqnr = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
+
+        List<Stock> input = new ArrayList<>();
+        input.add(eqnr);
+        input.add(null);
+
+        Exchange built = new Exchange("OSE", input, new Random(0));
+
+        assertTrue(built.hasStock("EQNR"));
+        assertEquals(1, built.findStocks(null).size());
     }
 
     @Test
