@@ -209,4 +209,77 @@ class ExchangeTest {
         exchange.sell(player, share);
         assertTrue(player.getPortfolio().getShares().isEmpty());
     }
+
+    @Test
+    void getName_returnsConfiguredName() {
+        assertEquals("Test Exchange", exchange.getName());
+    }
+
+    @Test
+    void hasStock_returnsFalse_forUnknownSymbol() {
+        assertFalse(exchange.hasStock("UNKNOWN"));
+    }
+
+    @Test
+    void findStocks_nullKeyword_returnsAll() {
+        assertEquals(2, exchange.findStocks(null).size());
+    }
+
+    @Test
+    void constructor_throwsOnNonPositiveWeek() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Exchange("OSE", List.of(), new Random(0), 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Exchange("OSE", List.of(), new Random(0), -1));
+    }
+
+    @Test
+    void buy_throwsOnZeroOrNegativeQuantity() {
+        assertThrows(Exception.class,
+                () -> exchange.buy(player, "EQNR", BigDecimal.ZERO));
+        assertThrows(Exception.class,
+                () -> exchange.buy(player, "EQNR", new BigDecimal("-1")));
+    }
+
+    @Test
+    void sell_throwsOnZeroOrNegativeQuantity() throws Exception {
+        Stock stock = exchange.getStock("EQNR");
+        Share someShare = new Share(stock, new BigDecimal("1"), stock.getSalesPrice());
+
+        assertThrows(Exception.class,
+                () -> exchange.sell(player, someShare, BigDecimal.ZERO));
+        assertThrows(Exception.class,
+                () -> exchange.sell(player, someShare, new BigDecimal("-1")));
+    }
+
+    @Test
+    void advance_clampsToMinimumPrice_whenComputationBecomesNonPositive() {
+        Random brokenRandom = new Random() {
+            @Override
+            public double nextDouble() {
+                return -10.0;
+            }
+        };
+
+        Stock tiny = new Stock("TINY", "Tiny Corp", new BigDecimal("0.01"));
+        Exchange ex = new Exchange("X", List.of(tiny), brokenRandom);
+
+        ex.advance();
+
+        assertEquals(new BigDecimal("0.01"), tiny.getSalesPrice());
+    }
+
+    @Test
+    void constructor_ignoresNullStocksInInputList() {
+        Stock eqnr = new Stock("EQNR", "Equinor", new BigDecimal("100.00"));
+
+        List<Stock> input = new java.util.ArrayList<>();
+        input.add(eqnr);
+        input.add(null);
+
+        Exchange exchange = new Exchange("OSE", input, new Random(0));
+
+        assertEquals(1, exchange.getStocks().size());
+        assertTrue(exchange.hasStock("EQNR"));
+    }
 }

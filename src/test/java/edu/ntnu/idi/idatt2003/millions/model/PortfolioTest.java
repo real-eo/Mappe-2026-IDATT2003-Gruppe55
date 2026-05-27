@@ -72,4 +72,29 @@ class PortfolioTest {
     void removeNull_returnsFalse() {
         assertFalse(portfolio.remove(null));
     }
+    @Test
+    void containsReturnsFalse_whenShareIsNull() {
+        assertFalse(portfolio.contains(null));
+    }
+
+    @Test
+    void findByStock_returnsEmpty_whenStockIsNull() {
+        assertTrue(portfolio.findByStock(null).isEmpty());
+    }
+
+    @Test
+    void remove_returnsFalse_whenShareNotPresent() {
+        assertFalse(portfolio.remove(share));
+    }
+
+    @Test
+    void remove_matchesBySymbol_notByInstance() {
+        portfolio.add(share);
+        Share sameSymbolDifferentInstance =
+                new Share(new Stock("EQNR", "Equinor ASA", new BigDecimal("300")),
+                        new BigDecimal("1"), new BigDecimal("300"));
+
+        assertTrue(portfolio.remove(sameSymbolDifferentInstance));
+        assertTrue(portfolio.getShares().isEmpty());
+    }
 }
