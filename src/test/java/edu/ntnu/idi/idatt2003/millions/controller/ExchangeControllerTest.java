@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
 import edu.ntnu.idi.idatt2003.millions.model.*;
+import edu.ntnu.idi.idatt2003.millions.view.FxTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -152,6 +153,23 @@ class ExchangeControllerTest {
     }
 
     @Test
+    void constructor_withNullSavedHistory_startsWithCurrentSnapshot() {
+        ExchangeController c = new ExchangeController(exchange, player, null);
+
+        assertEquals(1, c.getNetWorthHistory().size());
+        assertEquals(exchange.getWeek(), c.getNetWorthHistory().get(0).week());
+        assertEquals(player.getNetWorth(), c.getNetWorthHistory().get(0).netWorth());
+    }
+
+    @Test
+    void findStocks_withNoPriceBounds_returnsBaseSearchResult() {
+        List<Stock> fromBase = controller.findStocks("A");
+        List<Stock> withNullBounds = controller.findStocks("A", null, null);
+
+        assertEquals(fromBase, withNullBounds);
+    }
+
+    @Test
     void getExchange_and_getPlayer_returnProvidedInstances() {
         assertSame(exchange, controller.getExchange());
         assertSame(player, controller.getPlayer());
@@ -164,5 +182,18 @@ class ExchangeControllerTest {
         Share share = controller.getOwnedShare(s).orElseThrow();
         controller.sell(share, share.getQuantity());
         assertTrue(controller.getPortfolioShares().isEmpty());
+    }
+
+    @Test
+    void saveGame_withNullCallbacks_doesNotThrow() {
+        FxTestUtils.initToolkit();
+        assertDoesNotThrow(() -> controller.saveGame(null, null));
+    }
+
+    @Test
+    void saveGame_acceptsCallbacks_withoutThrowing() {
+        FxTestUtils.initToolkit();
+
+        assertDoesNotThrow(() -> controller.saveGame(id -> { }, error -> { }));
     }
 }

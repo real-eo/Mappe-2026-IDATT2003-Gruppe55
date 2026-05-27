@@ -132,6 +132,8 @@ public class Stock {
 
         BigDecimal latest = prices.get(prices.size() - 1);
         BigDecimal previous = prices.get(prices.size() - 2);
+
+        // ! EFFECTIVELY UNREACHABLE: Missing test coverage as `previous` should never be zero since addPrice() enforces positive prices
         if (previous.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
