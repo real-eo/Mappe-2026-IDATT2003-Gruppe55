@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
 import edu.ntnu.idi.idatt2003.millions.model.*;
+import edu.ntnu.idi.idatt2003.millions.view.FxTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -181,5 +182,18 @@ class ExchangeControllerTest {
         Share share = controller.getOwnedShare(s).orElseThrow();
         controller.sell(share, share.getQuantity());
         assertTrue(controller.getPortfolioShares().isEmpty());
+    }
+
+    @Test
+    void saveGame_withNullCallbacks_doesNotThrow() {
+        FxTestUtils.initToolkit();
+        assertDoesNotThrow(() -> controller.saveGame(null, null));
+    }
+
+    @Test
+    void saveGame_acceptsCallbacks_withoutThrowing() {
+        FxTestUtils.initToolkit();
+
+        assertDoesNotThrow(() -> controller.saveGame(id -> { }, error -> { }));
     }
 }

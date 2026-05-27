@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt2003.millions.view;
 
+import edu.ntnu.idi.idatt2003.millions.controller.ExchangeController;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
@@ -8,18 +9,23 @@ import edu.ntnu.idi.idatt2003.millions.view.FxTestUtils;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class MainTest {
 
@@ -141,5 +147,125 @@ class MainTest {
                 throw new RuntimeException(exception);
             }
         });
+    }
+
+    @Test
+    void showStartPage_and_showLoadPage_clearActiveController() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                Main main = new Main();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(new javafx.scene.layout.StackPane(), 800, 600));
+
+                Field activeControllerField = Main.class.getDeclaredField("activeController");
+                activeControllerField.setAccessible(true);
+                activeControllerField.set(main, new RecordingExchangeController());
+
+                Method showStartPage = Main.class.getDeclaredMethod("showStartPage", Stage.class);
+                showStartPage.setAccessible(true);
+                showStartPage.invoke(main, stage);
+                assertTrue(activeControllerField.get(main) == null);
+
+                activeControllerField.set(main, new RecordingExchangeController());
+                Method showLoadPage = Main.class.getDeclaredMethod("showLoadPage", Stage.class);
+                showLoadPage.setAccessible(true);
+                showLoadPage.invoke(main, stage);
+                assertTrue(activeControllerField.get(main) == null);
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    @Test
+    void showDashboard_setsActiveController_andAppliesDashboardStylesheet() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                Main main = new Main();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(new javafx.scene.layout.StackPane(), 800, 600));
+                ExchangeController controller = new RecordingExchangeController();
+
+                Method showDashboard = Main.class.getDeclaredMethod("showDashboard", Stage.class, ExchangeController.class);
+                showDashboard.setAccessible(true);
+                showDashboard.invoke(main, stage, controller);
+
+                Field activeControllerField = Main.class.getDeclaredField("activeController");
+                activeControllerField.setAccessible(true);
+
+                assertSame(controller, activeControllerField.get(main));
+                assertTrue(stage.getScene().getStylesheets().stream().anyMatch(s -> s.contains("dashboard.css")));
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    @Test
+    void configureAutoSave_consumesCloseEvent_onlyWhenControllerPresent() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                Main main = new Main();
+                Stage stage = new Stage();
+
+                Method configureAutoSave = Main.class.getDeclaredMethod("configureAutoSave", Stage.class);
+                configureAutoSave.setAccessible(true);
+                configureAutoSave.invoke(main, stage);
+
+                Field activeControllerField = Main.class.getDeclaredField("activeController");
+                activeControllerField.setAccessible(true);
+
+                WindowEvent withoutController = new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST);
+                stage.getOnCloseRequest().handle(withoutController);
+                assertFalse(withoutController.isConsumed());
+
+                RecordingExchangeController recording = new RecordingExchangeController();
+                activeControllerField.set(main, recording);
+                WindowEvent withController = new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST);
+                stage.getOnCloseRequest().handle(withController);
+
+                assertTrue(withController.isConsumed());
+                assertTrue(recording.saveInvoked.get());
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    @Test
+    void autoSaveAndExit_handlesNullController_andInvokesSaveWhenPresent() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                Main main = new Main();
+                Method autoSaveAndExit = Main.class.getDeclaredMethod("autoSaveAndExit");
+                autoSaveAndExit.setAccessible(true);
+
+                Field activeControllerField = Main.class.getDeclaredField("activeController");
+                activeControllerField.setAccessible(true);
+
+                RecordingExchangeController recording = new RecordingExchangeController();
+                activeControllerField.set(main, recording);
+                autoSaveAndExit.invoke(main);
+                assertTrue(recording.saveInvoked.get());
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    private static final class RecordingExchangeController extends ExchangeController {
+        private final AtomicBoolean saveInvoked = new AtomicBoolean(false);
+
+        private RecordingExchangeController() {
+            super(
+                new Exchange("OSE", List.of(new Stock("EQNR", "Equinor", new BigDecimal("100.00")))),
+                new Player("Recorder", new BigDecimal("1000.00"))
+            );
+        }
+
+        @Override
+        public void saveGame(java.util.function.Consumer<Long> onSuccess, java.util.function.Consumer<String> onFailure) {
+            saveInvoked.set(true);
+        }
     }
 }
