@@ -144,16 +144,6 @@ class TradeStockDialogTest {
         }
 
         @Override
-        protected String errorTitle() {
-            return "Trade";
-        }
-
-        @Override
-        protected String errorHeader() {
-            return "Trade failed";
-        }
-
-        @Override
         protected void handleConfirm() {
             confirmCalls.incrementAndGet();
         }

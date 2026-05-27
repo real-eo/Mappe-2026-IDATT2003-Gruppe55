@@ -10,8 +10,6 @@ import java.util.function.UnaryOperator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -47,6 +45,10 @@ public abstract class TradeStockDialog extends MillionsDialog {
      * Label displaying the computed trade total.
      */
     protected Label totalValue;
+    /**
+     * Inline error label shown at the bottom of the dialog.
+     */
+    protected Label errorLabel;
 
     /**
      * Creates a trade dialog for the given controller and stock.
@@ -126,12 +128,22 @@ public abstract class TradeStockDialog extends MillionsDialog {
 
         actions.getChildren().addAll(cancel, confirm);
 
-        content.getChildren().addAll(header, chart, pricePanel, sharesLabel, quantityBox, totalRow, actions);
+        errorLabel = new Label();
+        errorLabel.getStyleClass().add("trade-error-label");
+        errorLabel.setWrapText(true);
+        errorLabel.setMaxWidth(Double.MAX_VALUE);
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+
+        content.getChildren().addAll(header, chart, pricePanel, sharesLabel, quantityBox, totalRow, actions, errorLabel);
 
         cancel.setOnAction(event -> close());
         confirm.setOnAction(event -> handleConfirm());
         quantityField.setOnAction(event -> handleConfirm());
-        quantityField.textProperty().addListener((obs, oldValue, newValue) -> updateTotals());
+        quantityField.textProperty().addListener((obs, oldValue, newValue) -> {
+            clearError();
+            updateTotals();
+        });
         updateTotals();
 
         return content;
@@ -159,20 +171,6 @@ public abstract class TradeStockDialog extends MillionsDialog {
     protected abstract String confirmButtonText();
 
     /**
-     * Returns the alert title for validation or trade errors.
-     *
-     * @return error dialog title
-     */
-    protected abstract String errorTitle();
-
-    /**
-     * Returns the alert header for validation or trade errors.
-     *
-     * @return error dialog header
-     */
-    protected abstract String errorHeader();
-
-    /**
      * Validates user input and executes the trade when the dialog is confirmed.
      */
     protected abstract void handleConfirm();
@@ -183,22 +181,19 @@ public abstract class TradeStockDialog extends MillionsDialog {
     protected abstract void updateTotals();
 
     /**
-     * Shows a styled validation error alert.
+     * Shows an inline validation error at the bottom of the dialog.
      *
      * @param message validation message shown to the user
      */
     protected void showValidationError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(errorTitle());
-        alert.setHeaderText(errorHeader());
-        alert.setContentText(message);
-        DialogPane pane = alert.getDialogPane();
-        var url = getClass().getResource("/styles/dashboard.css");
-        if (url != null) {
-            pane.getStylesheets().add(url.toExternalForm());
-        }
-        pane.getStyleClass().addAll("millions-alert", "millions-error-alert");
-        alert.showAndWait();
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearError() {
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     /**

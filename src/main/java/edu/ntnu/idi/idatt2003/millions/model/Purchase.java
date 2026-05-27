@@ -36,12 +36,12 @@ public class Purchase extends Transaction {
     public void commit(Player player) throws MillionsException {
         if (isCommitted()) {
             throw new TransactionAlreadyCommittedException(
-                    "Purchase transaction has already been committed");
+                    "This purchase has already been processed.");
         }
         BigDecimal total = getCalculator().getTotal();
         if (player.getMoney().compareTo(total) < 0) {
             throw new InsufficientFundsException(
-                    "Insufficient funds: required " + total + " but player has " + player.getMoney());
+                    "You don't have enough funds for this purchase.");
         }
         player.withdrawMoney(total);
         player.getPortfolio().add(getShare());

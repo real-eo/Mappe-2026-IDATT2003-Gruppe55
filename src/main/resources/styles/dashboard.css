@@ -698,6 +698,12 @@
     -fx-font-size: 13.5;
 }
 
+.trade-error-label {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 11;
+    -fx-wrap-text: true;
+}
+
 /* Styled Alerts and error dialogs to match the app theme */
 .dialog-pane.millions-alert {
     -fx-background-color: #0f172a;
