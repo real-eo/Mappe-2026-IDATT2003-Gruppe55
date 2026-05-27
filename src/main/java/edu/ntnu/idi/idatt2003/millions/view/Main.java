@@ -39,6 +39,11 @@ public class Main extends Application {
     public Main() {
     }
 
+    /**
+     * Initialises the primary stage and shows the start page.
+     *
+     * @param stage the primary stage provided by the JavaFX runtime
+     */
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(new StartPage().createRoot(null, null), 1024, 768);
