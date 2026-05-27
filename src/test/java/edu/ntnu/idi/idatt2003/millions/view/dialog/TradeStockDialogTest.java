@@ -94,6 +94,21 @@ class TradeStockDialogTest {
     }
 
     @Test
+    void showValidationError_makesErrorLabelVisibleAndSetsText() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            DummyTradeStockDialog dialog = new DummyTradeStockDialog(newController(),
+                    new Stock("EQNR", "Equinor", new BigDecimal("100.00")));
+            dialog.buildContent();
+
+            dialog.showValidationError("test error");
+
+            assertTrue(dialog.errorLabel.isVisible());
+            assertTrue(dialog.errorLabel.isManaged());
+            assertEquals("test error", dialog.errorLabel.getText());
+        });
+    }
+
+    @Test
     void formatPrice_formatsAsUsd() {
         assertEquals("$1,234.50", TradeStockDialog.formatPrice(new BigDecimal("1234.5")));
     }

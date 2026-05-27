@@ -36,6 +36,32 @@ class StockPriceChartTest {
     }
 
     @Test
+    void setPrices_withAllEqualPrices_doesNotThrow() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            StockPriceChart chart = new StockPriceChart();
+            chart.resize(600, 240);
+            chart.setPrices(List.of(
+                new BigDecimal("100.00"),
+                new BigDecimal("100.00"),
+                new BigDecimal("100.00")
+            ));
+        });
+    }
+
+    @Test
+    void setPrices_withMoreThan20Prices_doesNotThrow() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            StockPriceChart chart = new StockPriceChart();
+            chart.resize(600, 240);
+            java.util.List<BigDecimal> prices = new java.util.ArrayList<>();
+            for (int i = 0; i < 21; i++) {
+                prices.add(new BigDecimal(100 + i));
+            }
+            chart.setPrices(prices);
+        });
+    }
+
+    @Test
     void formatPrice_formatsThousandsAndDecimals() throws Exception {
         Method formatPrice = StockPriceChart.class.getDeclaredMethod("formatPrice", double.class);
         formatPrice.setAccessible(true);

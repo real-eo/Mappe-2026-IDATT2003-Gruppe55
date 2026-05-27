@@ -14,6 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MillionsDialogTest {
 
     @Test
+    void canShow_defaultImplementation_returnsTrue() {
+        MillionsDialog dialog = new MillionsDialog() {
+            @Override
+            protected Node buildContent() {
+                return new StackPane();
+            }
+        };
+        assertTrue(dialog.canShow());
+    }
+
+    @Test
     void show_returnsEarly_whenCanShowIsFalse() {
         FxTestUtils.runOnFxThreadAndWait(() -> {
             MillionsDialog dialog = new MillionsDialog() {
