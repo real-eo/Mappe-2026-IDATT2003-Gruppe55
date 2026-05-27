@@ -152,6 +152,23 @@ class ExchangeControllerTest {
     }
 
     @Test
+    void constructor_withNullSavedHistory_startsWithCurrentSnapshot() {
+        ExchangeController c = new ExchangeController(exchange, player, null);
+
+        assertEquals(1, c.getNetWorthHistory().size());
+        assertEquals(exchange.getWeek(), c.getNetWorthHistory().get(0).week());
+        assertEquals(player.getNetWorth(), c.getNetWorthHistory().get(0).netWorth());
+    }
+
+    @Test
+    void findStocks_withNoPriceBounds_returnsBaseSearchResult() {
+        List<Stock> fromBase = controller.findStocks("A");
+        List<Stock> withNullBounds = controller.findStocks("A", null, null);
+
+        assertEquals(fromBase, withNullBounds);
+    }
+
+    @Test
     void getExchange_and_getPlayer_returnProvidedInstances() {
         assertSame(exchange, controller.getExchange());
         assertSame(player, controller.getPlayer());
