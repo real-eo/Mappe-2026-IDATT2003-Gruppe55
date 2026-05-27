@@ -37,3 +37,4 @@ maven-status
 *.tmp
 ~*.*
 *.md
+!README.md
