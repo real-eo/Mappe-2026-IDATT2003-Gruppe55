@@ -16,11 +16,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,9 +81,10 @@ class MainTest {
                 Stage stage = new Stage();
                 stage.setScene(new Scene(new javafx.scene.layout.StackPane(), 800, 600));
 
-                Method launchDashboard = Main.class.getDeclaredMethod("launchDashboard", Stage.class, String.class, BigDecimal.class);
+                Method launchDashboard = Main.class.getDeclaredMethod(
+                        "launchDashboard", Stage.class, String.class, BigDecimal.class, Path.class);
                 launchDashboard.setAccessible(true);
-                launchDashboard.invoke(main, stage, "Alice", new BigDecimal("10000.00"));
+                launchDashboard.invoke(main, stage, "Alice", new BigDecimal("10000.00"), null);
 
                 Parent root = stage.getScene().getRoot();
                 assertNotNull(root);
@@ -88,6 +93,66 @@ class MainTest {
                 throw new RuntimeException(exception);
             }
         });
+    }
+
+    @Test
+    void launchDashboard_withCustomCsvPath_buildsDashboardScene() {
+        FxTestUtils.runOnFxThreadAndWait(() -> {
+            try {
+                Main main = new Main();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(new javafx.scene.layout.StackPane(), 800, 600));
+
+                Path tempCsv = Files.createTempFile("test-stocks-", ".csv");
+                Files.writeString(tempCsv, "TST,Test Corp,99.00\n", StandardCharsets.UTF_8);
+
+                Method launchDashboard = Main.class.getDeclaredMethod(
+                        "launchDashboard", Stage.class, String.class, BigDecimal.class, Path.class);
+                launchDashboard.setAccessible(true);
+                launchDashboard.invoke(main, stage, "Alice", new BigDecimal("10000.00"), tempCsv);
+
+                assertNotNull(stage.getScene().getRoot());
+                assertTrue(stage.getScene().getStylesheets().stream().anyMatch(s -> s.contains("dashboard.css")));
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    @Test
+    void resolveExchangeName_returnsSnP500_forNullPath() throws Exception {
+        Method resolveExchangeName = Main.class.getDeclaredMethod("resolveExchangeName", Path.class);
+        resolveExchangeName.setAccessible(true);
+
+        String result = (String) resolveExchangeName.invoke(null, (Object) null);
+        assertEquals("S&P 500", result);
+    }
+
+    @Test
+    void resolveExchangeName_stripsExtension_forCsvFile() throws Exception {
+        Method resolveExchangeName = Main.class.getDeclaredMethod("resolveExchangeName", Path.class);
+        resolveExchangeName.setAccessible(true);
+
+        String result = (String) resolveExchangeName.invoke(null, Path.of("mystocks.csv"));
+        assertEquals("mystocks", result);
+    }
+
+    @Test
+    void resolveExchangeName_stripsExtension_caseInsensitive() throws Exception {
+        Method resolveExchangeName = Main.class.getDeclaredMethod("resolveExchangeName", Path.class);
+        resolveExchangeName.setAccessible(true);
+
+        String result = (String) resolveExchangeName.invoke(null, Path.of("data.CSV"));
+        assertEquals("data", result);
+    }
+
+    @Test
+    void resolveExchangeName_returnsFullName_forNonCsvFile() throws Exception {
+        Method resolveExchangeName = Main.class.getDeclaredMethod("resolveExchangeName", Path.class);
+        resolveExchangeName.setAccessible(true);
+
+        String result = (String) resolveExchangeName.invoke(null, Path.of("stocks.txt"));
+        assertEquals("stocks.txt", result);
     }
 
     @Test

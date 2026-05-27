@@ -119,4 +119,42 @@ class StockCsvLoaderTest {
         StockCsvLoader loader = new StockCsvLoader();
         assertThrows(IllegalArgumentException.class, () -> loader.loadFromPath(csv));
     }
+
+    @Test
+    void loadFromPath_returnsEmptyList_whenAllLinesAreComments() throws IOException {
+        Path csv = Files.createTempFile("stocks-all-comments-", ".csv");
+        Files.writeString(csv, "# header\n# another comment\n\n", StandardCharsets.UTF_8);
+
+        List<Stock> stocks = new StockCsvLoader().loadFromPath(csv);
+
+        assertTrue(stocks.isEmpty());
+    }
+
+    @Test
+    void loadFromPath_trimsWhitespace_fromSymbolAndName() throws IOException {
+        Path csv = Files.createTempFile("stocks-whitespace-", ".csv");
+        Files.writeString(csv, "  AAPL  ,  Apple Inc.  ,  150.00  \n", StandardCharsets.UTF_8);
+
+        List<Stock> stocks = new StockCsvLoader().loadFromPath(csv);
+
+        assertEquals(1, stocks.size());
+        assertEquals("AAPL", stocks.get(0).getSymbol());
+        assertEquals("Apple Inc.", stocks.get(0).getCompanyName());
+    }
+
+    @Test
+    void loadFromPath_throwsOnEmptyPrice() throws IOException {
+        Path csv = Files.createTempFile("stocks-empty-price-", ".csv");
+        Files.writeString(csv, "AAPL,Apple Inc.,\n", StandardCharsets.UTF_8);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new StockCsvLoader().loadFromPath(csv));
+    }
+
+    @Test
+    void loadFromPath_throwsOnNonExistentFile() {
+        Path nonExistent = Path.of("does-not-exist-12345.csv");
+        assertThrows(IOException.class,
+                () -> new StockCsvLoader().loadFromPath(nonExistent));
+    }
 }
