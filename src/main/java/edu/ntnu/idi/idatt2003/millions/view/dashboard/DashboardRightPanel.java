@@ -39,6 +39,11 @@ final class DashboardRightPanel {
     private boolean portfolioEmpty;
     private boolean historyEmpty;
 
+    /**
+     * Creates the right panel.
+     *
+     * @param controller the exchange controller used to load portfolio and history data
+     */
     DashboardRightPanel(ExchangeController controller) {
         this.controller = controller;
     }

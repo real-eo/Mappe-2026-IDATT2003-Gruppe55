@@ -12,6 +12,9 @@ import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Canvas-based chart component that renders a stock's price history as a line chart.
+ */
 final class StockPriceChart extends Pane {
 
     private static final double PAD_LEFT = 58;
@@ -26,6 +29,9 @@ final class StockPriceChart extends Pane {
     private final Canvas canvas = new Canvas();
     private List<BigDecimal> prices = List.of();
 
+    /**
+     * Creates an empty chart and binds it to this pane's size.
+     */
     StockPriceChart() {
         canvas.widthProperty().bind(widthProperty());
         canvas.heightProperty().bind(heightProperty());
@@ -34,6 +40,11 @@ final class StockPriceChart extends Pane {
         getChildren().add(canvas);
     }
 
+    /**
+     * Sets the price history to display and redraws the chart.
+     *
+     * @param prices list of historical prices, oldest first
+     */
     void setPrices(List<BigDecimal> prices) {
         this.prices = prices == null ? List.of() : prices;
         draw();

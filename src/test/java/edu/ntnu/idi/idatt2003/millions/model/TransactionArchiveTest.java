@@ -107,4 +107,38 @@ class TransactionArchiveTest {
         // First transaction should be a Purchase committed in week 1
         assertEquals(1, player.getTransactionArchive().getTransactions().get(0).getWeek());
     }
+
+    @Test
+    void getPurchases_and_getSales_returnEmpty_whenNoMatches() {
+        TransactionArchive archive = new TransactionArchive();
+        assertTrue(archive.getPurchases(99).isEmpty());
+        assertTrue(archive.getSales(99).isEmpty());
+    }
+
+    @Test
+    void totalQuantities_areZero_whenArchiveEmpty() {
+        TransactionArchive archive = new TransactionArchive();
+        assertEquals(BigDecimal.ZERO, archive.getTotalPurchasedQuantity());
+        assertEquals(BigDecimal.ZERO, archive.getTotalSoldQuantity());
+    }
+    
+    @Test
+    void getPurchases_ignoresSalesFromSameWeek() {
+        TransactionArchive archive = new TransactionArchive();
+        Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100"));
+
+        archive.add(new Sale(new Share(stock, new BigDecimal("2"), new BigDecimal("100")), 3));
+
+        assertTrue(archive.getPurchases(3).isEmpty());
+    }
+
+    @Test
+    void getSales_ignoresPurchasesFromSameWeek() {
+        TransactionArchive archive = new TransactionArchive();
+        Stock stock = new Stock("EQNR", "Equinor", new BigDecimal("100"));
+
+        archive.add(new Purchase(new Share(stock, new BigDecimal("2"), new BigDecimal("100")), 3));
+
+        assertTrue(archive.getSales(3).isEmpty());
+    }
 }

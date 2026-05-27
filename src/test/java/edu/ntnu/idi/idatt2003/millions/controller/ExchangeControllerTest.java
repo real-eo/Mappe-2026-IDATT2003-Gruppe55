@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
 import edu.ntnu.idi.idatt2003.millions.model.*;
+import edu.ntnu.idi.idatt2003.millions.view.FxTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -152,6 +153,23 @@ class ExchangeControllerTest {
     }
 
     @Test
+    void constructor_withNullSavedHistory_startsWithCurrentSnapshot() {
+        ExchangeController c = new ExchangeController(exchange, player, null);
+
+        assertEquals(1, c.getNetWorthHistory().size());
+        assertEquals(exchange.getWeek(), c.getNetWorthHistory().get(0).week());
+        assertEquals(player.getNetWorth(), c.getNetWorthHistory().get(0).netWorth());
+    }
+
+    @Test
+    void findStocks_withNoPriceBounds_returnsBaseSearchResult() {
+        List<Stock> fromBase = controller.findStocks("A");
+        List<Stock> withNullBounds = controller.findStocks("A", null, null);
+
+        assertEquals(fromBase, withNullBounds);
+    }
+
+    @Test
     void getExchange_and_getPlayer_returnProvidedInstances() {
         assertSame(exchange, controller.getExchange());
         assertSame(player, controller.getPlayer());
@@ -164,5 +182,64 @@ class ExchangeControllerTest {
         Share share = controller.getOwnedShare(s).orElseThrow();
         controller.sell(share, share.getQuantity());
         assertTrue(controller.getPortfolioShares().isEmpty());
+    }
+
+    @Test
+    void saveGame_withNullCallbacks_doesNotThrow() {
+        FxTestUtils.initToolkit();
+        assertDoesNotThrow(() -> controller.saveGame(null, null));
+    }
+
+    @Test
+    void saveGame_acceptsCallbacks_withoutThrowing() {
+        FxTestUtils.initToolkit();
+
+        assertDoesNotThrow(() -> controller.saveGame(id -> { }, error -> { }));
+    }
+
+    @Test
+    void findStocks_withOnlyLowerBound_filtersOutStocksBelowMin() {
+        // A is 100.00, B is 50.00; min = 60 -> only A qualifies
+        List<Stock> results = controller.findStocks("", new BigDecimal("60.00"), null);
+        assertEquals(1, results.size());
+        assertEquals("A", results.get(0).getSymbol());
+    }
+
+    @Test
+    void findStocks_withOnlyUpperBound_filtersOutStocksAboveMax() {
+        // A is 100.00, B is 50.00; max = 60 -> only B qualifies
+        List<Stock> results = controller.findStocks("", null, new BigDecimal("60.00"));
+        assertEquals(1, results.size());
+        assertEquals("B", results.get(0).getSymbol());
+    }
+
+    @Test
+    void findStocks_withBothBoundsOrdered_filtersToMatchingRange() {
+        // A is 100.00, B is 50.00; range [40, 75] -> only B qualifies
+        List<Stock> results = controller.findStocks("", new BigDecimal("40.00"), new BigDecimal("75.00"));
+        assertEquals(1, results.size());
+        assertEquals("B", results.get(0).getSymbol());
+    }
+
+    @Test
+    void getGainers_delegatesToExchange() {
+        Stock up = new Stock("UP", "Up Co", new BigDecimal("100.00"));
+        up.addPrice(new BigDecimal("120.00"));
+        Exchange e = new Exchange("E", List.of(up));
+        ExchangeController c = new ExchangeController(e, player);
+        List<Stock> gainers = c.getGainers(5);
+        assertEquals(1, gainers.size());
+        assertEquals("UP", gainers.get(0).getSymbol());
+    }
+
+    @Test
+    void getLosers_delegatesToExchange() {
+        Stock down = new Stock("DOWN", "Down Co", new BigDecimal("100.00"));
+        down.addPrice(new BigDecimal("80.00"));
+        Exchange e = new Exchange("E", List.of(down));
+        ExchangeController c = new ExchangeController(e, player);
+        List<Stock> losers = c.getLosers(5);
+        assertEquals(1, losers.size());
+        assertEquals("DOWN", losers.get(0).getSymbol());
     }
 }

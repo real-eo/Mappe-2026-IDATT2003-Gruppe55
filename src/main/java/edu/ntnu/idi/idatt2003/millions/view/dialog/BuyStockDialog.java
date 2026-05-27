@@ -10,8 +10,18 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.stage.Window;
 
+/**
+ * Dialog for buying shares of a selected stock.
+ */
 public final class BuyStockDialog extends TradeStockDialog {
 
+    /**
+     * Creates a buy dialog bound to the given controller and stock.
+     *
+     * @param controller the exchange controller used to execute purchases
+     * @param stock the stock that will be purchased
+     * @param onTradeComplete callback invoked after a successful trade (may be null)
+     */
     public BuyStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         super(controller, stock, onTradeComplete);
     }
@@ -29,16 +39,6 @@ public final class BuyStockDialog extends TradeStockDialog {
     @Override
     protected String confirmButtonText() {
         return "Confirm Purchase";
-    }
-
-    @Override
-    protected String errorTitle() {
-        return "Buy Shares";
-    }
-
-    @Override
-    protected String errorHeader() {
-        return "Unable to complete the purchase";
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class BuyStockDialog extends TradeStockDialog {
     protected void handleConfirm() {
         String rawQuantity = quantityField.getText() == null ? "" : quantityField.getText().trim();
         if (rawQuantity.isEmpty()) {
-            showValidationError("Please enter the number of shares to buy.");
+            showValidationError("Enter the number of shares you'd like to buy.");
             return;
         }
 
@@ -69,12 +69,12 @@ public final class BuyStockDialog extends TradeStockDialog {
         try {
             quantity = new BigDecimal(rawQuantity);
         } catch (NumberFormatException exception) {
-            showValidationError("Share quantity must be a valid number.");
+            showValidationError("Please enter a valid number of shares.");
             return;
         }
 
         if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            showValidationError("Share quantity must be greater than zero.");
+            showValidationError("Number of shares must be greater than zero.");
             return;
         }
 

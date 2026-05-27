@@ -16,6 +16,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 
+/**
+ * Top header bar for the dashboard showing player stats and navigation actions.
+ */
 final class DashboardHeader {
 
     private static final BigDecimal DEFAULT_DASHBOARD_AMOUNT = new BigDecimal("10000.00");
@@ -31,12 +34,24 @@ final class DashboardHeader {
     private Label statusBadge;
     private Button profileToggleButton;
 
+    /**
+     * Creates a dashboard header.
+     *
+     * @param controller        the exchange controller providing player and week data
+     * @param onToggleProfile   callback invoked when the profile button is clicked
+     * @param onAdvanceWeek     callback invoked when the next-week button is clicked
+     */
     DashboardHeader(ExchangeController controller, Runnable onToggleProfile, Runnable onAdvanceWeek) {
         this.controller = controller;
         this.onToggleProfile = onToggleProfile;
         this.onAdvanceWeek = onAdvanceWeek;
     }
 
+    /**
+     * Builds and returns the header node.
+     *
+     * @return the header HBox
+     */
     HBox createHeader() {
         HBox header = new HBox(18);
         header.getStyleClass().add("dashboard-header");
@@ -51,6 +66,9 @@ final class DashboardHeader {
         return header;
     }
 
+    /**
+     * Refreshes all displayed values from the controller.
+     */
     void refresh() {
         if (userLabel == null || weekLabel == null || cashValue == null || netWorthValue == null || statusBadge == null) {
             return;
@@ -63,6 +81,11 @@ final class DashboardHeader {
         statusBadge.setText(resolveStatusText());
     }
 
+    /**
+     * Updates the profile toggle button text to reflect the current view.
+     *
+     * @param showingProfile true when the profile view is active
+     */
     void updateProfileToggleLabel(boolean showingProfile) {
         if (profileToggleButton == null) {
             return;

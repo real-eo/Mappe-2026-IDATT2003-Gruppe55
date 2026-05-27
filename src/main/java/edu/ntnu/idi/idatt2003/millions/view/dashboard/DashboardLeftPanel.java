@@ -86,6 +86,12 @@ final class DashboardLeftPanel {
     private Label watchlistTab;
     private Label moversTab;
 
+    /**
+     * Creates the left panel.
+     *
+     * @param controller the exchange controller used to load and filter stocks
+     * @param onRefresh  callback invoked after a trade completes so the panel can refresh
+     */
     DashboardLeftPanel(ExchangeController controller, Runnable onRefresh) {
         this.controller = controller;
         this.onRefresh = onRefresh;

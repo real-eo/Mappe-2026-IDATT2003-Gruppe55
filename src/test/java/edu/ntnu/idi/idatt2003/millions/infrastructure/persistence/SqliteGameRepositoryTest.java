@@ -3,6 +3,8 @@ package edu.ntnu.idi.idatt2003.millions.infrastructure.persistence;
 import edu.ntnu.idi.idatt2003.millions.model.Exchange;
 import edu.ntnu.idi.idatt2003.millions.model.GameState;
 import edu.ntnu.idi.idatt2003.millions.model.Player;
+import edu.ntnu.idi.idatt2003.millions.model.Purchase;
+import edu.ntnu.idi.idatt2003.millions.model.Sale;
 import edu.ntnu.idi.idatt2003.millions.model.Share;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import org.junit.jupiter.api.Test;
@@ -15,10 +17,30 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SqliteGameRepositoryTest {
+
+    @Test
+    void constructor_throws_whenDatabasePathIsNull() {
+        assertThrows(NullPointerException.class, () -> new SqliteGameRepository(null));
+    }
+
+    @Test
+    void save_throws_whenStateIsNull() throws Exception {
+        Path db = Files.createTempFile("millions-null-state-", ".db");
+        try {
+            SqliteGameRepository repository = new SqliteGameRepository(db);
+            repository.initialize();
+
+            assertThrows(NullPointerException.class, () -> repository.save(null));
+        } finally {
+            Files.deleteIfExists(db);
+        }
+    }
 
     @Test
     void save_list_and_load_roundtrip_preservesCoreState() throws Exception {
@@ -116,6 +138,64 @@ class SqliteGameRepositoryTest {
 
             Exception ex = assertThrows(Exception.class, () -> repository.load(1));
             assertTrue(ex.getMessage().contains("Unsupported transaction type"));
+        } finally {
+            Files.deleteIfExists(db);
+        }
+    }
+
+    @Test
+    void save_and_load_roundtrip_preservesTransactionArchive() throws Exception {
+        Path db = Files.createTempFile("millions-tx-archive-", ".db");
+        try {
+            SqliteGameRepository repository = new SqliteGameRepository(db);
+            repository.initialize();
+
+            Stock stock = new Stock("TX", "TX Corp", new BigDecimal("100.00"));
+            Exchange exchange = new Exchange("E", List.of(stock), new Random(0), 1);
+            Player player = new Player("Alice", new BigDecimal("10000.00"));
+
+            exchange.buy(player, "TX", new BigDecimal("2"));
+            exchange.advance();
+            Share ownedShare = player.getPortfolio().findByStock(stock).orElseThrow();
+            exchange.sell(player, ownedShare, new BigDecimal("1"));
+
+            assertEquals(2, player.getTransactionArchive().getTransactions().size());
+
+            long id = repository.save(new GameState(exchange, player));
+            Optional<GameState> loaded = repository.load(id);
+
+            assertTrue(loaded.isPresent());
+            List<?> txs = loaded.get().getPlayer().getTransactionArchive().getTransactions();
+            assertEquals(2, txs.size());
+
+            long purchases = txs.stream().filter(t -> t instanceof Purchase).count();
+            long sales = txs.stream().filter(t -> t instanceof Sale).count();
+            assertEquals(1, purchases);
+            assertEquals(1, sales);
+        } finally {
+            Files.deleteIfExists(db);
+        }
+    }
+
+    @Test
+    void listSaves_usesEpoch_whenCreatedAtIsInvalidOrBlank() throws Exception {
+        Path db = Files.createTempFile("millions-created-at-", ".db");
+        String jdbcUrl = "jdbc:sqlite:" + db.toAbsolutePath();
+        try {
+            SqliteGameRepository repository = new SqliteGameRepository(db);
+            repository.initialize();
+
+            try (Connection c = DriverManager.getConnection(jdbcUrl);
+                 Statement s = c.createStatement()) {
+                s.execute("PRAGMA foreign_keys = ON");
+                s.execute("INSERT INTO game_save (id, label, exchange_name, week, created_at) VALUES (1, 'L1', 'EX', 1, 'not-an-instant')");
+                s.execute("INSERT INTO game_save (id, label, exchange_name, week, created_at) VALUES (2, 'L2', 'EX', 2, '')");
+            }
+
+            List<GameSaveSummary> saves = repository.listSaves();
+
+            assertEquals(2, saves.size());
+            assertTrue(saves.stream().allMatch(s -> Instant.EPOCH.equals(s.createdAt())));
         } finally {
             Files.deleteIfExists(db);
         }

@@ -1,41 +1,77 @@
 package edu.ntnu.idi.idatt2003.millions.view.page;
 
+import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.function.BiConsumer;
+import java.nio.file.Path;
 import java.util.function.UnaryOperator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.FileChooser;
 
 /**
  * Start page UI for the Millions stock trading game.
  */
 public class StartPage {
 
+    /**
+     * Callback invoked when the player starts a new game.
+     */
+    @FunctionalInterface
+    public interface OnStartGame {
+        /**
+         * Called when the player starts a new game.
+         *
+         * @param name        the player's name
+         * @param capital     the starting capital
+         * @param csvPath     path to a custom stock CSV file, or {@code null} to use the default S&amp;P 500
+         */
+        void accept(String name, BigDecimal capital, Path csvPath);
+    }
+
     private static final String TROPHY_PATH = "M2 1 H12 V4 C12 6 10.8 7.5 9 8 V10 H11 V12 H3 V10 H5 V8 C3.2 7.5 2 6 2 4 Z";
     private static final String PLAY_PATH = "M3 2 L12 7 L3 12 Z";
 
-    public StackPane createRoot(BiConsumer<String, BigDecimal> onStart, Runnable onLoad) {
+    private Label errorLabel;
+    private Path selectedCsvPath;
+
+    /**
+     * Creates the start page component.
+     */
+    public StartPage() {
+    }
+
+    /**
+     * Builds the start page root node.
+     *
+     * @param onStart callback triggered when the user starts a new game
+     * @param onLoad  callback triggered when the user chooses to load a game
+     * @return configured root pane for the start page
+     */
+    public StackPane createRoot(OnStartGame onStart, Runnable onLoad) {
         StackPane root = new StackPane();
         root.getStyleClass().add("start-root");
         root.setPadding(new Insets(40));
 
         StackPane card = new StackPane();
         card.getStyleClass().add("start-card");
-        card.setPrefSize(500, 440);
-        card.setMaxSize(500, 440);
+        card.setPrefSize(500, 490);
+        card.setMaxWidth(500);
 
         VBox content = new VBox(16);
         content.setAlignment(Pos.TOP_LEFT);
@@ -77,6 +113,44 @@ public class StartPage {
         currencyIcon.getStyleClass().add("icon-label");
         HBox capitalInput = createInputField(currencyIcon, capitalField);
 
+        Label csvLabel = new Label("Stock Data");
+        csvLabel.getStyleClass().add("field-label");
+
+        ToggleGroup stockSource = new ToggleGroup();
+        RadioButton defaultRadio = new RadioButton("S&P 500 (default)");
+        defaultRadio.setToggleGroup(stockSource);
+        defaultRadio.setSelected(true);
+        defaultRadio.getStyleClass().add("csv-radio");
+        RadioButton customRadio = new RadioButton("Custom CSV");
+        customRadio.setToggleGroup(stockSource);
+        customRadio.getStyleClass().add("csv-radio");
+
+        HBox radioRow = new HBox(16, defaultRadio, customRadio);
+        radioRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label csvFileLabel = new Label("No file chosen");
+        csvFileLabel.getStyleClass().add("info-item");
+
+        Button chooseFileButton = new Button("Browse...");
+        chooseFileButton.getStyleClass().add("secondary-action");
+        chooseFileButton.setPadding(new Insets(4, 10, 4, 10));
+
+        HBox csvFileRow = new HBox(8, chooseFileButton, csvFileLabel);
+        csvFileRow.setAlignment(Pos.CENTER_LEFT);
+        csvFileRow.setVisible(false);
+        csvFileRow.setManaged(false);
+
+        customRadio.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            csvFileRow.setVisible(isSelected);
+            csvFileRow.setManaged(isSelected);
+            if (!isSelected) {
+                selectedCsvPath = null;
+                csvFileLabel.setText("No file chosen");
+            }
+        });
+
+        chooseFileButton.setOnAction(event -> pickCsvFile(chooseFileButton, csvFileLabel));
+
         VBox infoPanel = new VBox(6);
         infoPanel.getStyleClass().add("info-panel");
 
@@ -97,7 +171,12 @@ public class StartPage {
         );
 
         infoPanel.getChildren().addAll(infoHeader, infoList);
-        form.getChildren().addAll(nameLabel, nameInput, capitalLabel, capitalInput, infoPanel);
+        form.getChildren().addAll(
+            nameLabel, nameInput,
+            capitalLabel, capitalInput,
+            csvLabel, radioRow, csvFileRow,
+            infoPanel
+        );
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -114,7 +193,7 @@ public class StartPage {
         if (onStart == null) {
             startButton.setDisable(true);
         } else {
-            Runnable startAction = () -> handleStart(nameField, capitalField, onStart);
+            Runnable startAction = () -> handleStart(nameField, capitalField, customRadio, onStart);
             startButton.setOnAction(event -> startAction.run());
             nameField.setOnAction(event -> startAction.run());
             capitalField.setOnAction(event -> startAction.run());
@@ -132,7 +211,17 @@ public class StartPage {
         VBox actions = new VBox(10);
         actions.getChildren().addAll(startButton, loadButton);
 
-        content.getChildren().addAll(header, form, spacer, actions);
+        errorLabel = new Label();
+        errorLabel.getStyleClass().add("form-error-label");
+        errorLabel.setWrapText(true);
+        errorLabel.setMaxWidth(Double.MAX_VALUE);
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+
+        nameField.textProperty().addListener((obs, o, n) -> clearError());
+        capitalField.textProperty().addListener((obs, o, n) -> clearError());
+
+        content.getChildren().addAll(header, form, spacer, actions, errorLabel);
 
         Button closeButton = new Button("x");
         closeButton.getStyleClass().add("close-button");
@@ -150,17 +239,44 @@ public class StartPage {
         return root;
     }
 
+    private void pickCsvFile(Button browseButton, Label csvFileLabel) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select Stock CSV File");
+        chooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("CSV files", "*.csv")
+        );
+        File file = chooser.showOpenDialog(browseButton.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+        Path path = file.toPath();
+        try {
+            var stocks = new StockCsvLoader().loadFromPath(path);
+            if (stocks.isEmpty()) {
+                showValidationError("The selected CSV file contains no valid stock entries.");
+                return;
+            }
+            selectedCsvPath = path;
+            csvFileLabel.setText(file.getName() + " (" + stocks.size() + " stocks)");
+            clearError();
+        } catch (IOException | IllegalArgumentException ex) {
+            showValidationError("Invalid CSV file: " + ex.getMessage());
+            selectedCsvPath = null;
+            csvFileLabel.setText("No file chosen");
+        }
+    }
+
     private void handleStart(TextField nameField, TextField capitalField,
-                             BiConsumer<String, BigDecimal> onStart) {
+                             RadioButton customRadio, OnStartGame onStart) {
         String name = nameField.getText() == null ? "" : nameField.getText().trim();
         if (name.isEmpty()) {
-            showValidationError("Please enter your name.");
+            showValidationError("Enter your name to get started.");
             return;
         }
 
         String capitalText = capitalField.getText() == null ? "" : capitalField.getText().trim();
         if (capitalText.isEmpty()) {
-            showValidationError("Please enter a starting capital.");
+            showValidationError("Enter a starting capital to get started.");
             return;
         }
 
@@ -168,24 +284,32 @@ public class StartPage {
         try {
             startingMoney = new BigDecimal(capitalText);
         } catch (NumberFormatException exception) {
-            showValidationError("Starting capital must be a valid number.");
+            showValidationError("Please enter a valid amount for your starting capital.");
             return;
         }
 
         if (startingMoney.compareTo(BigDecimal.ZERO) <= 0) {
-            showValidationError("Starting capital must be greater than zero.");
+            showValidationError("Starting capital must be greater than $0.");
             return;
         }
 
-        onStart.accept(name, startingMoney);
+        if (customRadio.isSelected() && selectedCsvPath == null) {
+            showValidationError("Select a CSV file or switch back to the default S&P 500.");
+            return;
+        }
+
+        onStart.accept(name, startingMoney, customRadio.isSelected() ? selectedCsvPath : null);
     }
 
     private void showValidationError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Start Game");
-        alert.setHeaderText("Cannot start the game");
-        alert.setContentText(message);
-        alert.showAndWait();
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearError() {
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     private static HBox createInputField(Node leadingIcon, TextField textField) {
@@ -213,5 +337,4 @@ public class StartPage {
         icon.getStyleClass().add(styleClass);
         return icon;
     }
-
 }

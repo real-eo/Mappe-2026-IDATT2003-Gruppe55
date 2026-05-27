@@ -193,6 +193,7 @@ public class Exchange {
      * @param player   the buying player
      * @param symbol   the stock symbol to buy
      * @param quantity the number of shares to purchase
+        * @return the committed purchase transaction
      * @throws StockNotFoundException if the symbol is not listed
      * @throws MillionsException      if the purchase cannot be committed
      */
@@ -220,6 +221,7 @@ public class Exchange {
      * @param player   the selling player
      * @param share    the share to sell
      * @param quantity the number of shares to sell
+        * @return the committed sale transaction
      * @throws StockNotFoundException if the symbol is not listed
      * @throws ShareNotOwnedException if the player does not own the stock
      * @throws MillionsException      if the sale cannot be committed
@@ -241,6 +243,7 @@ public class Exchange {
      *
      * @param player   the selling player
      * @param share    the share to sell
+        * @return the committed sale transaction
      * @throws StockNotFoundException if the symbol is not listed
      * @throws ShareNotOwnedException if the player does not own the stock
      * @throws MillionsException      if the sale cannot be committed
@@ -254,7 +257,7 @@ public class Exchange {
 
     /**
      * Advances the simulation by one week, incrementing the week counter and updating
-        * each stock's price by a random small change (+/- {@value} % at most).
+        * each stock's price by a random small change (+/- 5% at most).
      */
     public void advance() {
         week++;

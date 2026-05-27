@@ -10,8 +10,18 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.stage.Window;
 
+/**
+ * Dialog for selling owned shares of a selected stock.
+ */
 public final class SellStockDialog extends TradeStockDialog {
 
+    /**
+     * Creates a sell dialog bound to the given controller and stock.
+     *
+     * @param controller the exchange controller used to execute sales
+     * @param stock the stock that will be sold
+     * @param onTradeComplete callback invoked after a successful trade (may be null)
+     */
     public SellStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         super(controller, stock, onTradeComplete);
     }
@@ -29,16 +39,6 @@ public final class SellStockDialog extends TradeStockDialog {
     @Override
     protected String confirmButtonText() {
         return "Confirm Sale";
-    }
-
-    @Override
-    protected String errorTitle() {
-        return "Sell Shares";
-    }
-
-    @Override
-    protected String errorHeader() {
-        return "Unable to complete the sale";
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class SellStockDialog extends TradeStockDialog {
     protected void handleConfirm() {
         String rawQuantity = quantityField.getText() == null ? "" : quantityField.getText().trim();
         if (rawQuantity.isEmpty()) {
-            showValidationError("Please enter the number of shares to sell.");
+            showValidationError("Enter the number of shares you'd like to sell.");
             return;
         }
 
@@ -75,24 +75,24 @@ public final class SellStockDialog extends TradeStockDialog {
         try {
             quantity = new BigDecimal(rawQuantity);
         } catch (NumberFormatException exception) {
-            showValidationError("Share quantity must be a valid number.");
+            showValidationError("Please enter a valid number of shares.");
             return;
         }
 
         if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            showValidationError("Share quantity must be greater than zero.");
+            showValidationError("Number of shares must be greater than zero.");
             return;
         }
 
         Optional<Share> share = controller.getOwnedShare(stock);
         if (share.isEmpty()) {
-            showValidationError("You do not own any shares of " + stock.getSymbol() + ".");
+            showValidationError("You don't own any " + stock.getSymbol() + " shares.");
             return;
         }
 
         if (quantity.compareTo(share.get().getQuantity()) > 0) {
-            showValidationError("You only own " + share.get().getQuantity() + " shares of "
-                + stock.getSymbol() + ".");
+            showValidationError("You only have " + share.get().getQuantity() + " shares of "
+                + stock.getSymbol() + " available to sell.");
             return;
         }
 

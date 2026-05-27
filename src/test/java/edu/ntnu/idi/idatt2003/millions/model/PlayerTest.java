@@ -107,4 +107,68 @@ class PlayerTest {
         assertTrue(s.contains("Alice"));
         assertTrue(s.contains("1000"));
     }
+
+    @Test
+    void getStatus_returnsNovice_initially() {
+        Player player = new Player("Alice", new BigDecimal("1000"));
+        assertEquals(PlayerStatus.NOVICE, player.getStatus());
+    }
+
+    @Test
+    void getStatus_returnsInvestor_whenWeeksAndGrowthMeetThreshold() {
+        Player player = new Player("Alice", new BigDecimal("1000"));
+        Stock stock = new Stock("EQNR", "Equinor", BigDecimal.ONE);
+
+        for (int week = 1; week <= 10; week++) {
+            player.getTransactionArchive()
+                    .add(new Purchase(new Share(stock, BigDecimal.ONE, BigDecimal.ONE), week));
+        }
+        player.addMoney(new BigDecimal("200"));
+
+        assertEquals(PlayerStatus.INVESTOR, player.getStatus());
+    }
+
+    @Test
+    void getStatus_returnsSpeculator_whenWeeksAndGrowthMeetThreshold() {
+        Player player = new Player("Alice", new BigDecimal("1000"));
+        Stock stock = new Stock("EQNR", "Equinor", BigDecimal.ONE);
+
+        for (int week = 1; week <= 20; week++) {
+            player.getTransactionArchive()
+                    .add(new Purchase(new Share(stock, BigDecimal.ONE, BigDecimal.ONE), week));
+        }
+        player.addMoney(new BigDecimal("1000"));
+
+        assertEquals(PlayerStatus.SPECULATOR, player.getStatus());
+    }
+
+    @Test
+    void getStatus_returnsNovice_whenInvestorWeeksReachedButGrowthTooLow() {
+        Player player = new Player("Alice", new BigDecimal("1000"));
+        Stock stock = new Stock("EQNR", "Equinor", BigDecimal.ONE);
+
+        for (int week = 1; week <= 10; week++) {
+            player.getTransactionArchive()
+                .add(new Purchase(new Share(stock, BigDecimal.ONE, BigDecimal.ONE), week));
+        }
+
+        player.addMoney(new BigDecimal("199"));
+
+        assertEquals(PlayerStatus.NOVICE, player.getStatus());
+    }
+
+    @Test
+    void getStatus_returnsInvestor_whenSpeculatorWeeksReachedButGrowthTooLowForSpeculator() {
+        Player player = new Player("Alice", new BigDecimal("1000"));
+        Stock stock = new Stock("EQNR", "Equinor", BigDecimal.ONE);
+
+        for (int week = 1; week <= 20; week++) {
+            player.getTransactionArchive()
+                .add(new Purchase(new Share(stock, BigDecimal.ONE, BigDecimal.ONE), week));
+        }
+
+        player.addMoney(new BigDecimal("999"));
+
+        assertEquals(PlayerStatus.INVESTOR, player.getStatus());
+    }
 }

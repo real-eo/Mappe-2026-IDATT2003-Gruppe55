@@ -2,6 +2,9 @@ package edu.ntnu.idi.idatt2003.millions.view.dashboard;
 
 import javafx.scene.shape.SVGPath;
 
+/**
+ * SVG path constants and factory method for dashboard icons.
+ */
 final class DashboardIcons {
 
     static final double ICON_BASE_SIZE = 24.0;
@@ -19,6 +22,14 @@ final class DashboardIcons {
     private DashboardIcons() {
     }
 
+    /**
+     * Creates a scaled SVGPath icon with the given style class.
+     *
+     * @param path       the SVG path data
+     * @param styleClass CSS class to apply for colour
+     * @param size       target size in pixels (scaled from {@link #ICON_BASE_SIZE})
+     * @return configured SVGPath node
+     */
     static SVGPath createIcon(String path, String styleClass, double size) {
         SVGPath icon = new SVGPath();
         icon.setContent(path);

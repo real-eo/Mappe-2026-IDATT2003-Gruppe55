@@ -121,4 +121,17 @@ class StockTest {
     void getPrices_delegatesToGetHistoricalPrices() {
         assertEquals(stock.getHistoricalPrices(), stock.getPrices());
     }
+
+    @Test
+    void getLatestPriceChangePercent_returnsZero_whenOnlyOnePriceExists() {
+        assertEquals(BigDecimal.ZERO, stock.getLatestPriceChangePercent());
+    }
+
+    @Test
+    void toString_containsSymbolCompanyAndPrice() {
+        String text = stock.toString();
+        assertTrue(text.contains("EQNR"));
+        assertTrue(text.contains("Equinor"));
+        assertTrue(text.contains("100.00"));
+    }
 }

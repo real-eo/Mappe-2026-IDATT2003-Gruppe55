@@ -20,7 +20,6 @@ public class Sale extends Transaction {
      *
      * @param share      the share to sell
      * @param week       the week number
-     * @param calculator the proceeds calculator for this sale
      */
     public Sale(Share share, int week) {
         super(share, week, new SaleCalculator(share));
@@ -37,11 +36,11 @@ public class Sale extends Transaction {
     public void commit(Player player) throws MillionsException {
         if (isCommitted()) {
             throw new TransactionAlreadyCommittedException(
-                    "Sale transaction has already been committed");
+                    "This sale has already been processed.");
         }
         if (!player.getPortfolio().contains(getShare())) {
             throw new ShareNotOwnedException(
-                    "Player does not own stock: " + getShare().getStock().getSymbol());
+                    "You don't own any shares of " + getShare().getStock().getSymbol() + ".");
         }
         BigDecimal total = getCalculator().getTotal();
         player.addMoney(total);
