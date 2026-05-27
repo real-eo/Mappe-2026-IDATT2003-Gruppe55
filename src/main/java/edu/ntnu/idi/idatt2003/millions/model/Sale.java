@@ -20,7 +20,6 @@ public class Sale extends Transaction {
      *
      * @param share      the share to sell
      * @param week       the week number
-     * @param calculator the proceeds calculator for this sale
      */
     public Sale(Share share, int week) {
         super(share, week, new SaleCalculator(share));

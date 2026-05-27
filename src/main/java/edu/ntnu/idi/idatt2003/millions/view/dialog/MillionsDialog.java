@@ -11,12 +11,29 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
+/**
+ * Base class for modal dialogs used in the Millions UI.
+ */
 public abstract class MillionsDialog {
 
     private static final String STYLESHEET_PATH = "/styles/dashboard.css";
 
+    /**
+     * Backing stage for this dialog instance.
+     */
     protected Stage stage;
 
+    /**
+     * Creates a dialog instance.
+     */
+    protected MillionsDialog() {
+    }
+
+    /**
+     * Shows the dialog as a modal window.
+     *
+     * @param owner the owner window, or null to show as standalone
+     */
     public void show(Window owner) {
         if (!canShow()) {
             return;
@@ -49,12 +66,25 @@ public abstract class MillionsDialog {
         stage.showAndWait();
     }
 
+    /**
+     * Builds the dialog's content node.
+     *
+     * @return root content node for the dialog card
+     */
     protected abstract Node buildContent();
 
+    /**
+     * Closes the dialog window.
+     */
     protected void close() {
         stage.close();
     }
 
+    /**
+     * Indicates whether the dialog can be shown in its current state.
+     *
+     * @return true if dialog can be shown
+     */
     protected boolean canShow() {
         return true;
     }

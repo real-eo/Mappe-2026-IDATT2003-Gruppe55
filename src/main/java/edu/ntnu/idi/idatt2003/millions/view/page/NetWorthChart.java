@@ -12,6 +12,9 @@ import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Canvas-based chart component for rendering weekly net worth history.
+ */
 public class NetWorthChart extends Pane {
 
     private static final double PAD_LEFT = 72;
@@ -27,6 +30,9 @@ public class NetWorthChart extends Pane {
     private final Canvas canvas = new Canvas();
     private List<NetWorthSnapshot> data = List.of();
 
+    /**
+     * Creates an empty chart and binds it to this pane's size.
+     */
     public NetWorthChart() {
         canvas.widthProperty().bind(widthProperty());
         canvas.heightProperty().bind(heightProperty());
@@ -35,6 +41,11 @@ public class NetWorthChart extends Pane {
         getChildren().add(canvas);
     }
 
+    /**
+     * Sets chart data and redraws the visualization.
+     *
+     * @param snapshots weekly net worth snapshots to plot
+     */
     public void setData(List<NetWorthSnapshot> snapshots) {
         data = snapshots == null ? List.of() : snapshots;
         draw();

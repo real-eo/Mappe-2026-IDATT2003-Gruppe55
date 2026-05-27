@@ -32,6 +32,12 @@ public class Main extends Application {
 
     private ExchangeController activeController;
 
+    /**
+     * Creates the JavaFX application instance.
+     */
+    public Main() {
+    }
+
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(new StartPage().createRoot(null, null), 1024, 768);
@@ -43,6 +49,11 @@ public class Main extends Application {
         showStartPage(stage);
     }
 
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

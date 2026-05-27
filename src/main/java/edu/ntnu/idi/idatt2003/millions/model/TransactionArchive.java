@@ -24,6 +24,7 @@ public class TransactionArchive {
      * Adds a committed transaction to the archive.
      *
      * @param transaction the transaction to archive (must not be null)
+     * @return true if the transaction was added
      * @throws IllegalArgumentException if transaction is null
      */
     public boolean add(Transaction transaction) {

@@ -23,6 +23,7 @@ public class Portfolio {
      * Adds a share to the portfolio.
      *
      * @param share the share to add (must not be null)
+     * @return true if the share was added
      * @throws IllegalArgumentException if share is null
      */
     public boolean add(Share share) {

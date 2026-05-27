@@ -21,15 +21,40 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+/**
+ * Base dialog for trade operations that share quantity input and total calculation UI.
+ */
 public abstract class TradeStockDialog extends MillionsDialog {
 
+    /**
+     * Controller used to execute and evaluate trade operations.
+     */
     protected final ExchangeController controller;
+    /**
+     * Stock currently displayed in the dialog.
+     */
     protected final Stock stock;
+    /**
+     * Callback executed after a successful trade.
+     */
     protected final Runnable onTradeComplete;
 
+    /**
+     * Input field for user-entered share quantity.
+     */
     protected TextField quantityField;
+    /**
+     * Label displaying the computed trade total.
+     */
     protected Label totalValue;
 
+    /**
+     * Creates a trade dialog for the given controller and stock.
+     *
+     * @param controller the exchange controller used to calculate and execute trades
+     * @param stock the stock shown in the dialog
+     * @param onTradeComplete callback invoked after a successful trade (may be null)
+     */
     protected TradeStockDialog(ExchangeController controller, Stock stock, Runnable onTradeComplete) {
         this.controller = controller;
         this.stock = stock;
@@ -112,20 +137,56 @@ public abstract class TradeStockDialog extends MillionsDialog {
         return content;
     }
 
+    /**
+     * Returns the title shown at the top of the dialog.
+     *
+     * @return dialog title text
+     */
     protected abstract String dialogTitle();
 
+    /**
+     * Returns the label used for the total row.
+     *
+     * @return total row label text
+     */
     protected abstract String totalRowLabel();
 
+    /**
+     * Returns the text used for the primary confirmation button.
+     *
+     * @return confirmation button text
+     */
     protected abstract String confirmButtonText();
 
+    /**
+     * Returns the alert title for validation or trade errors.
+     *
+     * @return error dialog title
+     */
     protected abstract String errorTitle();
 
+    /**
+     * Returns the alert header for validation or trade errors.
+     *
+     * @return error dialog header
+     */
     protected abstract String errorHeader();
 
+    /**
+     * Validates user input and executes the trade when the dialog is confirmed.
+     */
     protected abstract void handleConfirm();
 
+    /**
+     * Recalculates and updates totals shown in the dialog based on current input.
+     */
     protected abstract void updateTotals();
 
+    /**
+     * Shows a styled validation error alert.
+     *
+     * @param message validation message shown to the user
+     */
     protected void showValidationError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(errorTitle());
@@ -140,6 +201,11 @@ public abstract class TradeStockDialog extends MillionsDialog {
         alert.showAndWait();
     }
 
+    /**
+     * Creates a text formatter filter that only allows numeric quantity input.
+     *
+     * @return change filter for quantity fields
+     */
     protected static UnaryOperator<TextFormatter.Change> numericFilter() {
         return change -> {
             String nextText = change.getControlNewText();
@@ -147,6 +213,12 @@ public abstract class TradeStockDialog extends MillionsDialog {
         };
     }
 
+    /**
+     * Parses user-entered quantity text to a BigDecimal.
+     *
+     * @param rawQuantity quantity text from UI input
+     * @return parsed quantity, or null when input is blank/invalid
+     */
     protected static BigDecimal parseQuantity(String rawQuantity) {
         if (rawQuantity == null) {
             return null;
@@ -162,6 +234,12 @@ public abstract class TradeStockDialog extends MillionsDialog {
         }
     }
 
+    /**
+     * Formats a price value for display with two decimals and dollar sign.
+     *
+     * @param price price to format
+     * @return formatted price string
+     */
     protected static String formatPrice(BigDecimal price) {
         DecimalFormat format = new DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.US));
         return "$" + format.format(price);
