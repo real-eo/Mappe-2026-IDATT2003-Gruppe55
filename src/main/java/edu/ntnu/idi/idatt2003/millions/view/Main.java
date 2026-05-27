@@ -13,6 +13,7 @@ import edu.ntnu.idi.idatt2003.millions.view.page.StartPage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -70,7 +71,7 @@ public class Main extends Application {
         activeController = null;
         StartPage startPage = new StartPage();
         Parent root = startPage.createRoot(
-            (name, startingMoney) -> launchDashboard(stage, name, startingMoney),
+            (name, startingMoney, csvPath) -> launchDashboard(stage, name, startingMoney, csvPath),
             () -> showLoadPage(stage)
         );
         Scene scene = stage.getScene();
@@ -102,7 +103,7 @@ public class Main extends Application {
         stage.setMaximized(true);
     }
 
-    private void launchDashboard(Stage stage, String name, BigDecimal startingMoney) {
+    private void launchDashboard(Stage stage, String name, BigDecimal startingMoney, Path csvPath) {
         Player player;
         try {
             player = new Player(name, startingMoney);
@@ -114,15 +115,30 @@ public class Main extends Application {
         List<Stock> stocks;
         StockCsvLoader loader = new StockCsvLoader();
         try {
-            stocks = loader.loadFromResource(STOCK_RESOURCE);
+            if (csvPath != null) {
+                stocks = loader.loadFromPath(csvPath);
+            } else {
+                stocks = loader.loadFromResource(STOCK_RESOURCE);
+            }
         } catch (IOException exception) {
             showError("Failed to load stock data: " + exception.getMessage());
             return;
         }
 
-        Exchange exchange = new Exchange("S&P 500", stocks);
+        String exchangeName = resolveExchangeName(csvPath);
+        Exchange exchange = new Exchange(exchangeName, stocks);
         ExchangeController controller = new ExchangeController(exchange, player);
         showDashboard(stage, controller);
+    }
+
+    private static String resolveExchangeName(Path csvPath) {
+        if (csvPath == null) {
+            return "S&P 500";
+        }
+        String fileName = csvPath.getFileName().toString();
+        return fileName.toLowerCase().endsWith(".csv")
+            ? fileName.substring(0, fileName.length() - 4)
+            : fileName;
     }
 
     private void launchDashboard(Stage stage, GameState state) {
