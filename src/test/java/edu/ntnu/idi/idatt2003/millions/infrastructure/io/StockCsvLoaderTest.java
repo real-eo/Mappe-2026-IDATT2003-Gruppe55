@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.infrastructure.io;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.io.StockCsvLoader;
 import edu.ntnu.idi.idatt2003.millions.model.Stock;
@@ -68,5 +68,31 @@ class StockCsvLoaderTest {
 
         assertTrue(stocks.size() > 100);
     }
-}
 
+    @Test
+    void loadFromPath_throwsOnNullPath() {
+        StockCsvLoader loader = new StockCsvLoader();
+        assertThrows(IllegalArgumentException.class, () -> loader.loadFromPath(null));
+    }
+
+    @Test
+    void loadFromResource_throwsOnBlankPath() {
+        StockCsvLoader loader = new StockCsvLoader();
+        assertThrows(IllegalArgumentException.class, () -> loader.loadFromResource(""));
+        assertThrows(IllegalArgumentException.class, () -> loader.loadFromResource(null));
+    }
+
+    @Test
+    void loadFromResource_throwsOnMissingResource() {
+        StockCsvLoader loader = new StockCsvLoader();
+        assertThrows(IllegalArgumentException.class, () -> loader.loadFromResource("nonexistent.csv"));
+    }
+
+    @Test
+    void loadFromPath_throwsOnInvalidPrice() throws IOException {
+        Path csv = Files.createTempFile("stocks-bad-price-", ".csv");
+        Files.writeString(csv, "AAPL,Apple Inc.,not-a-number\n", StandardCharsets.UTF_8);
+        StockCsvLoader loader = new StockCsvLoader();
+        assertThrows(IllegalArgumentException.class, () -> loader.loadFromPath(csv));
+    }
+}

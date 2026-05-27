@@ -355,9 +355,12 @@ final class DashboardLeftPanel {
         changeRow.setAlignment(Pos.CENTER_RIGHT);
         changeRow.getChildren().addAll(DashboardIcons.createIcon(cs.iconPath(), cs.iconCss(), 10), changeLabel);
 
+        HBox hlRow = buildHighLowRow(stock);
+        hlRow.setAlignment(Pos.CENTER_RIGHT);
+
         VBox right = new VBox(2);
         right.setAlignment(Pos.CENTER_RIGHT);
-        right.getChildren().addAll(label(info.price(), "stock-price"), changeRow);
+        right.getChildren().addAll(label(info.price(), "stock-price"), changeRow, hlRow);
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -378,6 +381,26 @@ final class DashboardLeftPanel {
         card.getStyleClass().add("stock-card");
         card.getChildren().addAll(header, actions);
         return card;
+    }
+
+    private HBox buildHighLowRow(Stock stock) {
+        Label hLabel = new Label("H");
+        hLabel.getStyleClass().add("stock-hl-label");
+        Label hValue = new Label(DashboardFormatters.formatPrice(stock.getHighestPrice()));
+        hValue.getStyleClass().addAll("stock-hl-value", "stock-hl-high");
+
+        Label sep = new Label("·");
+        sep.getStyleClass().add("stock-hl-sep");
+
+        Label lLabel = new Label("L");
+        lLabel.getStyleClass().add("stock-hl-label");
+        Label lValue = new Label(DashboardFormatters.formatPrice(stock.getLowestPrice()));
+        lValue.getStyleClass().addAll("stock-hl-value", "stock-hl-low");
+
+        HBox row = new HBox(6);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getChildren().addAll(hLabel, hValue, sep, lLabel, lValue);
+        return row;
     }
 
     private Button actionButton(String text, String styleClass, Stock stock, boolean isBuy) {

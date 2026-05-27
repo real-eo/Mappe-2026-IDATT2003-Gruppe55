@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,7 @@ import edu.ntnu.idi.idatt2003.millions.model.Stock;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StockTest {
 
@@ -72,5 +71,54 @@ class StockTest {
 
         assertEquals(new BigDecimal("-5.50"), stock.getLatestPriceChange());
     }
-}
 
+    @Test
+    void getLatestPriceChangePercent_calculatesPercentChange() {
+        stock.addPrice(new BigDecimal("110.00"));
+        // from 100 to 110 -> +10%
+        assertEquals(new BigDecimal("10.000000"), stock.getLatestPriceChangePercent());
+    }
+
+    @Test
+    void constructor_throwsOnBlankSymbol() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("", "Equinor", new BigDecimal("100")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock(null, "Equinor", new BigDecimal("100")));
+    }
+
+    @Test
+    void constructor_throwsOnBlankCompanyName() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "", new BigDecimal("100")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", null, new BigDecimal("100")));
+    }
+
+    @Test
+    void constructor_throwsOnNonPositivePrice() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "Equinor", BigDecimal.ZERO));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Stock("EQNR", "Equinor", null));
+    }
+
+    @Test
+    void addPrice_throwsOnNullOrNonPositive() {
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(null));
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(BigDecimal.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> stock.addPrice(new BigDecimal("-1")));
+    }
+
+    @Test
+    void getters_returnConstructedValues() {
+        assertEquals("EQNR", stock.getSymbol());
+        assertEquals("Equinor", stock.getCompanyName());
+        assertEquals(new BigDecimal("100.00"), stock.getSalesPrice());
+    }
+
+    @Test
+    void getPrices_delegatesToGetHistoricalPrices() {
+        assertEquals(stock.getHistoricalPrices(), stock.getPrices());
+    }
+}

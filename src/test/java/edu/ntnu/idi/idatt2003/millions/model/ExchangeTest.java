@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt2003.millions;
+package edu.ntnu.idi.idatt2003.millions.model;
 
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.InsufficientFundsException;
 import edu.ntnu.idi.idatt2003.millions.infrastructure.exception.ShareNotOwnedException;
@@ -62,6 +62,9 @@ class ExchangeTest {
         var share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
         exchange.sell(player, share, new BigDecimal("10"));
         assertTrue(player.getPortfolio().getShares().isEmpty());
+
+        // Verify player's money increased after sale (purchase -> sale proceeds)
+        assertTrue(player.getMoney().compareTo(new BigDecimal("48995.00")) > 0);
     }
 
     @Test
@@ -159,5 +162,51 @@ class ExchangeTest {
         assertTrue(exchange.getLosers(0).isEmpty());
         assertTrue(exchange.getGainers(-1).isEmpty());
         assertTrue(exchange.getLosers(-1).isEmpty());
+    }
+
+    @Test
+    void addStock_addsNewStockToExchange() {
+        Stock newStock = new Stock("NHY", "Norsk Hydro", new BigDecimal("60.00"));
+        exchange.addStock(newStock);
+        assertTrue(exchange.hasStock("NHY"));
+    }
+
+    @Test
+    void addStock_throwsOnNull() {
+        assertThrows(IllegalArgumentException.class, () -> exchange.addStock(null));
+    }
+
+    @Test
+    void getStocks_returnsAllListedStocks() {
+        List<Stock> stocks = exchange.getStocks();
+        assertEquals(2, stocks.size());
+    }
+
+    @Test
+    void constructor_throwsOnBlankName() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Exchange("", List.of()));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Exchange(null, List.of()));
+    }
+
+    @Test
+    void constructor_throwsOnNullStocksList() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Exchange("OSE", null));
+    }
+
+    @Test
+    void constructor_withWeek_setsWeekCorrectly() {
+        Exchange e = new Exchange("E", List.of(), new Random(0), 5);
+        assertEquals(5, e.getWeek());
+    }
+
+    @Test
+    void sell_wholeShare_overload_sellsEntireQuantity() throws Exception {
+        exchange.buy(player, "EQNR", new BigDecimal("5"));
+        Share share = player.getPortfolio().findByStock(exchange.getStock("EQNR")).orElseThrow();
+        exchange.sell(player, share);
+        assertTrue(player.getPortfolio().getShares().isEmpty());
     }
 }

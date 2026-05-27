@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt2003.millions.controller;
 
+import edu.ntnu.idi.idatt2003.millions.model.NetWorthSnapshot;
 import edu.ntnu.idi.idatt2003.millions.model.Sale;
 import edu.ntnu.idi.idatt2003.millions.model.Transaction;
 import java.math.BigDecimal;
@@ -66,6 +67,15 @@ public class ProfileController {
      */
     public List<OutcomeEntry> getTopLosses(int limit) {
         return resolveSaleOutcomes(false, limit);
+    }
+
+    /**
+     * Returns the net worth history for this session.
+     *
+     * @return list of net worth snapshots ordered by week
+     */
+    public List<NetWorthSnapshot> getNetWorthHistory() {
+        return exchangeController.getNetWorthHistory();
     }
 
     /**
