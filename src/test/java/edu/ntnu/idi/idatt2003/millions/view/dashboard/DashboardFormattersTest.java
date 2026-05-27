@@ -41,4 +41,19 @@ class DashboardFormattersTest {
     void formatQuantity_handlesVerySmallDecimals() {
         assertEquals("0.0001", DashboardFormatters.formatQuantity(new BigDecimal("0.0001")));
     }
+
+    @Test
+    void formatPrice_withZero_returnsFormattedZero() {
+        assertEquals("$0.00", DashboardFormatters.formatPrice(BigDecimal.ZERO));
+    }
+
+    @Test
+    void formatQuantity_withIntegerValue_omitsDecimalPart() {
+        assertEquals("100", DashboardFormatters.formatQuantity(new BigDecimal("100")));
+    }
+
+    @Test
+    void formatQuantity_withMoreThanFourDecimals_roundsToFourPlaces() {
+        assertEquals("1.1235", DashboardFormatters.formatQuantity(new BigDecimal("1.12345")));
+    }
 }
